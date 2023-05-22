@@ -2,19 +2,19 @@
 <html lang="zh-CN">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
     <title>OStarsO主页</title>
     <meta name="description"
         content="OStarsO主页，欢迎访问哟~">
     <meta name="keywords" content="OStarsO,OStarsO主页,主页,前端">
-    <link rel="stylesheet" type="text/css" href="./css/FiraCode.css">
-    <link rel="stylesheet" type="text/css" href="./css/flesx.css">
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/firacode/5.2.0/fira_code.css" as="style">
+    <link rel="stylesheet" href="./css/flesx.css">
     <link rel="shortcut icon" href="./favicon.ico">
     <style>
         /* 将图片设置为背景 */
-        .meBox {
+        .me-box {
             background-image: url("marek-piwnicki-FOMWbTDuh3s-unsplash.jpg?raw=true");
             background-size: cover;
             background-position: center;
@@ -25,25 +25,25 @@
 <body>
     <div id="box">
         <!-- 个人资料卡片 -->
-        <section class="meBox">
+        <section class="me-box">
             <!-- 介绍 -->
-            <section class="meBox-intro">
+            <section class="me-box-intro">
                 <p>大家好，我是OStarsO欢迎━(*｀∀´*)ノ亻!访问我的网站</p>
                 <div class="fg"></div>
             </section>
-            <ul class="meBox-interests">
+            <ul class="me-box-interests">
                 <li>热爱游戏</li>
                 <li>热爱网站</li>
                 <li>瞎折</li>
                 <li>写网站代码ing</li>
             </ul>
             <!-- 两个按钮 -->
-            <div class="meBox-Button">
-                <a href="https://catbot-cloud.github.io/catchat.html" target="_blank" rel="noopener">看Cat GBT</a>
-                <a href="https://www.bilibili.com" target="_blank" rel="noopener">去看哔哩哔哩</a>
-                <a href="https://kaifa.baidu.com" target="_blank" rel="noopener">去开发者搜索</a>
-                <a href="https://ywyj.cn/" target="_blank" rel="noopener">一网一匠</a>
-                <a href="https://2345.com/" target="_blank" rel="noopener">广告</a>
+            <div class="me-box-button">
+                <button onclick="window.location.href='https://catbot-cloud.github.io/catchat.html'">看Cat GBT</button>
+                <button onclick="window.location.href='https://www.bilibili.com'">去看哔哩哔哩</button>
+                <button onclick="window.location.href='https://kaifa.baidu.com'">去开发者搜索</button>
+                <button onclick="window.location.href='https://ywyj.cn/'">一网一匠</button>
+                <button onclick="window.location.href='https://2345.com/'">广告</button>
             </div>
         </section>
     </div>
