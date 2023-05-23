@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>猜数字小游戏</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			text-align: center;
+		}
+		h1 {
+			margin-top: 50px;
+		}
+		input[type="number"] {
+			padding: 5px 10px;
+			font-size: 16px;
+		}
+		button {
+			margin-top: 20px;
+			padding: 10px 20px;
+			font-size: 18px;
+			background-color: #4CAF50;
+			color: #fff;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<h1>猜数字小游戏</h1>
+	<p>请在1~100之间猜一个数字</p>
+	<input type="number" id="guess" min="1" max="100">
+	<button onclick="checkGuess()">猜一下</button>
+	<p id="message"></p>
+
+	<script>
+		// 生成随机数
+		let randomNumber = Math.floor(Math.random() * 100) + 1;
+
+		// 检查猜测的数字
+		function checkGuess() {
+			let guess = document.getElementById("guess").value;
+			let message = document.getElementById("message");
+
+			if (guess == randomNumber) {
+				message.innerHTML = "恭喜你，猜对了！";
+			} else if (guess < randomNumber) {
+				message.innerHTML = "太小了，请再试一次。";
+			} else if (guess > randomNumber) {
+				message.innerHTML = "太大了，请再试一次。";
+			}
+		}
+	</script>
+</body>
+</html>
