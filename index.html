@@ -80,6 +80,23 @@
 	} else {
 		window.location.href = "sj.html";
 	}
+
+	// 记录访问IP
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "https://api.ipify.org", true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4 && xhr.status == 200) {
+			var ip = xhr.responseText;
+			var data = new FormData();
+			data.append('ip', ip);
+			var request = new XMLHttpRequest();
+			request.open('POST', 'ip.php', true);
+			request.send(data);
+		}
+	};
+	xhr.send();
 </script>
+
+</html>
 
 </html>
