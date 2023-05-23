@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>跑酷小游戏</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    // 获取画布和上下文
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 定义变量
+    let x = 0;
+    let y = canvas.height - 50;
+    let speed = 5;
+    let isJumping = false;
+    let jumpHeight = 100;
+    let jumpSpeed = 10;
+
+    // 绘制角色
+    function drawCharacter() {
+      ctx.fillStyle = 'red';
+      ctx.fillRect(x, y, 50, 50);
+    }
+
+    // 绘制地面
+    function drawGround() {
+      ctx.fillStyle = 'green';
+      ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+    }
+
+    // 游戏主循环
+    function gameLoop() {
+      // 清空画布
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 绘制角色和地面
+      drawCharacter();
+      drawGround();
+
+      // 处理跳跃
+      if (isJumping) {
+        y -= jumpSpeed;
+        jumpSpeed -= 1;
+        if (y >= canvas.height - 50) {
+          isJumping = false;
+          y = canvas.height - 50;
+          jumpSpeed = 10;
+        }
+      }
+
+      // 处理移动
+      x += speed;
+      if (x >= canvas.width - 50) {
+        speed = -5;
+      } else if (x <= 0) {
+        speed = 5;
+      }
+
+      // 重新绘制
+      requestAnimationFrame(gameLoop);
+    }
+
+    // 处理跳跃事件
+    function handleJump() {
+      if (!isJumping) {
+        isJumping = true;
+      }
+    }
+
+    // 绑定事件
+    document.addEventListener('keydown', (event) => {
+      if (event.code === 'Space') {
+        handleJump();
+      }
+    });
+
+    // 开始游戏
+    gameLoop();
+  </script>
+</body>
+</html>
