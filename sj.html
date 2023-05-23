@@ -1,54 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>不支持手机访问</title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <title>OStarsO主页</title>
+    <meta name="description"
+        content="OStarsO主页，欢迎访问哟~">
+    <meta name="keywords" content="OStarsO,OStarsO主页,主页,前端">
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/firacode/5.2.0/fira_code.css" as="style">
+    <link rel="stylesheet" href="./css/flesx.css">
+    <link rel="shortcut icon" href="./favicon.ico">
     <style>
-        /*--预设--*/
-        body {
-            padding: 0px;
-            margin: 0px;
-            font-size: 16px;
-            font-family: 'Microsoft YaHei', '微软雅黑', MicrosoftJhengHei, '华文细黑', STHeiti, MingLiu;
+        /* 将图片设置为背景 */
+        .me-box {
+            background-image: url("marek-piwnicki-FOMWbTDuh3s-unsplash.jpg?raw=true");
+            background-size: cover;
+            background-position: center;
         }
-        #lyrow {
-            width: 960px;
-            margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        #lyrow div {
-            min-height: 18px;
-        }
-        #lyrow input, #lyrow textarea {
-            border: rgb(235, 235, 235) 1px solid;
-            border-radius: 3px;
-            padding: 5px 8px;
-            outline: 0;
-        }
-        #lyrow input:hover, #lyrow textarea:hover {
-            border: 1px solid #6bc1f2;
-        }
-        /*--编辑--*/
     </style>
-    <!--下载font-awesome.css图标包-->
-    <!--https://www.58html.com/html/template/font-awesome.zip-->
-    <link rel="stylesheet" href="https://www.58html.com/gui/css/font-awesome/css/font-awesome.css">
 </head>
+
 <body>
-    <div id="lyrow">
-        <h1>为什么不支持手机？☹</h1>
-        <span>因为手机浏览访问视角卡的问题，我正在制作手机做网页</span>
-        <h1>提出建议</h1>
-        <input type="text" name="input" placeholder="在这">
-        <input type="submit" name="button" value="提交">
+    <div id="box">
+        <!-- 个人资料卡片 -->
+        <section class="me-box">
+            <!-- 介绍 -->
+            <section class="me-box-intro">
+                <p>大家好，我是OStarsO欢迎━(*｀∀´*)ノ亻!访问我的网站</p>
+                <div class="fg"></div>
+            </section>
+            <ul class="me-box-interests">
+                <li>热爱游戏</li>
+                <li>热爱网站</li>
+                <li>瞎折</li>
+                <li>写网站代码ing</li>
+            </ul>
+            <!-- 两个按钮 -->
+            <div class="me-box-button">
+                <button onclick="window.location.href='https://catbot-cloud.github.io/catchat.html'">看Cat GBT</button>
+                <button onclick="window.location.href='https://www.bilibili.com'">去看哔哩哔哩</button>
+                <button onclick="window.location.href='https://kaifa.baidu.com'">去开发者搜索</button>
+                <button onclick="window.location.href='https://ywyj.cn/'">一网一匠</button>
+                <button onclick="window.location.href='https://2345.com/'">广告</button>
+            </div>
+        </section>
     </div>
-    <div class="tip">
-        <p>很抱歉，该网站不支持手机访问，请访问<a href="https://ostarso.github.io/pc.html">适用于PC的页面</a>。</p>
-    </div>
-    <script>
-        // 可以在这里添加脚本代码
-    </script>
 </body>
+
 </html>
