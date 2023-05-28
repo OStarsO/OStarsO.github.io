@@ -1,50 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 	<meta charset="UTF-8">
 	<title>正在检测设备访问</title>
 	<style>
 		/* 加载中-转圈圈 */
-		.lay-loader .lay-loader-inner:before {
-			content: "";
-			top: 5px;
-			left: 5px;
-			right: 5px;
-			bottom: 5px;
-			animation: spin 3s linear infinite;
-		}
-
-		.lay-loader .lay-loader-inner:after {
-			content: "";
-			top: 15px;
-			left: 15px;
-			right: 15px;
-			bottom: 15px;
-			animation: spin 1.5s linear infinite;
-		}
-
-		.lay-loader .lay-loader-inner {
-			display: block;
-			left: 0;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			width: 150px;
-			height: 150px;
-			margin: auto;
-			animation: spin 2s linear infinite;
-		}
-
-		.lay-loader .lay-loader-inner,
-		.lay-loader .lay-loader-inner:before,
-		.lay-loader .lay-loader-inner:after {
-			position: absolute;
-			border-radius: 50%;
-			border: 3px solid transparent;
-			border-top-color: #03c5b3;
-		}
-
 		.lay-loader {
 			position: fixed;
 			top: 0;
@@ -53,6 +13,45 @@
 			height: 100%;
 			background-color: #ffffff;
 			z-index: 9999999999;
+		}
+
+		.lay-loader .lay-loader-inner {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 150px;
+			height: 150px;
+			border-radius: 50%;
+			border: 3px solid transparent;
+			border-top-color: #03c5b3;
+			animation: spin 2s linear infinite;
+		}
+
+		.lay-loader .lay-loader-inner:before {
+			content: "";
+			position: absolute;
+			top: 5px;
+			left: 5px;
+			right: 5px;
+			bottom: 5px;
+			border-radius: 50%;
+			border: 3px solid transparent;
+			border-top-color: #03c5b3;
+			animation: spin 3s linear infinite;
+		}
+
+		.lay-loader .lay-loader-inner:after {
+			content: "";
+			position: absolute;
+			top: 15px;
+			left: 15px;
+			right: 15px;
+			bottom: 15px;
+			border-radius: 50%;
+			border: 3px solid transparent;
+			border-top-color: #03c5b3;
+			animation: spin 1.5s linear infinite;
 		}
 
 		@keyframes spin {
@@ -65,27 +64,23 @@
 		}
 	</style>
 </head>
-// 我真的服了这个也不过审 ****** 过审吧！求求你了！
 <body>
 	<!-- 加载中 转圈圈 -->
 	<div class="lay-loader">
 		<div class="lay-loader-inner"></div>
 	</div>
+
+	<script>
+		// 检测设备类型并跳转
+		var system = navigator.platform.toLowerCase();
+		if (system.indexOf('win') >= 0 || system.indexOf('mac') >= 0 || system.indexOf('linux') >= 0) {
+			window.location.href = "pc.html";
+		} else {
+			window.location.href = "sj.html";
+		}
+
+		// 警告框
+		window.alert("网页加载较慢~");
+	</script>
 </body>
-
-<script type="text/javascript">
-	var system = navigator.platform.toLowerCase();
-	if (system.indexOf('win') >= 0 || system.indexOf('mac') >= 0 || system.indexOf('linux') >= 0) {
-		window.location.href = "pc.html";
-	} else {
-		window.location.href = "sj.html";
-	}
-</script>
-	
-<script>
-			//警告框
-			window.alert("网页加载较慢~"); //window.alert()方法可以不带window前缀。
-			//alert("成功弹出警告框！")
-		</script>
-
 </html>
