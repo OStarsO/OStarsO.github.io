@@ -1,22 +1,51 @@
 <!DOCTYPE html>
-<html >
+<html lang="zh-CN">
+
 <head>
-  <meta charset="UTF-8">
-  <title>CSS3侧边栏单页切换小图标菜单DEMO演示</title>
-  <meta name="designer" content="Alberto Hartzet">
-<meta name="programer" content="Alberto Hartzet">
-<meta name="author" content="Alberto Hartzet">
-<meta name="description" content="One page navigation with pure CSS">
-<meta property="og:url" content="https://codepen.io/hrtzt/details/NPZKRN">
-<meta property="og:image" content="https://pbs.twimg.com/media/CCNJN_XUMAAJSzU.jpg:large">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+
+    <meta name="description"
+        content="OStarsO主页，欢迎访问哟~">
+    <meta name="keywords" content="OStarsO,OStarsO主页,主页,前端">
+    <link rel="stylesheet" type="text/css" href="./css/FiraCode.css">
+    <link rel="stylesheet" type="text/css" href="./css/flesx.css">
+    <link rel="shortcut icon" href="./favicon.ico">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/demo.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<script src="js/jquery-1.11.0.min.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/hullabaloo.js"></script>
+<script type="text/javascript">
+	$.hulla = new hullabaloo();
+
+	setTimeout(function() {
+	  $.hulla.send("Hi！这里是OStarsO的网站！", "success");
+	}, 1000);
+
+	setTimeout(function() {
+	  $.hulla.send("欢迎您的访问！", "info");
+	}, 2000);
+
+	setTimeout(function() {
+	  $.hulla.send("欢迎━(*｀∀´*)ノ亻!", "warning");
+	}, 3000);
+</script>
+
+<div style="text-align:center;clear:both;">
+<script src="/gg_bd_ad_720x90.js" type="text/javascript"></script>
+<script src="/follow.js" type="text/javascript"></script>
+</div>
 
   <link rel="stylesheet" href="css/normalize.min.css">
 
   <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css'>
 
 <link rel="stylesheet" href="css/style.css">
-
-</head>
 
 <body>
   <div class="ct" id="t1">
@@ -32,7 +61,7 @@
             <a href="#t5"><li class="icon fa fa-plus-circle" id="cinco"></li></a>
           </ul>
           <div class="page" id="p1">
-             <section class="icon fa fa-bolt"><span class="title">Bolt</span><span class="hint">Like this pen to see the magic!...<br> Just kidding, it won't happen anything but I'll be really happy If you do so.</span></section>  
+             <section class="icon fa fa-bolt"><span class="title">主页</span><span class="hint">Like this pen to see the magic!...<br> Just kidding, it won't happen anything but I'll be really happy If you do so.</span></section>  
           </div>
           <div class="page" id="p2">
             <section class="icon fa fa-keyboard-o"><span class="title">Type</span></section>
