@@ -1,16 +1,24 @@
-<!doctype html>
-<style> #pionter{ width: 20px; height: 20px; background: pink; border-radius: 20px; position:absolute; } </style>
-
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 </head>
+ 
 <body>
-	<div id="pionter"></div>
-		<script>
-		window.onload = function(){
-			var pionter = document.querySelector('#pionter');
-			window.onmousemove =function(e){					
-				pionter['style']['left'] = e.clientX +'px';
-				pionter['style']['top'] = e.clientY +'px'; 
-			}; 
-		}; 
-	</script>
+    <!--光标特效仙女棒-->
+    <script src="https://blog-static.cnblogs.com/files/axqa/fairyDustCursor.js"></script>
+    <!--光标之泡泡-->
+    <script src="https://blog-static.cnblogs.com/files/axqa/bubbleCursor.js"></script>
+    <!--笑脸-->
+    <script src="https://blog-static.cnblogs.com/files/axqa/emojiCursor.js"></script>
+    <!--雪花-->
+    <script src="https://blog-static.cnblogs.com/files/axqa/snowflakeCursor.js"></script>
+    <!-- 点击后出现烟花效果 -->
+    <script src="https://blog-static.cnblogs.com/files/axqa/cursor-effects.js"></script>
+ 
 </body>
+ 
+</html>
