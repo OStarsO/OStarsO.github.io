@@ -1,0 +1,16 @@
+<!doctype html>
+<style> #pionter{ width: 20px; height: 20px; background: pink; border-radius: 20px; position:absolute; } </style>
+
+</head>
+<body>
+	<div id="pionter"></div>
+		<script>
+		window.onload = function(){
+			var pionter = document.querySelector('#pionter');
+			window.onmousemove =function(e){					
+				pionter['style']['left'] = e.clientX +'px';
+				pionter['style']['top'] = e.clientY +'px'; 
+			}; 
+		}; 
+	</script>
+</body>
