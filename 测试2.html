@@ -1,0 +1,19 @@
+<script type="text/javascript">
+            var nowPos;                 //当前的位置
+            var myTimer;                    //定时器变量
+            function startIt(){             //开始函数
+                //开始定时器，以10毫秒为单位
+                myTimer = window.setInterval("scrollPage()",10);
+            }
+            //停止函数
+            function stopIt(){
+                //取消定时器
+                clearInterval(myTimer);
+            }
+            //滚动屏幕的函数
+            function scrollPage(){
+                window.scrollBy(0,1);   //以一个像素为单位开始滚屏
+            }
+            document.onmousedown = stopIt;  //监听单击事件
+            document.ondblclick = startIt;      //监听双击事件
+</script>
