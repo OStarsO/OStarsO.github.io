@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>纯CSS3花瓣样式的Loading加载动画DEMO演示</title>
+<title>设备检测</title>
 
 <link type="text/css" href="css/zzsc.css" rel="stylesheet" />
 
@@ -29,6 +29,16 @@
 		</div>
 	</div>
 </div>
+
+<script>
+// 检测设备类型并跳转
+var system = navigator.platform.toLowerCase();
+if (system.indexOf('win') >= 0 || system.indexOf('mac') >= 0 || system.indexOf('linux') >= 0) {
+    window.location.href = "pc.html";
+} else {
+    window.location.href = "sj.html";
+}
+</script>
 
 </body>
 </html>
