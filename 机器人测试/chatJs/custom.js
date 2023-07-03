@@ -6,7 +6,7 @@ var common_ops = {
               if( typeof cb == "function" ){
                   cb();
               }
-              layer.close( index );
+              layer.close( index ); 
           }
       });
   },
