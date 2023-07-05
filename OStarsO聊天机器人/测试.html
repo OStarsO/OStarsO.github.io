@@ -8,18 +8,6 @@
     <link rel="stylesheet" href="./static/css/bootstrap.min.css">
     <link rel="stylesheet" href="./static/css/style.css">
     <title>OStarsO机器人</title>
-    <style>
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-
-        .typing-animation {
-            overflow: hidden;
-            white-space: nowrap;
-            animation: typing 2s steps(40, end);
-        }
-    </style>
 </head>
 <body>
   <div class="container">
@@ -67,21 +55,25 @@
 <script src="./static/js/custom.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>  
 <script>
-    $(document).ready(function() {
-        $("#chatBtn").click(function() {
-            var inputText = $("#chatInput").val();
-            if (inputText !== "") {
-                var newMessage = '<div class="message"><div class="user-message">' + inputText + '</div></div>';
-                $("#chatWindow").append(newMessage);
-                $("#chatInput").val("");
-
-                setTimeout(function() {
-                    var response = "This is the response from the chat bot.";
-                    var newResponse = '<div class="message"><div class="bot-message typing-animation">' + response + '</div></div>';
-                    $("#chatWindow").append(newResponse);
-                }, 1000);
-            }
-        });
-    });
+  // Function to animate the robot's output
+  function animateOutput() {
+    var output = "Hello, I'm a robot!";
+    var delay = 100; // Delay between each character
+    var i = 0;
+    var chatWindow = document.getElementById("chatWindow");
+  
+    function typeWriter() {
+      if (i < output.length) {
+        chatWindow.innerHTML += output.charAt(i);
+        i++;
+        setTimeout(typeWriter, delay);
+      }
+    }
+  
+    typeWriter();
+  }
+  
+  // Call the animateOutput function on page load
+  window.onload = animateOutput;
 </script>
 </html>
