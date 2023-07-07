@@ -59,24 +59,28 @@
 							</div>
 							<div>
 								<section>
-									<h2>反馈</h2>
-									<form method="post" action="#">
-										<div class="fields">
-											<div class="field half">
-												<input type="text" name="name" id="name" placeholder="名字" />
-											</div>
-											<div class="field half">
-												<input type="text" name="email" id="email" placeholder="邮箱" />
-											</div>
-											<div class="field">
-												<textarea name="message" id="message" rows="4" placeholder="建议"></textarea>
-											</div>
-										</div>
-										<ul class="actions">
-											<li><input type="submit" value="确定" class="primary" /></li>
-											<li><input type="reset" value="取消" /></li>
-										</ul>
-									</form>
+								    <h2>反馈</h2>
+								    <form method="post" action="#">
+								        <div class="fields">
+								            <div class="field half">
+								                <input type="text" name="name" id="name" placeholder="名字" />
+								            </div>
+								            <div class="field half">
+								                <input type="text" name="email" id="email" placeholder="邮箱" />
+								            </div>
+								            <div class="field">
+								                <textarea name="message" id="message" rows="4" placeholder="建议"></textarea>
+								            </div>
+								            
+								            <!-- 在此处添加 reCAPTCHA 小部件 -->
+								            <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
+								            
+								        </div>
+								        <ul class="actions">
+								            <li><input type="submit" value="确定" class="primary" /></li>
+								            <li><input type="reset" value="取消" /></li>
+								        </ul>
+								    </form>
 								</section>
 							</div>
 						</div>
