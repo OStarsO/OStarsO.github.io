@@ -15,10 +15,10 @@ var responses = {
 	     "我 %hope% 此帐户并不重要。",
 	     "此密码需要更多 %emoji%." ],
 
-	3: [ 0, "Todlers %eat% passwords like yours for breakfast",
-	     "Mashing your %head% on the keyboard would be more secure",
-	     "Are you taking this %seriously%?",
-	     "You're %joking% right?" ],
+	3: [ 0, "蹒跚学步 %eat% 像您这样的早餐密码",
+	     "捣碎你的 %head% 在键盘上会更安全",
+	     "你拿这个吗 %seriously%?",
+	     "你是 %joking% 右？" ],
 
 	4: [ 0, "I've seen %dogs% with better passwords.",
 	     "Perhaps this was good 10 %years% ago.",
