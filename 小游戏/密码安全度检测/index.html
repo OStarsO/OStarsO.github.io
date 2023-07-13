@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+
+<head>
+  <!-- META -->
+  <title> Passive Aggressive Passwords</title>
+  <meta name="description" content="PaP - The passive aggressive password machine.">
+  <meta property="og:title" content="PaP - Passive aggressive password machine." />
+  <meta property="og:image" content="https://trypap.com/PAPshare.jpg" />
+  <meta property="og:url" content="https://trypap.com" />
+  <meta property="og:site_name" content="PaP Machine" />
+  <!-- CSS -->
+  <link href="css/style.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="js/lib/complexify.banlist.js"></script>
+  <script src="js/lib/complexify.js"></script>
+</head>
+
+<body>
+  <div id="fb-root"></div>
+  <script>
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "https://connect.facebook.net/en_US/all.js#xfbml=1";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+  </script>
+  <div id="wrap">
+    <div id="main" class="clearfix">
+      <header>
+        <span class="icon">
+						<span class="s1"> </span>
+        <span class="s2"> </span>
+        <span class="s3"> </span>
+        <span class="s4"> </span>
+        </span>
+        <span class="title"> PaP &#8212; The Passive Aggressive Password Machine</span>
+        <section class="content">
+          <p class="about-us">
+            The PaP Machine is a little sideproject and exploration of minimalistic design by <a href="http://tholman.com" target="_blank">Tim Holman</a> and <a href="http://www.vanschneider.com/" target="_blank">Tobias van Schneider</a>. To make the world
+            <br> a better place, one smile at a time.
+            </br>
+            </br>
+            You can follow us here: </br>
+            <span class="follow-us">
+								<a href="https://twitter.com/twholman" class="twitter-follow-button" data-show-count="false" data-lang="en">Follow @twholman</a>
+								<a href="https://twitter.com/vanschneider" class="twitter-follow-button" data-show-count="false" data-lang="en">Follow @vanschneider</a>
+							</span>
+          </p>
+          <p class="about-project">
+            Its simple really, you enter a password...
+            <br>any password and the PaP Machine will be honest<sup>*</sup>&nbsp;&nbsp;&nbsp;about your passwords strength.
+            </br>
+            </br>
+            <sup>*</sup> &nbsp;&nbsp;Honest like a lawyer, or your cold hearted X.
+          </p>
+        </section>
+      </header>
+      <section class="password">
+        <input type="password" placeholder="Please Enter a Password">
+      </section>
+      <section class="comment">
+        <span class="smiley">:)</span>
+        <span class="passive-agressive">
+						Imagine your <span class='red'> in-laws </span> are helping you with a password... this is what they'd say.
+        </span>
+      </section>
+    </div>
+  </div>
+  <section class="sharing" id="footer">
+    <span class="about">&#8212; About Pap</span>
+    <img class="pointer" src="./img/help.png">
+    <div class="fb-like" data-href="https://trypap.com" data-send="false" data-layout="button_count" data-width="100" data-show-faces="false"></div>
+    <a href="https://twitter.com/share" data-url="" class="twitter-share-button" data-text="Lean, and mean... The Passive Aggressive Password Machine - (by @twholman &amp; @vanschneider) - " data-align="right" data-via "@twholman &amp; @vanschneider">Tweet</a>
+  </section>
+  <!-- Initiate -->
+  <script src="js/passive_passwords.js"></script>
+  <script>
+  ! function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (!d.getElementById(id)) {
+      js = d.createElement(s);
+      js.id = id;
+      js.src = "https://platform.twitter.com/widgets.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }
+  }(document, "script", "twitter-wjs");
+  </script>
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-38608226-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script');
+    ga.type = 'text/javascript';
+    ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(ga, s);
+  })();
+  </script>
+</body>
+
+</html>
