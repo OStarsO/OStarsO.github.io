@@ -11,9 +11,9 @@ var responses = {
 	     "真 %poor% 努力。" ],
 
 	2: [ 0, "愿如来佛祖有 %mercy% 在您的电子邮件帐户上。",
-	     "Don't come %crying% to me when you're hacked.",
-	     "I %hope% this account isn't important.",
-	     "This password needs more %emoji%." ],
+	     "别来 %crying% 当你被黑客入侵时给我。",
+	     "我 %hope% 此帐户并不重要。",
+	     "此密码需要更多 %emoji%." ],
 
 	3: [ 0, "Todlers %eat% passwords like yours for breakfast",
 	     "Mashing your %head% on the keyboard would be more secure",
