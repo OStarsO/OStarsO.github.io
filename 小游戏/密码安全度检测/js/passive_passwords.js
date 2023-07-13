@@ -1,27 +1,16 @@
-/*!
- * Passive Passwords
- * MIT licensed
- *
- * Copyright (C) Tim Holman, http://tholman.com
- */
-
-/*! Passive agressive responses, as said by your cold hearted X.
- *  Level: Response - the higher, the better the password
- *  Buzz word surrounded by "%" signs
- */
 var responses = {
 
-	0: [ 0, "I need a %password% not this monstrosity.",
-		 "Really, you call %that!% a password?",
-	     "Do you even know what a password %is!?%",
-	     "Worst. Password. %Ever.%" ],
+	0: [ 0, "我需要一个 %password% 不是这个怪物。",
+		 "真的，你打电话 %that!% 密码？",
+	     "你甚至知道密码是什么吗 %is!?%",
+	     "糟糕。密码。 %Ever.%" ],
 
-	1: [ 0, "I'm not %angry%, just disappointed.",
-	     "Try harder, %bub%",
-	     "This is pretty %pathetic%",
-	     "Really %poor% effort." ],
+	1: [ 0, "我不是 %angry%, 只是失望。",
+	     "努力 %bub%",
+	     "这很漂亮 %pathetic%",
+	     "真 %poor% 努力。" ],
 
-	2: [ 0, "May god have %mercy% on your email account.",
+	2: [ 0, "愿如来佛祖有 %mercy% 在您的电子邮件帐户上。",
 	     "Don't come %crying% to me when you're hacked.",
 	     "I %hope% this account isn't important.",
 	     "This password needs more %emoji%." ],
