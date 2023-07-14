@@ -20,10 +20,10 @@ var responses = {
 	     "你拿这个吗 %seriously%?",
 	     "你是 %joking% 右？" ],
 
-	4: [ 0, "I've seen %dogs% with better passwords.",
-	     "Perhaps this was good 10 %years% ago.",
-	     "I %worry% about you.",
-	     "You lack %creativity%."],
+	4: [ 0, "我见过 %dogs% 使用更好的密码。",
+	     "也许这很好 10 %years% 前。",
+	     "我 %worry% 关于你。",
+	     "你缺乏 %creativity%."],
 
 	5: [ 0, "Oh... you're going to use %that% huh?",
 	     "%Weak%. Just weak.",
