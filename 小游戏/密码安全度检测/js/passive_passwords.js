@@ -25,10 +25,10 @@ var responses = {
 	     "我 %worry% 关于你。",
 	     "你缺乏 %creativity%."],
 
-	5: [ 0, "Oh... you're going to use %that% huh?",
-	     "%Weak%. Just weak.",
-	     "Sorry %chump%, this just won't do.",
-	     "You're %half% way there, I'd say."
+	5: [ 0, "哦。。。您将使用 %that% 哼？",
+	     "%Weak%. 只是弱。",
+	     "不好意思 %chump%, 这是不行的。",
+	     "你是 %half% 我会说。"
 	     ],
 
 	6: [ 0, "我 %almost% 就像你要去哪里一样。",
