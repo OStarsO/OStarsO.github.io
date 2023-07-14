@@ -31,10 +31,10 @@ var responses = {
 	     "You're %half% way there, I'd say."
 	     ],
 
-	6: [ 0, "I %almost% like where you're going with this.",
-	     "%Close%, but no cigar.",
-	     "Perhaps I should %just do it%.",
-	     "You're %starting% to understand."],
+	6: [ 0, "我 %almost% 就像你要去哪里一样。",
+	     "%Close%, 但没有雪茄。",
+	     "也许我应该 %just do it%.",
+	     "你是 %starting% 去理解。"],
 
 	7: [ 0, "你是 %getting% 那里。。。有点。",
 	     "温暖，你得到了 %warmer%.",
