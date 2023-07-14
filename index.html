@@ -41,5 +41,28 @@
   }, 3000);
 </script>
 
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function() {
+    var sjPage = "sj.html";
+    var pcPage = "pc.html";
+    var xhr = new XMLHttpRequest();
+    xhr.open("HEAD", sjPage, true);
+    xhr.onload = function() {
+      if (xhr.status == 404) {
+        xhr.open("HEAD", pcPage, true);
+        xhr.onload = function() {
+          if (xhr.status == 404) {
+            var notFoundDiv = document.createElement("div");
+            notFoundDiv.innerHTML = "网页不存在";
+            document.body.appendChild(notFoundDiv);
+          }
+        };
+        xhr.send();
+      }
+    };
+    xhr.send();
+  });
+</script>
+
 </body>
 </html>
