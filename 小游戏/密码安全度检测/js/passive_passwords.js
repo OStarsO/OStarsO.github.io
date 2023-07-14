@@ -41,10 +41,10 @@ var responses = {
 	     "I would %almost% use this.",
 	     "I'll give you an A for %effort%." ],
 
-	8: [ 0, "Not too %shabby%, for a 3 year old.",
-	     "So close. I'm %mean% because I care.",
-	     "%Fair%, but not your best work.",
-	     "%Who% wrote this for you?" ],
+	8: [ 0, "不大 %shabby%, 对于一个3岁的孩子。",
+	     "如此接近。我是 %mean% 因为我在乎。",
+	     "%Fair%, 但不是你最好的作品。",
+	     "%Who% 给你写的？" ],
 
 	9: [ 0, "它非常强大...我 %guess%.",
 	     "我认识你 %could% 最终到达那里。",
