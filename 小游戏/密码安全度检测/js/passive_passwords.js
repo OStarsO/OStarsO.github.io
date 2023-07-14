@@ -46,10 +46,10 @@ var responses = {
 	     "%Fair%, but not your best work.",
 	     "%Who% wrote this for you?" ],
 
-	9: [ 0, "Its pretty strong... I %guess%.",
-	     "I knew you %could% get there in the end.",
-	     "Yeah, like you're going to %remember% this.",
-	     "That'll do %pig%, that'll do." ]
+	9: [ 0, "它非常强大...我 %guess%.",
+	     "我认识你 %could% 最终到达那里。",
+	     "是的，就像你要去 %remember% 这。",
+	     "那就行了 %pig%, 那就行了。" ]
 
 }
 
