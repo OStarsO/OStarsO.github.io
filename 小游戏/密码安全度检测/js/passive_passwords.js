@@ -36,10 +36,10 @@ var responses = {
 	     "Perhaps I should %just do it%.",
 	     "You're %starting% to understand."],
 
-	7: [ 0, "You're %getting% there... kinda.",
-	     "Warmer, you're getting %warmer%.",
-	     "I would %almost% use this.",
-	     "I'll give you an A for %effort%." ],
+	7: [ 0, "你是 %getting% 那里。。。有点。",
+	     "温暖，你得到了 %warmer%.",
+	     "我会 %almost% 使用这个。",
+	     "我会给你一个 A %effort%." ],
 
 	8: [ 0, "不大 %shabby%, 对于一个3岁的孩子。",
 	     "如此接近。我是 %mean% 因为我在乎。",
