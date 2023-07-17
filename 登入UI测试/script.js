@@ -4,6 +4,15 @@ const usernameInput = document.getElementById("username");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 
+// 登入成功后的处理
+if (username === "admin" && email === "admin@example.com" && password === "password") {
+  // 存储登入成功的标记到localStorage
+  localStorage.setItem("isLoggedIn", "true");
+
+  // 跳转到OStarsO.html
+  window.location.href = "OStarsO.html";
+}
+
 // 监听登入表单的提交事件
 form1.addEventListener("submit", function(e) {
   e.preventDefault(); // 阻止表单默认提交行为
