@@ -59,10 +59,16 @@
       if (countDownSeconds <= 0) {
         clearInterval(countDownInterval);
         // 在这里执行跳转的代码
-        window.location.href = "your-page.html";
+        var userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.indexOf('mobile') != -1 || userAgent.indexOf('android') != -1) {
+          window.location.href = "sj.html"; // If the device is mobile or Android, redirect to sj.html
+        } else if (userAgent.indexOf('macintosh') != -1 || userAgent.indexOf('windows') != -1) {
+          window.location.href = "pc.html"; // If the device is Macintosh or Windows, redirect to pc.html
+        } else {
+          window.location.href = "default.html"; // If the device is not recognized, redirect to default.html
+        }
       }
     }, 1000);
-
   </script>
 
   <script>
