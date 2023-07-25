@@ -11,43 +11,59 @@
 
 <body>
   <div id="loading-text" style="text-align:center;clear:both;"></div>
+  <div id="ip-text" style="text-align:center;clear:both;"></div>
 
   <script>
     var text = "加载中...";
+    var ipText = "IP已记录：" + getFakeIP(); // 使用 getFakeIP() 函数获取假的IP地址
     var delay = 300; // Delay between each character display in milliseconds
 
-    function displayText() {
-      var element = document.getElementById("loading-text");
+    function displayText(element, targetText) {
       var currentTextLength = element.innerHTML.length;
 
-      if (currentTextLength < text.length) {
-        element.innerHTML = text.slice(0, currentTextLength + 1);
+      if (currentTextLength < targetText.length) {
+        element.innerHTML = targetText.slice(0, currentTextLength + 1);
 
-        setTimeout(displayText, delay);
+        setTimeout(function () {
+          displayText(element, targetText);
+        }, delay);
       }
     }
 
-    displayText();
+    // 获取假的IP地址
+    function getFakeIP() {
+      var ipSegments = Array(4).fill(0).map(function () {
+        return Math.floor(Math.random() * 256);
+      });
 
-    setTimeout(function() {
-      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        window.location.href = "sj.html";
-      } else {
-        window.location.href = "pc.html";
-      }
+      return ipSegments.join('.');
+    }
+
+    displayText(document.getElementById("loading-text"), text);
+
+    setTimeout(function () {
+      var element = document.getElementById("ip-text");
+      element.innerHTML = ipText;
+      displayText(element, ipText);
     }, 3000);
+
+    setTimeout(function () {
+      // 在这里执行等待5秒后的代码
+    }, 5000);
   </script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    // 这里添加你的其他脚本或代码
+
+    document.addEventListener("DOMContentLoaded", function () {
       var sjPage = "sj.html";
       var pcPage = "pc.html";
       var xhr = new XMLHttpRequest();
       xhr.open("HEAD", sjPage, true);
-      xhr.onload = function() {
+      xhr.onload = function () {
         if (xhr.status == 404) {
           xhr.open("HEAD", pcPage, true);
-          xhr.onload = function() {
+          xhr.onload = function () {
             if (xhr.status == 404) {
               var notFoundDiv = document.createElement("div");
               notFoundDiv.innerHTML = "网页不存在";
