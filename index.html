@@ -47,9 +47,22 @@
       displayText(element, ipText);
     }, 3000);
 
-    setTimeout(function () {
-      // 在这里执行等待5秒后的代码
-    }, 5000);
+    var countDownSeconds = 5;
+    var countDownElement = document.createElement("div");
+    countDownElement.id = "countdown";
+    countDownElement.style.textAlign = "center";
+    document.body.appendChild(countDownElement);
+
+    var countDownInterval = setInterval(function () {
+      countDownSeconds--;
+      countDownElement.innerHTML = "还需 " + countDownSeconds + " 秒跳转";
+      if (countDownSeconds <= 0) {
+        clearInterval(countDownInterval);
+        // 在这里执行跳转的代码
+        window.location.href = "your-page.html";
+      }
+    }, 1000);
+
   </script>
 
   <script>
