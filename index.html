@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>加载中...</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading Page</title>
   <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Varela+Round&amp;display=swap'>
   <link rel="stylesheet" href="./style.css">
 </head>
@@ -59,14 +59,7 @@
       if (countDownSeconds <= 0) {
         clearInterval(countDownInterval);
         // 在这里执行跳转的代码
-        var userAgent = navigator.userAgent.toLowerCase();
-        if (userAgent.indexOf('mobile') != -1 || userAgent.indexOf('android') != -1) {
-          window.location.href = "sj.html"; // If the device is mobile or Android, redirect to sj.html
-        } else if (userAgent.indexOf('macintosh') != -1 || userAgent.indexOf('windows') != -1) {
-          window.location.href = "pc.html"; // If the device is Macintosh or Windows, redirect to pc.html
-        } else {
-          window.location.href = "default.html"; // If the device is not recognized, redirect to default.html
-        }
+        window.location.href = "pc.html"; // 直接跳转到pc.html
       }
     }, 1000);
   </script>
