@@ -1,100 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>正在加载...</title>
-  <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Varela+Round&amp;display=swap'>
-  <link rel="stylesheet" href="./style.css">
-  <style>
-    body {
-      background-color: #000;
-      color: #fff;
-    }
-  </style>
+  <title>HTML5 Canvas 液体流动样式Loading加载动画DEMO演示</title>
+  <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/css?family=Montserrat:700,900'>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-  <div id="loading-text" style="text-align:center;clear:both;"></div>
-  <div id="ip-text" style="text-align:center;clear:both;"></div>
+  <div class="text">检测中...</div>
+  <canvas id='canvas'></canvas>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <defs>
+      <filter id="shadowed-goo">
+        <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+        <feGaussianBlur in="goo" stdDeviation="3" result="shadow" />
+        <feColorMatrix in="shadow" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 -0.2" result="shadow" />
+        <feOffset in="shadow" dx="1" dy="1" result="shadow" />
+        <feBlend in2="shadow" in="goo" result="goo" />
+        <feBlend in2="goo" in="SourceGraphic" result="mix" />
+      </filter>
+      <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+        <feBlend in2="goo" in="SourceGraphic" result="mix" />
+      </filter>
+    </defs>
+  </svg>
+
+  <script src="js/index.js"></script>
+
+  <div style="text-align: center; clear: both">
+    <script src="/gg_bd_ad_720x90.js" type="text/javascript"></script>
+    <script src="/follow.js" type="text/javascript"></script>
+  </div>
 
   <script>
-    var text = "加载中...";
-    var ipText = "IP已记录：" + getFakeIP(); // 使用 getFakeIP() 函数获取假的IP地址
-    var delay = 300; // Delay between each character display in milliseconds
-
-    function displayText(element, targetText) {
-      var currentTextLength = element.innerHTML.length;
-
-      if (currentTextLength < targetText.length) {
-        element.innerHTML = targetText.slice(0, currentTextLength + 1);
-
-        setTimeout(function () {
-          displayText(element, targetText);
-        }, delay);
-      }
-    }
-
-    // 获取假的IP地址
-    function getFakeIP() {
-      var ipSegments = Array(4).fill(0).map(function () {
-        return Math.floor(Math.random() * 256);
-      });
-
-      return ipSegments.join('.');
-    }
-
-    displayText(document.getElementById("loading-text"), text);
-
-    setTimeout(function () {
-      var element = document.getElementById("ip-text");
-      element.innerHTML = ipText;
-      displayText(element, ipText);
-    }, 3000);
-
-    var countDownSeconds = 5;
-    var countDownElement = document.createElement("div");
-    countDownElement.id = "countdown";
-    countDownElement.style.textAlign = "center";
-    document.body.appendChild(countDownElement);
-
-    var countDownInterval = setInterval(function () {
-      countDownSeconds--;
-      countDownElement.innerHTML = "还需 " + countDownSeconds + " 秒跳转";
-      if (countDownSeconds <= 0) {
-        clearInterval(countDownInterval);
-        // 在这里执行跳转的代码
-        window.location.href = "pc.html"; // 直接跳转到pc.html
-      }
-    }, 1000);
+    setTimeout(function() {
+      window.location.href = "pc.html";
+    }, 5000);
   </script>
-
-  <script>
-    // 这里添加你的其他脚本或代码
-
-    document.addEventListener("DOMContentLoaded", function () {
-      var sjPage = "sj.html";
-      var pcPage = "pc.html";
-      var xhr = new XMLHttpRequest();
-      xhr.open("HEAD", sjPage, true);
-      xhr.onload = function () {
-        if (xhr.status == 404) {
-          xhr.open("HEAD", pcPage, true);
-          xhr.onload = function () {
-            if (xhr.status == 404) {
-              var notFoundDiv = document.createElement("div");
-              notFoundDiv.innerHTML = "网页不存在";
-              document.body.appendChild(notFoundDiv);
-            }
-          };
-          xhr.send();
-        }
-      };
-      xhr.send();
-    });
-  </script>
-
 </body>
-
 </html>
