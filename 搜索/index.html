@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+	<meta name="referrer" content="never" />
+	<title>ST导航</title>
+	<link rel="stylesheet" type="text/css" href="css/main.css?v=1.50.16069" />
+	<link rel="stylesheet" id="nightCss" type="text/css" href="css/night.css?v=1.50.16069" disabled />
+</head>
+
+<body>
+	<div id="app">
+		<div class="page-home">
+			<div class="0"></div>
+			<div class="ornament-input-group" style="display: none;"></div>
+			<div class="bookmark"></div>
+		</div>
+		<div class="page-search">
+			<div class="history">
+				<div class="emptyHistory"></div>
+				<ul class="content"></ul>
+			</div>
+			<ul class="suggestion"></ul>
+			<div class="bottom-row">
+				<div class="search-from">
+					<div class="input-bg">
+						<input type="text" class="search-input" placeholder="搜索或输入网址" />
+						<div class="empty-input"></div>
+						<div class="search-btn">取消</div>
+					</div>
+				</div>
+				<div class="shortcut">
+					<div class="content">
+						<ul class="shortcut1">
+							<li>www.</li>
+							<li>m.</li>
+							<li>wap.</li>
+							<li>.org</li>
+						</ul>
+						<ul class="shortcut2">
+							<li>.</li>
+							<li>/</li>
+							<li>.cn</li>
+							<li>.com</li>
+							<li>.org</li>
+						</ul>
+						<ul class="shortcut3">
+							<li>快搜:</li>
+							<li>百科</li>
+							<li>视频</li>
+							<li>豆瓣</li>
+							<li>微博</li>
+							<li>知乎</li>
+							<li>小说</li>
+							<li>新闻</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<input type="text" class="s-temp" />
+	</div>
+	<script>
+		var app = window.app || {};
+		app.version = "1.50.16069";
+	</script>
+	<script src="js/lib/require.js?v=1.50.16069"></script>
+	<script src="js/main.js?v=1.50.16069"></script>
+	<script>
+		if (location.protocol == "https:" && navigator.serviceWorker) {
+			navigator.serviceWorker.register('sw.js');
+		}
+	</script>
+	<!-- 不重要的CSS最后加载 -->
+	<link rel="stylesheet" type="text/css" href="css/lazy.css?v=1.50.16069" />
+</body>
+
+</html>
+
+
+<!-- 看什么，这是anzhuo的-->
+<div class="web_notice" style="position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0,0,0,0.3);z-index: 99999;">
+<div style="position: fixed;top: 50%;left: 50%;width: 550px;background: #FFF;transform: translate(-50%, -50%);border-radius: 40px;padding: 50px 40px;">
+<h3 style="font-weight: bold;text-align: center;font-size: 30px;
+">提示</h3><div style="font-size: 16px;margin-top: 26px;line-height: 30px;color: #999;
+">本导航清晰无广告，以及所有代码都归ST所有，请勿抄袭，可以借用！（只要访问网站都会弹出）</div><a style="display: block;background: #98a3ff;color: #FFF;text-align: center;font-weight: bold;font-size: 19px;line-height: 60px;margin: 0 auto;margin-top: 45px;border-radius: 32px;width: 80%;" onclick="javascript:document.querySelector('.web_notice').remove()">确定</ a></div></div>
+<button onclick="window.location.href='caidan.html'" type="button" id="add">彩蛋</button>
