@@ -9,7 +9,7 @@
         <link rel="apple-touch-startup-image" media="(min-device-width: 768px) and (orientation: portrait)" href="images/splash_iPad_portrait.png"/>
         <link rel="apple-touch-startup-image" media="(min-device-width: 768px) and (orientation: landscape)" href="images/splash_iPad_landscape.png"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-        <title>Gomoku</title>
+        <title>五子棋</title>
         <link rel="stylesheet" href="style/jquery.mobile.min.css"/>
         <script src="js/jquery.min.js"></script>
         <script src="js/jquery.mobile.min.js"></script>
@@ -26,17 +26,17 @@
         <div data-role="page" data-theme="w" id="game-page" class="no-background">
             <div data-role="content" class="center no-padding">
                 <div id="game-region">
-                    <header class="game-ult">Gomoku</header>
+                    <header class="game-ult">五子棋</header>
                     <div id="game-info" class="game-ult ui-bar ui-bar-e">
                         <span class="go black"></span>
-                        <span class="cont">Your turn.</span>
+                        <span class="cont">该你了。</span>
                     </div>
                     <div id="main-but-group" class="game-ult">
-                        <a href="#new-game" data-rel="dialog" data-role="button" data-icon="grid">New Game</a>
-                        <a href="#" id="undo-button" data-icon="back" data-role="button">Undo</a>
+                        <a href="#new-game" data-rel="dialog" data-role="button" data-icon="grid">新游戏</a>
+                        <a href="#" id="undo-button" data-icon="back" data-role="button">取消</a>
                     </div>
                     <div id="other-but-group" class="game-ult">
-                        <a href="#help-page" id="help-button" data-icon="star" data-role="button">About</a>
+                        <a href="#help-page" id="help-button" data-icon="star" data-role="button">关于</a>
                     </div>
                     <div class="go-board" data-enhance="false"></div>
                     <table class="board" data-enhance="false">
@@ -47,70 +47,70 @@
         </div>
         <div id="game-won" data-theme="e" data-role="dialog">
             <div data-role="header">
-                <h4>You Win!</h4>
+                <h4>你赢了！</h4>
             </div>
             <div data-role="content">
-                <div id="win-content">You have won the game! Play again? </div>
+                <div id="win-content">你赢了比赛！再玩一次？</div>
                 <fieldset class="ui-grid-a">
                     <div class="ui-block-a">
-                        <button type="submit" class="back-to-game" data-theme="c">Back</button>
+                        <button type="submit" class="back-to-game" data-theme="c">返回</button>
                     </div>
                     <div class="ui-block-b">
-                        <a href="#new-game" data-rel="dialog" data-role="button" data-icon="grid">Start A New Game </a>
+                        <a href="#new-game" data-rel="dialog" data-role="button" data-icon="grid">开始新游戏</a>
                     </div>
                 </fieldset>
             </div>
         </div>
         <div id="new-game" data-theme="e" data-role="dialog" class="long-dialog">
             <div data-role="header">
-                <h4>New Game</h4>
+                <h4>新游戏</h4>
             </div>
             <div data-role="content">
                 <fieldset data-role="controlgroup" data-theme="e" id="mode-select">
-                    <legend>Play with</legend>
+                    <legend>玩</legend>
                     <input type="radio" name="radio-choice-1" id="radio-choice-1" value="vshuman"/>
-                    <label for="radio-choice-1">Human</label>
+                    <label for="radio-choice-1">玩家</label>
                     <input type="radio" name="radio-choice-1" id="radio-choice-2" value="vscomputer"/>
-                    <label for="radio-choice-2">Computer</label>
+                    <label for="radio-choice-2">STbot</label>
                 </fieldset>
                 <fieldset data-role="controlgroup" data-theme="e" id="color-select" class="vs-computer">
-                    <legend>Your Color</legend>
+                    <legend>你的颜色</legend>
                     <input type="radio" name="radio-choice-1" id="radio-choice-2" value="black" data-theme="a"/>
-                    <label for="radio-choice-2">Black</label>
+                    <label for="radio-choice-2">黑色</label>
                     <input type="radio" name="radio-choice-1" id="radio-choice-1" value="white" data-theme="c"/>
-                    <label for="radio-choice-1">White</label>
+                    <label for="radio-choice-1">白色</label>
                 </fieldset>
                 <fieldset data-role="controlgroup" data-theme="e" id="level-select" class="vs-computer">
-                    <legend>Level Of Difficulty</legend>
+                    <legend>难度</legend>
                     <input type="radio" name="radio-choice-1" id="radio-choice-1" value="novice"/>
-                    <label for="radio-choice-1">Novice</label>
+                    <label for="radio-choice-1">简单</label>
                     <input type="radio" name="radio-choice-1" id="radio-choice-2" value="medium"/>
-                    <label for="radio-choice-2">Medium</label>
+                    <label for="radio-choice-2">普通</label>
                     <input type="radio" name="radio-choice-1" id="radio-choice-3" value="expert"/>
-                    <label for="radio-choice-3">Expert</label>
+                    <label for="radio-choice-3">专家</label>
                 </fieldset>
                 <fieldset class="ui-grid-a">
                     <div class="ui-block-a">
-                        <button type="submit" class="back-to-game" data-theme="c">Back</button>
+                        <button type="submit" class="back-to-game" data-theme="c">背面</button>
                     </div>
                     <div class="ui-block-b">
-                        <button type="submit" id="start-game" data-theme="b">Start</button>
+                        <button type="submit" id="start-game" data-theme="b">开始</button>
                     </div>
                 </fieldset>
             </div>
         </div>
         <div data-role="dialog" data-theme="e" id="help-page">
             <div data-role="header">
-                <h4>About</h4>
+                <h4>关于</h4>
             </div>
             <div data-role="content" class="thin-content">
                 <p>
-                    I am Yujian and I made this game for fun. You can check out <a href="http://yjyao.com">my website</a>
-                    for my other lame projects, or find out more about me. You can also read a bit more about this game <a href="http://yjyao.com/2012/06/gomoku-in-html5.html">here</a>
-                    . Or, install this game in Chrome and/or post your comments <a href="https://chrome.google.com/webstore/detail/ngbpiahelilpgbnonpjfaoegaigopepa">here</a>
-                    .
+                    我是Yujian，我做这个游戏是为了好玩。你可以退出<a href="http://ostarso.github.io/小游戏">我的小游戏网站</a>
+                    对于我的其他蹩脚项目，或者了解更多关于我的信息。你也可以阅读更多关于这个游戏的信息<a href="http://ostarso.github.io/小游戏/五子棋">在这里</a>
+                    或者，在GitHub中安装此游戏和/或发表您的评论<a href="https://chrome.google.com/webstore/detail/ngbpiahelilpgbnonpjfaoegaigopepa">在这里</a>
+                    。
                 </p>
-                <p>Also, have fun beating/get beaten by my AI!</p>
+                <p>还有，打得开心/被我的AI打败！</p>
             </div>
         </div>
         <script type="text/javascript">
