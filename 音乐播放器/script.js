@@ -20,7 +20,7 @@ new Vue({
           name: "Mekanın Sahibi",
           artist: "Norm Ender",
           cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/1.jpg",
-          source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/1.mp3",
+          source: "https://github.com/OStarsO/OStarsO.github.io/blob/445d6201efd3b42d4d46863b60a89b7b95a5000f/%E9%9F%B3%E4%B9%90/Mine/Mine.m4a",
           url: "https://www.youtube.com/watch?v=z3wAjJXbYzA",
           favorited: false
         },
