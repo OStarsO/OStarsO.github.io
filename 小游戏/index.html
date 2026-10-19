@@ -1,115 +1,1293 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小游戏引导系统</title>
+    <style>
+        :root {
+            --primary-color: #00c0ff;
+            --background-color: #0a0a20;
+            --text-color: #e0e0ff;
+            --accent-color: #ff5eff;
+            --error-color: #ff4455;
+        }
 
-<html>
-	<head>
-		<title>OStarsO小游戏</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-	</head>
-	<body class="is-preload">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-		<!-- Wrapper -->
-			<div id="wrapper">
+        body {
+            background-color: #03030f;
+            color: var(--text-color);
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            min-height: 100vh;
+            width: 100vw;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-				<!-- Header -->
-					<header id="header">
-						<h1><a href="index.html"><strong>OStarsO</strong>Mini Games</a></h1>
-						<nav>
-							<ul>
-								<li><a href="#footer" class="icon solid fa-info-circle">反馈</a></li>
-							</ul>
-						</nav>
-					</header>
+        /* ================== */
+        /* 星空Canvas背景 */
+        /* ================== */
+        #starfield-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-				<!-- Main -->
-					<h2>小游戏</h2>
-					<div class="tool">
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/2048/';">2048</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/pacman/';">吃豆人</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/猜数字.html';">猜数字</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/赛车游戏';">赛车游戏</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/电脑蓝屏模拟器';">蓝屏模拟器</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/水果忍者';">水果忍者</button>
-				          <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/消消乐';">开心消消乐</button>
-				          <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/贪吃蛇';">贪吃蛇</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/打方块';">打方块</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/石头剪刀布';">石头剪刀布</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/密码安全度检测';">密码安全度检测（公测）</button>
-				          <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/国际象棋';">国际象棋（bot公测）</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/今天吃什么';">今天吃什么</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/翻牌消除游戏';">翻牌消除游戏</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/跑酷';">跑酷简易版</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/推箱子';">推箱子</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/st方棋动物游戏';">st方棋动物游戏</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/五子棋';">五子棋</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/趣味闯关';">解谜闯关</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/切方块';">切方块</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/盖塔楼';">盖塔楼</button>
-					  <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/股大爷';">股大爷</button>
-				          <button onclick="window.location.href = 'https://ostarso.github.io/小游戏/球跑者/qlupaozhe/moyu';">球跑者</button>
-					</div>
-				<!-- Footer -->
-					<footer id="footer" class="panel">
-						<div class="inner split">
-							<div>
-								<section>
-									<h2>OStarsO小游戏反馈</h2>
-									<p>希望你们可以反馈！</p>
-								</section>
-								<section>
-									<h2>哈哈 ...</h2>
-									<ul class="icons">
-										<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-										<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
-										<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
-										<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
-										<li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
-										<li><a href="#" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
-									</ul>
-								</section>
-								<p class="copyright">
-									&copy; 2023~2023: <a href="">OStarsO</a>.
-								</p>
-							</div>
-							<div>
-								<section>
-									<h2>反馈</h2>
-									<form method="post" action="#">
-										<div class="fields">
-											<div class="field half">
-												<input type="text" name="name" id="name" placeholder="名字" />
-											</div>
-											<div class="field half">
-												<input type="text" name="email" id="email" placeholder="邮箱" />
-											</div>
-											<div class="field">
-												<textarea name="message" id="message" rows="4" placeholder="建议"></textarea>
-											</div>
-										</div>
-										<ul class="actions">
-											<li><input type="submit" value="确定" class="primary" /></li>
-											<li><input type="reset" value="取消" /></li>
-										</ul>
-									</form>
-								</section>
-							</div>
-						</div>
-					</footer>
+        /* ================== */
+        /* 主容器 */
+        /* ================== */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
 
-			</div>
+        .container.zoom-out {
+            opacity: 0;
+            transform: scale(1.6) translateY(-30px);
+            pointer-events: none;
+            filter: blur(4px);
+        }
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.poptrox.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
-		<!-- 音乐 -->
-	<div id="xf-MusicPlayer" data-cdnName="https://player.xfyun.club/js"></div>
-        <script src="https://player.xfyun.club/js/xf-MusicPlayer/js/xf-MusicPlayer.min.js"></script>
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(0, 192, 255, 0.8), 0 0 60px rgba(0, 192, 255, 0.4);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            letter-spacing: 2px;
+            transition: all 0.5s ease;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
 
-	</body>
+        @keyframes titleGlow {
+            0%,
+            100% {
+                text-shadow: 0 0 20px rgba(0, 192, 255, 0.8), 0 0 60px rgba(0, 192, 255, 0.4);
+            }
+            50% {
+                text-shadow: 0 0 35px rgba(0, 220, 255, 1), 0 0 90px rgba(0, 192, 255, 0.7), 0 0 120px rgba(100, 180, 255, 0.5);
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8888cc;
+            margin-bottom: 50px;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            transition: all 0.5s ease;
+        }
+
+        /* ================== */
+        /* 门户卡片网格 */
+        /* ================== */
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 28px;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .portal-grid.fade-out {
+            opacity: 0;
+            transform: translateY(40px);
+            filter: blur(8px);
+        }
+
+        .portal-link {
+            background: rgba(18, 26, 55, 0.75);
+            padding: 32px 24px;
+            border-radius: 18px;
+            cursor: pointer;
+            border: 1.5px solid rgba(0, 192, 255, 0.5);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            box-shadow: 0 0 20px rgba(0, 192, 255, 0.2), inset 0 0 20px rgba(0, 192, 255, 0.05);
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            display: block;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .portal-link::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: -60%;
+            width: 220%;
+            height: 220%;
+            background: radial-gradient(circle, rgba(0, 192, 255, 0.12) 0%, transparent 65%);
+            transform: rotate(45deg);
+            transition: all 0.7s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .portal-link:hover::before {
+            opacity: 1;
+            transform: rotate(45deg) scale(1.1);
+        }
+
+        .portal-link:hover {
+            background: rgba(25, 40, 80, 0.9);
+            transform: translateY(-10px) scale(1.04);
+            box-shadow: 0 18px 45px rgba(0, 192, 255, 0.55), 0 0 60px rgba(255, 94, 255, 0.25),
+                inset 0 0 30px rgba(0, 192, 255, 0.1);
+            border-color: var(--accent-color);
+            border-width: 2px;
+        }
+
+        .portal-link:active {
+            transform: scale(0.96);
+            transition: all 0.1s ease;
+            box-shadow: 0 5px 15px rgba(0, 192, 255, 0.7);
+        }
+
+        .portal-link .portal-icon {
+            font-size: 3em;
+            display: block;
+            margin-bottom: 8px;
+            transition: all 0.4s ease;
+            filter: drop-shadow(0 0 10px rgba(0, 192, 255, 0.5));
+        }
+
+        .portal-link:hover .portal-icon {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 20px rgba(255, 94, 255, 0.7));
+        }
+
+        .portal-link h2 {
+            color: var(--primary-color);
+            margin-top: 6px;
+            font-size: 1.4em;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .portal-link p {
+            color: #aaaaff;
+            margin-top: 8px;
+            font-size: 0.9em;
+            line-height: 1.5;
+            transition: all 0.3s ease;
+        }
+
+        .portal-link:hover h2 {
+            color: #fff;
+            text-shadow: 0 0 15px rgba(0, 192, 255, 0.8);
+        }
+
+        .portal-link:hover p {
+            color: #d0d0ff;
+        }
+
+        /* 边框发光脉冲 */
+        .portal-link::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 20px;
+            padding: 2px;
+            background: transparent;
+            pointer-events: none;
+            transition: all 0.4s ease;
+            opacity: 0;
+            z-index: -1;
+        }
+
+        .portal-link:hover::after {
+            opacity: 1;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color), var(--primary-color));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: borderGlow 2s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        /* ================== */
+        /* 过渡层 */
+        /* ================== */
+        #transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 8, 24, 0.92);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        #transition-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        .portal-preview {
+            font-size: 2.8em;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            text-shadow: 0 0 40px rgba(0, 192, 255, 0.9), 0 0 80px rgba(0, 192, 255, 0.5);
+            opacity: 0;
+            transform: scale(0.6) translateY(20px);
+            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .portal-preview.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            animation: previewPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes previewPulse {
+            0%,
+            100% {
+                text-shadow: 0 0 40px rgba(0, 192, 255, 0.9), 0 0 80px rgba(0, 192, 255, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 55px rgba(0, 220, 255, 1), 0 0 110px rgba(0, 192, 255, 0.8), 0 0 150px rgba(150, 200, 255, 0.6);
+            }
+        }
+
+        .loading-container {
+            width: 420px;
+            max-width: 88%;
+            margin-top: 16px;
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(0, 192, 255, 0.18);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            position: relative;
+            box-shadow: 0 0 14px rgba(0, 192, 255, 0.25);
+        }
+
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary-color), #5ec8ff, var(--accent-color));
+            border-radius: 5px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 12px rgba(0, 192, 255, 0.6);
+        }
+
+        .loading-progress.error-state {
+            background: linear-gradient(90deg, #ff4455, #ff6677, #ff8899);
+            box-shadow: 0 0 12px rgba(255, 68, 85, 0.7);
+            animation: errorPulse 0.6s ease-in-out infinite;
+        }
+
+        @keyframes errorPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 12px rgba(255, 68, 85, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 28px rgba(255, 68, 85, 1), 0 0 50px rgba(255, 50, 60, 0.6);
+            }
+        }
+
+        .loading-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+            animation: loading-shine 1.2s infinite;
+        }
+
+        @keyframes loading-shine {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(220%);
+            }
+        }
+
+        .loading-text {
+            text-align: center;
+            color: #aaaaff;
+            font-size: 0.9em;
+            height: 22px;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .loading-text.error-text {
+            color: #ff6677;
+            animation: errorBlink 0.8s ease-in-out infinite;
+        }
+
+        @keyframes errorBlink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .error-message {
+            color: #ff5566;
+            font-size: 1.15em;
+            margin-top: 18px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 1px;
+            min-height: 28px;
+        }
+
+        .error-message.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .retry-hint {
+            color: #8888bb;
+            font-size: 0.85em;
+            margin-top: 8px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        .retry-hint.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ================== */
+        /* 星爆粒子效果 */
+        /* ================== */
+        .starburst-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+            border-radius: 50%;
+            animation: starburstFly 1s forwards;
+        }
+
+        @keyframes starburstFly {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* ================== */
+        /* 响应式 */
+        /* ================== */
+        @media (max-width: 768px) {
+            .container {
+                margin: 25px auto;
+                padding: 12px;
+            }
+            h1 {
+                font-size: 1.6em;
+                margin-bottom: 16px;
+            }
+            .subtitle {
+                font-size: 0.85em;
+                margin-bottom: 30px;
+            }
+            .portal-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 16px;
+            }
+            .portal-link {
+                padding: 22px 14px;
+                border-radius: 14px;
+            }
+            .portal-link .portal-icon {
+                font-size: 2.2em;
+            }
+            .portal-link h2 {
+                font-size: 1.1em;
+            }
+            .portal-link p {
+                font-size: 0.78em;
+            }
+            .portal-preview {
+                font-size: 2em;
+            }
+            .loading-container {
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .portal-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .portal-link {
+                padding: 16px 10px;
+                border-radius: 12px;
+            }
+            .portal-link .portal-icon {
+                font-size: 1.8em;
+            }
+            .portal-link h2 {
+                font-size: 0.95em;
+            }
+            .portal-link p {
+                font-size: 0.7em;
+                display: none;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 星空背景Canvas -->
+    <canvas id="starfield-canvas"></canvas>
+
+    <!-- 过渡层 -->
+    <div id="transition-overlay">
+        <div class="portal-preview" id="portal-preview">🌍 地球星域</div>
+        <div class="loading-container">
+            <div class="loading-bar">
+                <div class="loading-progress" id="loading-progress"></div>
+            </div>
+            <div class="loading-text" id="loading-text">正在建立量子连接...</div>
+        </div>
+        <div class="error-message" id="error-message">⚠️ 门户连接失败</div>
+        <div class="retry-hint" id="retry-hint">系统将自动返回导航界面...</div>
+    </div>
+
+    <!-- 主内容 -->
+    <div class="container" id="main-container">
+        <h1 id="main-title">🚀 引导导航系统 🚀</h1>
+        <p class="subtitle" id="main-subtitle">请选择您需要前往的网页，系统将为您加载量子通道</p>
+
+        <!-- 小游戏大厅 -->
+        <p class="subtitle" id="games-title" style="margin-top: 70px; margin-bottom: 30px;">🎮 小游戏大厅 · 23 款</p>
+        <div class="portal-grid" id="games-grid">
+            <a href="2048/" class="portal-link" data-target-url="2048/" data-portal-name="2048" data-icon="🔢">
+                <span role="img" aria-label="2048" class="portal-icon">🔢</span>
+                <h2>2048</h2>
+                <p>经典数字合并。</p>
+            </a>
+            <a href="pacman/index.htm" class="portal-link" data-target-url="pacman/index.htm" data-portal-name="吃豆人" data-icon="🟡">
+                <span role="img" aria-label="吃豆人" class="portal-icon">🟡</span>
+                <h2>吃豆人</h2>
+                <p>经典街机重制版。</p>
+            </a>
+            <a href="猜数字.html" class="portal-link" data-target-url="猜数字.html" data-portal-name="猜数字" data-icon="🎯">
+                <span role="img" aria-label="猜数字" class="portal-icon">🎯</span>
+                <h2>猜数字</h2>
+                <p>数字大小挑战。</p>
+            </a>
+            <a href="赛车游戏/" class="portal-link" data-target-url="赛车游戏/" data-portal-name="赛车游戏" data-icon="🏎️">
+                <span role="img" aria-label="赛车游戏" class="portal-icon">🏎️</span>
+                <h2>赛车游戏</h2>
+                <p>竞速躲避障碍。</p>
+            </a>
+            <a href="电脑蓝屏模拟器/" class="portal-link" data-target-url="电脑蓝屏模拟器/" data-portal-name="蓝屏模拟器" data-icon="💻">
+                <span role="img" aria-label="蓝屏模拟器" class="portal-icon">💻</span>
+                <h2>蓝屏模拟器</h2>
+                <p>整蛊蓝屏模拟。</p>
+            </a>
+            <a href="水果忍者/" class="portal-link" data-target-url="水果忍者/" data-portal-name="水果忍者" data-icon="🍉">
+                <span role="img" aria-label="水果忍者" class="portal-icon">🍉</span>
+                <h2>水果忍者</h2>
+                <p>切水果快手刀。</p>
+            </a>
+            <a href="消消乐/" class="portal-link" data-target-url="消消乐/" data-portal-name="开心消消乐" data-icon="🍬">
+                <span role="img" aria-label="开心消消乐" class="portal-icon">🍬</span>
+                <h2>开心消消乐</h2>
+                <p>三消经典玩法。</p>
+            </a>
+            <a href="贪吃蛇/" class="portal-link" data-target-url="贪吃蛇/" data-portal-name="贪吃蛇" data-icon="🐍">
+                <span role="img" aria-label="贪吃蛇" class="portal-icon">🐍</span>
+                <h2>贪吃蛇</h2>
+                <p>经典贪吃蛇。</p>
+            </a>
+            <a href="打方块/" class="portal-link" data-target-url="打方块/" data-portal-name="打方块" data-icon="🧱">
+                <span role="img" aria-label="打方块" class="portal-icon">🧱</span>
+                <h2>打方块</h2>
+                <p>打砖块街机。</p>
+            </a>
+            <a href="石头剪刀布/" class="portal-link" data-target-url="石头剪刀布/" data-portal-name="石头剪刀布" data-icon="✊">
+                <span role="img" aria-label="石头剪刀布" class="portal-icon">✊</span>
+                <h2>石头剪刀布</h2>
+                <p>和电脑猜拳。</p>
+            </a>
+            <a href="密码安全度检测/" class="portal-link" data-target-url="密码安全度检测/" data-portal-name="密码安全度检测" data-icon="🔐">
+                <span role="img" aria-label="密码安全度检测" class="portal-icon">🔐</span>
+                <h2>密码安全度检测</h2>
+                <p>检测密码强度（公测）。</p>
+            </a>
+            <a href="国际象棋/" class="portal-link" data-target-url="国际象棋/" data-portal-name="国际象棋" data-icon="♟️">
+                <span role="img" aria-label="国际象棋" class="portal-icon">♟️</span>
+                <h2>国际象棋</h2>
+                <p>人机对弈 bot（公测）。</p>
+            </a>
+            <a href="今天吃什么/" class="portal-link" data-target-url="今天吃什么/" data-portal-name="今天吃什么" data-icon="🍜">
+                <span role="img" aria-label="今天吃什么" class="portal-icon">🍜</span>
+                <h2>今天吃什么</h2>
+                <p>随机决定吃啥。</p>
+            </a>
+            <a href="翻牌消除游戏/" class="portal-link" data-target-url="翻牌消除游戏/" data-portal-name="翻牌消除游戏" data-icon="🃏">
+                <span role="img" aria-label="翻牌消除游戏" class="portal-icon">🃏</span>
+                <h2>翻牌消除游戏</h2>
+                <p>记忆翻牌配对。</p>
+            </a>
+            <a href="跑酷/" class="portal-link" data-target-url="跑酷/" data-portal-name="跑酷简易版" data-icon="🏃">
+                <span role="img" aria-label="跑酷简易版" class="portal-icon">🏃</span>
+                <h2>跑酷简易版</h2>
+                <p>一键跑酷闯关。</p>
+            </a>
+            <a href="推箱子/" class="portal-link" data-target-url="推箱子/" data-portal-name="推箱子" data-icon="📦">
+                <span role="img" aria-label="推箱子" class="portal-icon">📦</span>
+                <h2>推箱子</h2>
+                <p>经典益智推箱子。</p>
+            </a>
+            <a href="st方棋动物游戏/" class="portal-link" data-target-url="st方棋动物游戏/" data-portal-name="st方棋动物游戏" data-icon="🐾">
+                <span role="img" aria-label="st方棋动物游戏" class="portal-icon">🐾</span>
+                <h2>st方棋动物游戏</h2>
+                <p>动物版三方棋。</p>
+            </a>
+            <a href="五子棋/" class="portal-link" data-target-url="五子棋/" data-portal-name="五子棋" data-icon="⚫">
+                <span role="img" aria-label="五子棋" class="portal-icon">⚫</span>
+                <h2>五子棋</h2>
+                <p>五子连珠对战。</p>
+            </a>
+            <a href="趣味闯关.html" class="portal-link" data-target-url="趣味闯关.html" data-portal-name="解谜闯关" data-icon="🧩">
+                <span role="img" aria-label="解谜闯关" class="portal-icon">🧩</span>
+                <h2>解谜闯关</h2>
+                <p>趣味解谜闯关。</p>
+            </a>
+            <a href="切方块.html" class="portal-link" data-target-url="切方块.html" data-portal-name="切方块" data-icon="✂️">
+                <span role="img" aria-label="切方块" class="portal-icon">✂️</span>
+                <h2>切方块</h2>
+                <p>滑动切方块。</p>
+            </a>
+            <a href="盖塔楼.html" class="portal-link" data-target-url="盖塔楼.html" data-portal-name="盖塔楼" data-icon="🏗️">
+                <span role="img" aria-label="盖塔楼" class="portal-icon">🏗️</span>
+                <h2>盖塔楼</h2>
+                <p>堆叠盖塔楼。</p>
+            </a>
+            <a href="股大爷/" class="portal-link" data-target-url="股大爷/" data-portal-name="股大爷" data-icon="📈">
+                <span role="img" aria-label="股大爷" class="portal-icon">📈</span>
+                <h2>股大爷</h2>
+                <p>股票模拟（入口缺失）。</p>
+            </a>
+            <a href="球跑者/qlupaozhe/moyu.html" class="portal-link" data-target-url="球跑者/qlupaozhe/moyu.html" data-portal-name="球跑者" data-icon="⚽">
+                <span role="img" aria-label="球跑者" class="portal-icon">⚽</span>
+                <h2>球跑者</h2>
+                <p>球跑者摸鱼版。</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ====================
+            // 3D星空粒子系统
+            // ====================
+            class Starfield3D {
+                constructor(canvas) {
+                    this.canvas = canvas;
+                    this.ctx = canvas.getContext('2d');
+                    this.stars = [];
+                    this.width = 0;
+                    this.height = 0;
+                    this.centerX = 0;
+                    this.centerY = 0;
+                    this.focalLength = 380;
+                    this.targetFocalLength = 380;
+                    this.speedMultiplier = 1;
+                    this.targetSpeedMultiplier = 1;
+                    this.starCount = 280;
+                    this.baseZSpeed = 3.5;
+                    this.zFar = 900;
+                    this.zNear = 0.8;
+                    this.spreadRadius = 550;
+                    this.trailEnabled = false;
+                    this.prevStarPositions = [];
+                    this.init();
+                    this.setupResize();
+                    this.animate();
+                }
+
+                init() {
+                    this.resize();
+                    this.createStars();
+                }
+
+                resize() {
+                    this.width = window.innerWidth;
+                    this.height = window.innerHeight;
+                    this.centerX = this.width / 2;
+                    this.centerY = this.height / 2;
+                    this.canvas.width = this.width;
+                    this.canvas.height = this.height;
+                }
+
+                setupResize() {
+                    window.addEventListener('resize', () => {
+                        const oldCenterX = this.centerX;
+                        const oldCenterY = this.centerY;
+                        this.resize();
+                        const dx = this.centerX - oldCenterX;
+                        const dy = this.centerY - oldCenterY;
+                        for (let star of this.stars) {
+                            star.x += dx * (star.z / this.zFar);
+                            star.y += dy * (star.z / this.zFar);
+                        }
+                    });
+                }
+
+                createStars() {
+                    this.stars = [];
+                    this.prevStarPositions = [];
+                    for (let i = 0; i < this.starCount; i++) {
+                        const star = this.generateStar(true);
+                        this.stars.push(star);
+                        this.prevStarPositions.push({ sx: -100, sy: -100 });
+                    }
+                }
+
+                generateStar(randomZ = false) {
+                    const z = randomZ ? Math.random() * this.zFar + this.zNear :
+                        this.zFar * 0.1 + Math.random() * this.zFar * 0.9;
+                    const spreadAtZ = this.spreadRadius * (z / this.zFar) * 1.3;
+                    const angle = Math.random() * Math.PI * 2;
+                    const radius = Math.random() * spreadAtZ;
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+                    const baseSize = Math.random() * 2.2 + 0.4;
+                    const depthRatio = 1 - (z / this.zFar);
+                    const brightness = 0.35 + depthRatio * 0.65;
+                    const hueShift = Math.random() * 30;
+                    return {
+                        x: x,
+                        y: y,
+                        z: z,
+                        baseSize: baseSize,
+                        brightness: brightness,
+                        hueShift: hueShift,
+                        twinkleSpeed: Math.random() * 0.02 + 0.005,
+                        twinkleOffset: Math.random() * Math.PI * 2,
+                    };
+                }
+
+                resetStar(star) {
+                    const newStar = this.generateStar(false);
+                    star.z = this.zFar + Math.random() * 200;
+                    star.x = newStar.x;
+                    star.y = newStar.y;
+                    star.baseSize = newStar.baseSize;
+                    star.brightness = newStar.brightness;
+                    star.hueShift = newStar.hueShift;
+                    star.twinkleSpeed = newStar.twinkleSpeed;
+                    star.twinkleOffset = newStar.twinkleOffset;
+                }
+
+                project(star) {
+                    const safeZ = Math.max(star.z, this.zNear);
+                    const scale = this.focalLength / safeZ;
+                    const sx = star.x * scale + this.centerX;
+                    const sy = star.y * scale + this.centerY;
+                    const size = star.baseSize * scale;
+                    const clampedSize = Math.max(0.3, Math.min(size, 18));
+                    const alpha = Math.max(0.15, Math.min(1, star.brightness * (1 - safeZ / (this.zFar * 1.2))));
+                    return { sx, sy, size: clampedSize, alpha, safeZ };
+                }
+
+                updateStars() {
+                    const effectiveSpeed = this.baseZSpeed * this.speedMultiplier;
+                    const now = performance.now() * 0.001;
+
+                    for (let i = 0; i < this.stars.length; i++) {
+                        const star = this.stars[i];
+                        const prevProj = this.project(star);
+                        this.prevStarPositions[i] = { sx: prevProj.sx, sy: prevProj.sy, alpha: prevProj.alpha };
+
+                        star.z -= effectiveSpeed * (0.6 + star.brightness * 1.2);
+                        star.x += (Math.random() - 0.5) * effectiveSpeed * 0.3;
+                        star.y += (Math.random() - 0.5) * effectiveSpeed * 0.3;
+
+                        if (star.z <= this.zNear) {
+                            this.resetStar(star);
+                            this.prevStarPositions[i] = { sx: -100, sy: -100, alpha: 0 };
+                        }
+
+                        const drift = Math.sin(now * star.twinkleSpeed + star.twinkleOffset) * 0.15;
+                        star.brightness = Math.max(0.25, Math.min(1, star.brightness + drift));
+                    }
+
+                    // 平滑过渡focalLength
+                    this.focalLength += (this.targetFocalLength - this.focalLength) * 0.08;
+                    // 平滑过渡speedMultiplier
+                    this.speedMultiplier += (this.targetSpeedMultiplier - this.speedMultiplier) * 0.06;
+                }
+
+                drawStars() {
+                    const ctx = this.ctx;
+                    ctx.clearRect(0, 0, this.width, this.height);
+
+                    // 深空背景渐变
+                    const bgGrad = ctx.createRadialGradient(this.centerX, this.centerY, 0,
+                        this.centerX, this.centerY, Math.max(this.width, this.height) * 0.75);
+                    bgGrad.addColorStop(0, '#0d1030');
+                    bgGrad.addColorStop(0.5, '#080b22');
+                    bgGrad.addColorStop(1, '#020412');
+                    ctx.fillStyle = bgGrad;
+                    ctx.fillRect(0, 0, this.width, this.height);
+
+                    // 星云微光
+                    const nebulaGrad = ctx.createRadialGradient(
+                        this.centerX * 0.7, this.centerY * 0.6, this.width * 0.05,
+                        this.centerX * 1.1, this.centerY * 0.9, this.width * 0.5
+                    );
+                    nebulaGrad.addColorStop(0, 'rgba(30, 60, 140, 0.06)');
+                    nebulaGrad.addColorStop(0.5, 'rgba(20, 30, 90, 0.03)');
+                    nebulaGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.fillStyle = nebulaGrad;
+                    ctx.fillRect(0, 0, this.width, this.height);
+
+                    const now = performance.now() * 0.001;
+
+                    for (let i = 0; i < this.stars.length; i++) {
+                        const star = this.stars[i];
+                        const proj = this.project(star);
+                        const prev = this.prevStarPositions[i];
+
+                        // 拖尾效果（仅在加速时）
+                        if (this.speedMultiplier > 2.5 && prev.alpha > 0.05 &&
+                            Math.abs(proj.sx - prev.sx) < this.width * 0.6 &&
+                            Math.abs(proj.sy - prev.sy) < this.height * 0.6) {
+                            const trailAlpha = prev.alpha * 0.5;
+                            ctx.beginPath();
+                            ctx.moveTo(prev.sx, prev.sy);
+                            ctx.lineTo(proj.sx, proj.sy);
+                            ctx.strokeStyle = `rgba(180,210,255,${trailAlpha * 0.6})`;
+                            ctx.lineWidth = proj.size * 0.4;
+                            ctx.stroke();
+                        }
+
+                        // 绘制星星光晕
+                        if (proj.size > 2.5 && proj.alpha > 0.5) {
+                            const glowGrad = ctx.createRadialGradient(proj.sx, proj.sy, 0, proj.sx, proj.sy, proj.size *
+                                2.5);
+                            const glowAlpha = proj.alpha * 0.35;
+                            glowGrad.addColorStop(0, `rgba(160,210,255,${glowAlpha})`);
+                            glowGrad.addColorStop(0.5, `rgba(100,170,240,${glowAlpha * 0.6})`);
+                            glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+                            ctx.beginPath();
+                            ctx.arc(proj.sx, proj.sy, proj.size * 2.5, 0, Math.PI * 2);
+                            ctx.fillStyle = glowGrad;
+                            ctx.fill();
+                        }
+
+                        // 星星主体
+                        const twinkle = Math.sin(now * star.twinkleSpeed * 3 + star.twinkleOffset) * 0.2 + 0.8;
+                        const finalAlpha = proj.alpha * twinkle;
+                        const colorR = 200 + star.hueShift;
+                        const colorG = 210 + star.hueShift * 0.5;
+                        const colorB = 240;
+                        ctx.beginPath();
+                        ctx.arc(proj.sx, proj.sy, proj.size, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${Math.round(colorR)},${Math.round(colorG)},${Math.round(colorB)},${finalAlpha})`;
+                        ctx.fill();
+
+                        // 亮星十字光芒
+                        if (proj.size > 3.5 && proj.alpha > 0.65) {
+                            const crossAlpha = finalAlpha * 0.5;
+                            const crossLen = proj.size * 3;
+                            ctx.strokeStyle = `rgba(200,225,255,${crossAlpha})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.beginPath();
+                            ctx.moveTo(proj.sx - crossLen, proj.sy);
+                            ctx.lineTo(proj.sx + crossLen, proj.sy);
+                            ctx.moveTo(proj.sx - crossLen, proj.sy + crossLen);
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                animate() {
+                    this.updateStars();
+                    this.drawStars();
+                    this._rafId = requestAnimationFrame(() => this.animate());
+                }
+
+                accelerate() {
+                    this.targetSpeedMultiplier = 9;
+                    this.targetFocalLength = 560;
+                }
+
+                decelerate() {
+                    this.targetSpeedMultiplier = 1;
+                    this.targetFocalLength = 380;
+                }
+
+                setSpeedInstant(speed) {
+                    this.speedMultiplier = speed;
+                    this.targetSpeedMultiplier = speed;
+                    this.focalLength = speed > 5 ? 560 : 380;
+                    this.targetFocalLength = speed > 5 ? 560 : 380;
+                }
+
+                getCurrentSpeed() {
+                    return this.speedMultiplier;
+                }
+            }
+
+            // ====================
+            // 主应用逻辑
+            // ====================
+            document.addEventListener('DOMContentLoaded', () => {
+                const canvas = document.getElementById('starfield-canvas');
+                const starfield = new Starfield3D(canvas);
+
+                const portalLinks = document.querySelectorAll('.portal-link');
+                const overlay = document.getElementById('transition-overlay');
+                const portalPreview = document.getElementById('portal-preview');
+                const loadingProgress = document.getElementById('loading-progress');
+                const loadingText = document.getElementById('loading-text');
+                const errorMessage = document.getElementById('error-message');
+                const retryHint = document.getElementById('retry-hint');
+                const mainContainer = document.getElementById('main-container');
+                const portalGrid = document.getElementById('portal-grid');
+                const mainTitle = document.getElementById('main-title');
+                const mainSubtitle = document.getElementById('main-subtitle');
+
+                let isTransitioning = false;
+                let progressInterval = null;
+                let revertTimeout = null;
+                let fileCheckAbortController = null;
+
+                // 创建星爆粒子
+                function createStarburstParticles(x, y, count = 22) {
+                    const colors = ['#00c0ff', '#ff5eff', '#ffffff', '#88ccff', '#ffaaff', '#aaddff'];
+                    const fragment = document.createDocumentFragment();
+                    for (let i = 0; i < count; i++) {
+                        const particle = document.createElement('div');
+                        particle.className = 'starburst-particle';
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = 40 + Math.random() * 140;
+                        const dx = Math.cos(angle) * distance;
+                        const dy = Math.sin(angle) * distance;
+                        const size = 3 + Math.random() * 10;
+                        particle.style.cssText = `
+                            left: ${x}px;
+                            top: ${y}px;
+                            width: ${size}px;
+                            height: ${size}px;
+                            --dx: ${dx}px;
+                            --dy: ${dy}px;
+                            background: ${colors[Math.floor(Math.random() * colors.length)]};
+                            box-shadow: 0 0 ${size * 2}px ${colors[Math.floor(Math.random() * colors.length)]};
+                            animation-duration: ${0.5 + Math.random() * 0.9}s;
+                        `;
+                        fragment.appendChild(particle);
+                    }
+                    document.body.appendChild(fragment);
+
+                    // 清理粒子
+                    setTimeout(() => {
+                        const particles = document.querySelectorAll('.starburst-particle');
+                        particles.forEach(p => p.remove());
+                    }, 1600);
+                }
+
+                // 重置所有状态
+                function resetAllState() {
+                    if (progressInterval) {
+                        clearInterval(progressInterval);
+                        progressInterval = null;
+                    }
+                    if (revertTimeout) {
+                        clearTimeout(revertTimeout);
+                        revertTimeout = null;
+                    }
+                    if (fileCheckAbortController) {
+                        fileCheckAbortController.abort();
+                        fileCheckAbortController = null;
+                    }
+
+                    overlay.classList.remove('active');
+                    portalPreview.classList.remove('active');
+                    errorMessage.classList.remove('active');
+                    retryHint.classList.remove('active');
+                    loadingProgress.classList.remove('error-state');
+                    loadingProgress.style.width = '0%';
+                    loadingText.classList.remove('error-text');
+                    loadingText.textContent = '正在建立量子连接...';
+                    mainContainer.classList.remove('zoom-out');
+                    document.querySelectorAll('.portal-grid').forEach(g => g.classList.remove('fade-out'));
+                    mainTitle.style.opacity = '1';
+                    mainSubtitle.style.opacity = '1';
+                    starfield.decelerate();
+                    canvas.style.transform = '';
+                    isTransitioning = false;
+                }
+
+                // 文件存在检测
+                async function checkFileExists(url, signal) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'HEAD',
+                            signal: signal,
+                            cache: 'no-cache',
+                        });
+                        return response.ok;
+                    } catch (error) {
+                        if (error.name === 'AbortError') {
+                            return null; // 被取消
+                        }
+                        console.error('文件检测失败:', error.message);
+                        return false;
+                    }
+                }
+
+                // 处理门户点击
+                portalLinks.forEach(link => {
+                    link.addEventListener('click', async function(e) {
+                        e.preventDefault();
+                        if (isTransitioning) return;
+                        isTransitioning = true;
+
+                        const targetUrl = this.getAttribute('data-target-url');
+                        const portalName = this.getAttribute('data-portal-name');
+                        const portalIcon = this.getAttribute('data-icon') || '🚀';
+                        const rect = this.getBoundingClientRect();
+                        const centerX = rect.left + rect.width / 2;
+                        const centerY = rect.top + rect.height / 2;
+
+                        // 取消之前的任何操作
+                        if (fileCheckAbortController) {
+                            fileCheckAbortController.abort();
+                        }
+                        fileCheckAbortController = new AbortController();
+                        const signal = fileCheckAbortController.signal;
+
+                        // 清理之前的定时器
+                        if (progressInterval) clearInterval(progressInterval);
+                        if (revertTimeout) clearTimeout(revertTimeout);
+
+                        // 1. 星爆粒子效果
+                        createStarburstParticles(centerX, centerY, 28);
+
+                        // 2. 更新预览
+                        portalPreview.textContent = `${portalIcon} ${portalName}`;
+                        portalPreview.classList.remove('active');
+                        errorMessage.classList.remove('active');
+                        retryHint.classList.remove('active');
+                        loadingProgress.classList.remove('error-state');
+                        loadingProgress.style.width = '0%';
+                        loadingText.classList.remove('error-text');
+                        loadingText.textContent = '正在建立量子连接...';
+
+                        // 3. 显示过渡层
+                        overlay.classList.add('active');
+
+                        // 4. 容器zoom-out + 卡片fade-out
+                        mainContainer.classList.add('zoom-out');
+                        document.querySelectorAll('.portal-grid').forEach(g => g.classList.add('fade-out'));
+                        mainTitle.style.opacity = '0';
+                        mainSubtitle.style.opacity = '0';
+
+                        // 5. 星空加速
+                        starfield.accelerate();
+                        canvas.style.transform = 'scale(1.04)';
+
+                        // 6. 延迟显示预览文字
+                        setTimeout(() => {
+                            if (!isTransitioning) return;
+                            portalPreview.classList.add('active');
+                        }, 280);
+
+                        // 7. 模拟加载进度 + 文件检测
+                        let progress = 0;
+                        let fileCheckDone = false;
+                        let fileExists = false;
+                        let fileCheckResult = null;
+
+                        // 发起文件检测
+                        const fileCheckPromise = checkFileExists(targetUrl, signal).then(result => {
+                            if (result === null) return; // 被取消
+                            fileCheckDone = true;
+                            fileCheckResult = result;
+                            fileExists = result;
+                        });
+
+                        progressInterval = setInterval(() => {
+                            if (!isTransitioning) {
+                                clearInterval(progressInterval);
+                                progressInterval = null;
+                                return;
+                            }
+
+                            if (fileCheckDone) {
+                                // 文件检测完成
+                                if (fileExists) {
+                                    // 成功：快速完成进度
+                                    progress += Math.random() * 20 + 8;
+                                    if (progress >= 100) {
+                                        progress = 100;
+                                        loadingProgress.style.width = '100%';
+                                        loadingText.textContent = '✅ 跃迁准备就绪！';
+                                        clearInterval(progressInterval);
+                                        progressInterval = null;
+
+                                        // 跳转
+                                        revertTimeout = setTimeout(() => {
+                                            if (isTransitioning) {
+                                                window.location.href = targetUrl;
+                                            }
+                                        }, 400);
+                                    } else {
+                                        loadingProgress.style.width = `${progress}%`;
+                                        loadingText.textContent = '校准导航坐标...';
+                                    }
+                                } else {
+                                    // 失败：停止进度，显示错误
+                                    clearInterval(progressInterval);
+                                    progressInterval = null;
+                                    loadingProgress.classList.add('error-state');
+                                    loadingText.classList.add('error-text');
+                                    loadingText.textContent = '❌ 量子通道中断';
+                                    errorMessage.textContent =
+                                        `⚠️ 目标门户 "${targetUrl}" 不存在或无法访问`;
+                                    errorMessage.classList.add('active');
+                                    retryHint.classList.add('active');
+
+                                    // 回退
+                                    revertTimeout = setTimeout(() => {
+                                        revertToNormal();
+                                    }, 2200);
+                                }
+                            } else {
+                                // 文件检测进行中，模拟进度
+                                if (progress < 65) {
+                                    progress += Math.random() * 6 + 1.5;
+                                    if (progress > 65) progress = 65;
+                                    loadingProgress.style.width = `${progress}%`;
+
+                                    if (progress < 20) {
+                                        loadingText.textContent = '正在建立量子连接...';
+                                    } else if (progress < 40) {
+                                        loadingText.textContent = '检测目标门户状态...';
+                                    } else if (progress < 60) {
+                                        loadingText.textContent = '压缩时空曲率...';
+                                    } else {
+                                        loadingText.textContent = '等待门户响应...';
+                                    }
+                                } else {
+                                    // 保持在65%等待文件检测
+                                    loadingProgress.style.width = '65%';
+                                    loadingText.textContent = '等待门户响应...';
+                                }
+                            }
+                        }, 70);
+
+                        // 设置文件检测超时（5秒）
+                        const timeoutPromise = new Promise((resolve) => {
+                            setTimeout(() => {
+                                if (!fileCheckDone) {
+                                    resolve('timeout');
+                                }
+                            }, 5000);
+                        });
+
+                        // 等待文件检测或超时
+                        const raceResult = await Promise.race([
+                            fileCheckPromise.then(() => 'done'),
+                            timeoutPromise,
+                        ]);
+
+                        if (raceResult === 'timeout' && !fileCheckDone && isTransitioning) {
+                            fileCheckDone = true;
+                            fileCheckResult = false;
+                            fileExists = false;
+                            // 超时视为失败
+                            if (progressInterval) {
+                                clearInterval(progressInterval);
+                                progressInterval = null;
+                            }
+                            loadingProgress.classList.add('error-state');
+                            loadingText.classList.add('error-text');
+                            loadingText.textContent = '⏱️ 连接超时';
+                            errorMessage.textContent = '⚠️ 目标门户响应超时，请检查网络';
+                            errorMessage.classList.add('active');
+                            retryHint.classList.add('active');
+                            revertTimeout = setTimeout(() => {
+                                revertToNormal();
+                            }, 2200);
+                        }
+                    });
+                });
+
+                // 回退到正常状态
+                function revertToNormal() {
+                    if (!isTransitioning) return;
+                    if (progressInterval) {
+                        clearInterval(progressInterval);
+                        progressInterval = null;
+                    }
+                    if (fileCheckAbortController) {
+                        fileCheckAbortController.abort();
+                        fileCheckAbortController = null;
+                    }
+
+                    // 过渡层淡出
+                    overlay.classList.remove('active');
+                    portalPreview.classList.remove('active');
+
+                    // 容器恢复
+                    mainContainer.classList.remove('zoom-out');
+                    document.querySelectorAll('.portal-grid').forEach(g => g.classList.remove('fade-out'));
+                    mainTitle.style.opacity = '1';
+                    mainSubtitle.style.opacity = '1';
+
+                    // 星空减速
+                    starfield.decelerate();
+                    canvas.style.transform = '';
+
+                    // 延迟清理错误状态
+                    setTimeout(() => {
+                        errorMessage.classList.remove('active');
+                        retryHint.classList.remove('active');
+                        loadingProgress.classList.remove('error-state');
+                        loadingProgress.style.width = '0%';
+                        loadingText.classList.remove('error-text');
+                        loadingText.textContent = '正在建立量子连接...';
+                        isTransitioning = false;
+                    }, 500);
+
+                    // 确保完全清理
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 800);
+                }
+
+                // 点击overlay空白区域回退（仅在错误状态时）
+                overlay.addEventListener('click', function(e) {
+                    if (!isTransitioning) return;
+                    const isErrorActive = errorMessage.classList.contains('active');
+                    if (!isErrorActive) return;
+
+                    // 检查点击目标
+                    const clickedOnPreview = portalPreview.contains(e.target);
+                    const clickedOnLoading = loadingProgress.parentElement.contains(e.target);
+                    const clickedOnError = errorMessage.contains(e.target);
+                    const clickedOnRetry = retryHint.contains(e.target);
+
+                    if (!clickedOnPreview && !clickedOnLoading && !clickedOnError && !clickedOnRetry) {
+                        // 点击空白区域，提前回退
+                        if (revertTimeout) clearTimeout(revertTimeout);
+                        revertToNormal();
+                    }
+                });
+
+                // 防止overlay上的滚动
+                overlay.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                }, { passive: false });
+
+                // 防止在过渡期间通过其他方式触发
+                overlay.addEventListener('wheel', function(e) {
+                    if (isTransitioning) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+
+                // 键盘ESC回退
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && isTransitioning && errorMessage.classList.contains(
+                            'active')) {
+                        if (revertTimeout) clearTimeout(revertTimeout);
+                        revertToNormal();
+                    }
+                });
+
+                // 初始入场动画
+                setTimeout(() => {
+                    mainContainer.style.opacity = '1';
+                    mainContainer.style.transform = 'scale(1) translateY(0)';
+                }, 200);
+
+                // 页面卸载时清理
+                window.addEventListener('beforeunload', () => {
+                    if (progressInterval) clearInterval(progressInterval);
+                    if (revertTimeout) clearTimeout(revertTimeout);
+                    if (fileCheckAbortController) fileCheckAbortController.abort();
+                    isTransitioning = false;
+                });
+            });
+        })();
+    </script>
+</body>
 </html>
