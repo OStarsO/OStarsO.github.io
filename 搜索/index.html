@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>ST导航 - 星空搜索</title>
+    <style>
+        /* ================= 基础样式 ================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #050510;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 星空画布 */
+        #starCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* ================= 主容器 ================= */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            justify-content: center; 
+            padding: 20px;
+        }
+
+        /* 搜索后的布局调整 */
+        body.is-searching .main-container {
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+
+        /* ================= 头部区域 ================= */
+        .header-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .greeting {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            transition: opacity 0.3s, height 0.3s;
+        }
+
+        body.is-searching .greeting {
+            opacity: 0;
+            height: 0;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #fff, #88b0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(136, 176, 255, 0.3);
+            transition: all 0.4s;
+        }
+
+        body.is-searching .logo {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .search-box-wrapper {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 8px 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s ease;
+        }
+
+        .search-box.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(100, 200, 255, 0.5);
+            box-shadow: 0 0 20px rgba(100, 200, 255, 0.3), 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            outline: none;
+            padding: 8px 10px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            border: none;
+            color: #fff;
+            padding: 8px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            opacity: 0.8;
+        }
+        
+        .search-btn:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        /* 快捷方式 */
+        .shortcuts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 40px;
+            opacity: 1;
+            transition: all 0.4s ease;
+        }
+
+        body.is-searching .shortcuts {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-20px);
+            height: 0;
+            margin-top: 0;
+            overflow: hidden;
+        }
+
+        .shortcut-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .shortcut-item:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .shortcut-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .shortcut-item:hover .shortcut-icon {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(100, 200, 255, 0.4);
+        }
+
+        .shortcut-text {
+            font-size: 13px;
+        }
+
+        /* ================= 搜索结果区域 ================= */
+        .results-area {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 30px;
+            /* 保持占位以便测量尺寸，由卡片自身控制透明度 */
+            opacity: 1; 
+            pointer-events: none;
+            overflow-y: auto;
+            max-height: calc(100vh - 220px);
+            padding-right: 10px;
+        }
+
+        body.is-searching .results-area {
+            pointer-events: auto;
+        }
+
+        /* 自定义滚动条 */
+        .results-area::-webkit-scrollbar { width: 6px; }
+        .results-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+        /* 卡片初始隐藏 */
+        .result-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            /* 隐藏但保留占位 */
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            visibility: hidden; 
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s, visibility 0s;
+        }
+
+        /* 卡片被砸中后的显现状态 */
+        .result-item.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+
+        .result-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .result-title {
+            color: #64b5f6;
+            font-size: 18px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .result-title:hover {
+            text-decoration: underline;
+        }
+
+        .result-url {
+            color: #4caf50;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .result-desc {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.7);
+            border-radius: 20px;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        body.is-searching .back-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* 跃迁暗角 */
+        .warp-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 20%, rgba(5,5,16,0.6) 100%);
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        body.is-warping .warp-mask {
+            opacity: 1;
+        }
+
+        /* ================= 飞行的星星（流星）样式 ================= */
+        .flying-star {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            margin-left: -6px;
+            margin-top: -6px;
+            border-radius: 50%;
+            background: #fff;
+            /* 制造发光光晕 */
+            box-shadow: 0 0 15px 3px #fff, 0 0 30px 6px #88b0ff, 0 0 50px 12px rgba(136, 176, 255, 0.6);
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="starCanvas"></canvas>
+    <div class="warp-mask" id="warpMask"></div>
+
+    <div class="main-container">
+        <div class="header-area">
+            <div class="greeting" id="greeting">晚上好，现在是 20:00</div>
+            <div class="logo">ST 导航</div>
+            
+            <div class="search-box-wrapper">
+                <div class="search-box" id="searchBox">
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索或输入网址..." autocomplete="off" />
+                    <button class="search-btn" id="searchBtn">搜索</button>
+                </div>
+            </div>
+
+            <div class="shortcuts">
+                <a href="#" class="shortcut-item">
+                    <div class="shortcut-icon" style="color: #fb7299;">📺</div>
+                    <div class="shortcut-text">哔哩哔哩</div>
+                </a>
+                <a href="#" class="shortcut-item">
+                    <div class="shortcut-icon" style="color: #0084ff;">💡</div>
+                    <div class="shortcut-text">知乎</div>
+                </a>
+                <a href="#" class="shortcut-item">
+                    <div class="shortcut-icon" style="color: #ff8200;">🔥</div>
+                    <div class="shortcut-text">微博</div>
+                </a>
+                <a href="#" class="shortcut-item">
+                    <div class="shortcut-icon" style="color: #fff;">🐙</div>
+                    <div class="shortcut-text">GitHub</div>
+                </a>
+                <a href="#" class="shortcut-item">
+                    <div class="shortcut-icon" style="color: #00b96b;">📚</div>
+                    <div class="shortcut-text">豆瓣</div>
+                </a>
+            </div>
+        </div>
+
+        <div class="results-area" id="resultsContainer"></div>
+
+        <button class="back-btn" id="backBtn">返回首页</button>
+    </div>
+
+    <script>
+        /* ==========================================
+           1. 星空粒子引擎
+           ========================================== */
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let stars = [];
+        const numStars = 800; 
+        const speed = { idle: 0.5, prepare: 4, warp: 60 }; 
+        let currentState = 'idle';
+        let currentSpeed = speed.idle;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Star {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = (Math.random() - 0.5) * width * 3;
+                this.y = (Math.random() - 0.5) * height * 3;
+                this.z = Math.random() * width; 
+                this.color = `rgba(255, 255, 255, ${Math.random() * 0.8 + 0.2})`;
+                this.size = Math.random() * 1.5 + 0.5;
+            }
+            update() {
+                this.z -= currentSpeed;
+                if (this.z <= 0) {
+                    this.reset();
+                    this.z = width; 
+                }
+            }
+            draw() {
+                const screenX = (this.x / this.z) * (width / 2) + width / 2;
+                const screenY = (this.y / this.z) * (height / 2) + height / 2;
+                const scale = (1 - this.z / width) * this.size * 3;
+                
+                if (scale > 0.1) {
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, scale, 0, Math.PI * 2);
+                    if (currentState === 'warp') {
+                        ctx.fillStyle = `rgba(150, 200, 255, ${Math.max(0, 1 - this.z / width)})`;
+                    } else {
+                        ctx.fillStyle = this.color;
+                    }
+                    ctx.fill();
+                }
+            }
+        }
+
+        for (let i = 0; i < numStars; i++) {
+            stars.push(new Star());
+        }
+
+        function animate() {
+            // 稍微增加清屏透明度，让 Warp 时的拖尾更长更酷炫
+            ctx.fillStyle = currentState === 'warp' ? 'rgba(5, 5, 16, 0.1)' : 'rgba(5, 5, 16, 0.3)';
+            ctx.fillRect(0, 0, width, height);
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+
+        /* ==========================================
+           2. UI 交互与卡片化流星
+           ========================================== */
+        const body = document.body;
+        const searchBox = document.getElementById('searchBox');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const backBtn = document.getElementById('backBtn');
+        const greeting = document.getElementById('greeting');
+
+        let searchToken = 0; // 用于打断动画
+
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let text = '晚上好';
+            if (hour < 6) text = '夜深了';
+            else if (hour < 12) text = '早上好';
+            else if (hour < 14) text = '中午好';
+            else if (hour < 18) text = '下午好';
+            greeting.innerText = `${text}，现在是 ${String(hour).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
+        }
+        updateGreeting();
+
+        searchInput.addEventListener('focus', () => {
+            if (currentState === 'idle') {
+                currentState = 'prepare';
+                currentSpeed = speed.prepare;
+                searchBox.classList.add('active');
+            }
+        });
+
+        searchInput.addEventListener('blur', () => {
+            if (currentState === 'prepare') {
+                currentState = 'idle';
+                currentSpeed = speed.idle;
+                searchBox.classList.remove('active');
+            }
+        });
+
+        function triggerSearch() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            const currentToken = ++searchToken;
+
+            // 1. 星空跃迁，UI 平滑上移
+            currentState = 'warp';
+            currentSpeed = speed.warp;
+            searchInput.blur();
+            body.classList.add('is-warping');
+            body.classList.add('is-searching');
+
+            // 2. 生成卡片 DOM（初始不可见，但占据位置）
+            const mockData = [
+                { title: `${query} - 维基百科，自由的百科全书`, url: `https://zh.wikipedia.org/wiki/${query}`, desc: `关于 ${query} 的详细百科介绍，涵盖历史、发展、应用等领域，是了解该词条最权威的渠道...` },
+                { title: `${query} 的最新相关信息与新闻`, url: `https://news.example.com/search?q=${query}`, desc: `今日头条、百度新闻等各大媒体关于 ${query} 的最新报道与深度分析...` },
+                { title: `如何评价/使用 ${query}？ - 知乎`, url: `https://www.zhihu.com/search?q=${query}`, desc: `知乎用户关于 ${query} 的热门讨论、经验分享和专业知识解答，看看大家是怎么说的...` },
+                { title: `${query}官网 - 首页`, url: `https://www.${query}.com`, desc: `欢迎访问 ${query} 官方网站，获取第一手资讯与服务。` },
+                { title: `下载 ${query} - 安全无捆绑`, url: `https://download.example.com/${query}`, desc: `提供最新版本的 ${query} 下载，纯净无毒，极速安装...` }
+            ];
+
+            resultsContainer.innerHTML = mockData.map((item, index) => `
+                <div class="result-item" id="res-card-${index}">
+                    <a href="${item.url}" class="result-title" target="_blank">${item.title}</a>
+                    <div class="result-url">${item.url}</div>
+                    <div class="result-desc">${item.desc}</div>
+                </div>
+            `).join('');
+            
+            // 3. 等待 DOM 布局稳定（搜索框滑动到位）后开始发射星星
+            setTimeout(() => {
+                if (currentToken !== searchToken) return;
+                launchStarsToCards(currentToken);
+            }, 400); // 400ms 足够搜索框上移完毕
+        }
+
+        // 核心：依次发射星星砸中卡片
+        function launchStarsToCards(token) {
+            const cards = document.querySelectorAll('.result-item');
+            
+            // 遍历每个卡片
+            cards.forEach((card, index) => {
+                // 获取卡片在屏幕上的绝对中心位置
+                const rect = card.getBoundingClientRect();
+                const targetX = rect.left + rect.width / 2;
+                const targetY = rect.top + rect.height / 2;
+
+                // 依次延迟发射 (0ms, 200ms, 400ms...)
+                setTimeout(() => {
+                    if (token !== searchToken) return;
+                    
+                    // 创建一颗飞行的星星
+                    createFlyingStar(targetX, targetY, () => {
+                        if (token !== searchToken) return;
+                        // 星星砸中目标后，卡片显现
+                        card.style.visibility = 'visible';
+                        void card.offsetWidth; // 强制重绘，确保 transition 生效
+                        card.classList.add('visible');
+                    });
+                }, index * 180); // 间隔 180ms 依次砸下
+            });
+
+            // 所有的星星发射并飞行完毕后，恢复星空状态
+            const totalTime = cards.length * 180 + 600;
+            setTimeout(() => {
+                if (token !== searchToken) return;
+                currentState = 'idle';
+                currentSpeed = speed.idle;
+                body.classList.remove('is-warping');
+            }, totalTime);
+        }
+
+        // 创建并执行星星飞行动画
+        function createFlyingStar(targetX, targetY, onComplete) {
+            const star = document.createElement('div');
+            star.className = 'flying-star';
+            document.body.appendChild(star);
+
+            // 起始位置：屏幕中心偏下方（模拟从跃迁的深处向你飞来）
+            const startX = window.innerWidth / 2 + (Math.random() - 0.5) * 200;
+            const startY = window.innerHeight * 0.6 + (Math.random() - 0.5) * 200;
+
+            star.style.left = `${startX}px`;
+            star.style.top = `${startY}px`;
+            
+            const deltaX = targetX - startX;
+            const deltaY = targetY - startY;
+
+            // 使用 Web Animations API 实现平滑加速飞行
+            const animation = star.animate([
+                { transform: `translate(0, 0) scale(0.1)`, opacity: 0 },
+                { transform: `translate(${deltaX * 0.2}px, ${deltaY * 0.2}px) scale(1.5)`, opacity: 1, offset: 0.2 },
+                { transform: `translate(${deltaX}px, ${deltaY}px) scale(0.8)`, opacity: 0.8 }
+            ], {
+                duration: 500, // 飞行耗时 500ms
+                easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)', // 先加速后减速
+                fill: 'forwards'
+            });
+
+            animation.onfinish = () => {
+                star.remove(); // 移除星星DOM
+                if(onComplete) onComplete(); // 触发卡片显现
+            };
+        }
+
+        searchBtn.addEventListener('click', triggerSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') triggerSearch();
+        });
+
+        // 返回首页（打断所有动画）
+        backBtn.addEventListener('click', () => {
+            searchToken++; // 使所有未完成的定时器和动画失效
+            body.classList.remove('is-searching');
+            searchInput.value = '';
+            currentState = 'idle';
+            currentSpeed = speed.idle;
+            
+            // 清理所有正在飞行的星星
+            document.querySelectorAll('.flying-star').forEach(el => el.remove());
+
+            setTimeout(() => {
+                resultsContainer.innerHTML = '';
+            }, 400);
+        });
+    </script>
+</body>
+</html>
