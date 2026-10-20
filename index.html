@@ -1,147 +1,315 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title data-react-helmet="true">系统维护中</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="stylesheet" href="./api.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>正在进入…</title>
 <style>
-    /* 新增样式 */
-    .footer {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      padding: 10px;
-      background-color: #fff;
-    }
-    .footer a {
-        text-decoration: none;
-        color: black;
-    }
-  </style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #04060c;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ================= 星空画布 ================= */
+  #stars {
+    position: fixed;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  /* ================= 中央舞台 ================= */
+  .stage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* 被加载页面的容器：初始是"缩在远处"的小窗 */
+  .frame {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    transform: scale(0.28);          /* 远处的小窗 */
+    transform-origin: 50% 50%;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #060a12;
+    box-shadow:
+      0 0 0 1px rgba(150, 200, 255, 0.30),
+      0 0 60px rgba(90, 150, 255, 0.32),
+      0 0 180px rgba(60, 110, 255, 0.18);
+    pointer-events: none;
+    will-change: transform;
+    transition:
+      transform 1.05s cubic-bezier(0.22, 0.9, 0.28, 1),
+      border-radius 1s ease,
+      box-shadow 1s ease;
+  }
+
+  .frame iframe {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #060a12;
+  }
+
+  /* 加载中盖在页面上的"暗纱"（加载完成后淡出，露出真实页面） */
+  .veil {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.9s ease;
+    background:
+      radial-gradient(circle at 50% 50%,
+        rgba(14, 26, 50, 0.35) 0%,
+        rgba(4, 6, 12, 0.78) 65%,
+        rgba(4, 6, 12, 0.92) 100%),
+      repeating-linear-gradient(0deg,
+        rgba(255, 255, 255, 0.035) 0px,
+        rgba(255, 255, 255, 0.035) 1px,
+        transparent 1px,
+        transparent 3px);
+  }
+
+  .frame.reveal .veil { opacity: 0; }
+
+  /* ================= 底部提示 ================= */
+  .hint {
+    position: fixed;
+    left: 50%;
+    bottom: 6vh;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font: 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(190, 214, 255, 0.8);
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .hint::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #a8caff;
+    box-shadow: 0 0 12px #5f9bff, 0 0 3px #fff;
+    animation: blink 1.1s steps(1, end) infinite;
+  }
+
+  .hint.hide {
+    opacity: 0;
+    transform: translateX(-50%) translateY(14px);
+  }
+
+  @keyframes blink {
+    0%, 49%   { opacity: 1; }
+    50%, 100% { opacity: 0.12; }
+  }
+</style>
 </head>
 <body>
-<div class="container">
-<div class="error">
-<h3>当前网站正在维护中，请稍后访问，具体详情请联系管理员！</h3>
-</div>
-<div class="stack-container">
-<div class="card-container">
-<div class="perspec" style="--spreaddist: 125px; --scaledist: .75; --vertdist: -25px;">
-<div class="card">
-<div class="writing">
-<div class="topbar">
-<div class="red"></div>
-<div class="yellow"></div>
-<div class="green"></div>
-</div>
-<div class="code">
-<ul>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="card-container">
-<div class="perspec" style="--spreaddist: 100px; --scaledist: .8; --vertdist: -20px;">
-<div class="card">
-<div class="writing">
-<div class="topbar">
-<div class="red"></div>
-<div class="yellow"></div>
-<div class="green"></div>
-</div>
-<div class="code">
-<ul>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="card-container">
-<div class="perspec" style="--spreaddist:75px; --scaledist: .85; --vertdist: -15px;">
-<div class="card">
-<div class="writing">
-<div class="topbar">
-<div class="red"></div>
-<div class="yellow"></div>
-<div class="green"></div>
-</div>
-<div class="code">
-<ul>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="card-container">
-<div class="perspec" style="--spreaddist: 50px; --scaledist: .9; --vertdist: -10px;">
-<div class="card">
-<div class="writing">
-<div class="topbar">
-<div class="red"></div>
-<div class="yellow"></div>
-<div class="green"></div>
-</div>
-<div class="code">
-<ul>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="card-container">
-<div class="perspec" style="--spreaddist: 25px; --scaledist: .95; --vertdist: -5px;">
-<div class="card">
-<div class="writing">
-<div class="topbar">
-<div class="red"></div>
-<div class="yellow"></div>
-<div class="green"></div>
-</div>
-<div class="code">
-<ul>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="card-container">
-<div class="perspec" style="--spreaddist: 0px; --scaledist: 1; --vertdist: 0px;">
-<div class="card">
-<div class="writing">
-<div class="topbar">
-<div class="red"></div>
-<div class="yellow"></div>
-<div class="green"></div>
-</div>
-<div class="code">
-<ul>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
 
-<div class="footer">
-<div>
-<span>Copyright © <script>
-                    document.write(new Date().getFullYear());<!-- 这个是自动获取年份 -->
-                  </script> OStarsO All Rights Reserved. </span>
-</div>
-<p></p>
-</div>
+  <canvas id="stars"></canvas>
+
+  <div class="stage">
+    <div class="frame" id="frame">
+      <iframe id="page" title="Introduction"></iframe>
+      <div class="veil"></div>
+    </div>
+  </div>
+
+  <div class="hint" id="hint">正在加载</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var canvas = document.getElementById('stars');
+  var ctx    = canvas.getContext('2d');
+  var frame  = document.getElementById('frame');
+  var iframe = document.getElementById('page');
+  var hint   = document.getElementById('hint');
+
+  /* =========================================================
+     一、星空：白色像素点，从远处朝观察者（屏幕外）飞来
+     ========================================================= */
+  var W = 0, H = 0, CX = 0, CY = 0, DPR = 1;
+
+  var FOV   = 520;    // 焦距（越大越"广角"）
+  var FAR   = 1400;   // 最远深度
+  var SPEED = 10;     // 每帧推进的深度
+  var COUNT = 340;    // 星星数量
+
+  var stars   = [];
+  var running = true;
+  var lastT   = 0;
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function spawn(s, initial) {
+    s.x = rand(-1, 1) * 1800;
+    s.y = rand(-1, 1) * 1800;
+    s.z = initial ? rand(40, FAR) : FAR + rand(0, 500);
+    s.b = rand(0.45, 1);            // 亮度系数
+  }
+
+  function initStars() {
+    stars.length = 0;
+    for (var i = 0; i < COUNT; i++) {
+      var s = {};
+      spawn(s, true);
+      stars.push(s);
+    }
+  }
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width  = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    CX = W / 2;
+    CY = H / 2;
+
+    ctx.fillStyle = '#04060c';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function tick(now) {
+    if (!running) return;
+
+    if (!lastT) lastT = now;
+    var dt = now - lastT;
+    lastT = now;
+    if (dt > 120) dt = 120;          // 切标签页回来时防止大跳帧
+    var f = dt / 16.667;
+
+    /* 半透明擦除 => 残留短暂拖尾，像光线划过 */
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'rgba(4, 6, 12, 0.42)';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = '#ffffff';
+
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+
+      s.z -= SPEED * f;              // 向观察者推进
+      if (s.z <= 14) { spawn(s, false); continue; }
+
+      var k  = FOV / s.z;            // 透视缩放
+      var sx = CX + s.x * k;
+      var sy = CY + s.y * k;
+
+      // 飞出屏幕就回收重生
+      if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) {
+        spawn(s, false);
+        continue;
+      }
+
+      var t     = 1 - s.z / FAR;                                  // 0 = 远, 1 = 近
+      var size  = Math.max(1, Math.round(1 + t * 3.2));           // 像素块大小 1~4
+      var alpha = Math.min(1, 0.12 + t * 1.5) * s.b;
+
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(sx | 0, sy | 0, size, size);                   // 整数对齐 => 硬边像素感
+    }
+
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+
+  initStars();
+  resize();
+  requestAnimationFrame(tick);
+  window.addEventListener('resize', resize);
+
+  /* =========================================================
+     二、加载 Introduction.html，完成后让它"冲向观察者"
+     ========================================================= */
+  var revealed  = false;
+  var t0        = performance.now();
+  var MIN_SHOW  = 1900;                                  // 最短展示时间，避免一闪而过
+  var hardTimer = setTimeout(function () { reveal(); }, 20000);  // 兜底
+
+  function reveal() {
+    if (revealed) return;
+    revealed = true;
+    clearTimeout(hardTimer);
+
+    hint.classList.add('hide');
+    frame.style.pointerEvents = 'auto';
+
+    // ① 先放大并略微"过冲"，制造冲过来的速度感
+    frame.style.transition = 'transform 1.05s cubic-bezier(0.22, 0.9, 0.28, 1),' +
+                             ' border-radius 1s ease, box-shadow 1s ease';
+    frame.style.transform  = 'scale(1.06)';
+    frame.classList.add('reveal');          // 暗纱淡出，页面真正显现
+
+    // ② 回弹到正好满屏
+    setTimeout(function () {
+      frame.style.transition = 'transform 0.55s cubic-bezier(0.33, 1, 0.42, 1)';
+      frame.style.transform  = 'scale(1)';
+    }, 980);
+
+    // ③ 去掉外发光和圆角，彻底变成"正常页面"
+    setTimeout(function () {
+      frame.style.transition = 'border-radius 0.8s ease, box-shadow 0.8s ease';
+      frame.style.borderRadius = '0px';
+      frame.style.boxShadow    = 'none';
+    }, 1150);
+
+    // ④ 关掉星空动画省电（已被 iframe 完全覆盖）
+    setTimeout(function () { running = false; }, 2600);
+  }
+
+  iframe.addEventListener('load', function () {
+    // 尝试获取内嵌页面的标题并修改当前标签页的标题
+    try {
+      var innerTitle = iframe.contentDocument.title;
+      if (innerTitle) {
+        document.title = innerTitle;
+      } else {
+        document.title = 'Introduction'; // 如果没有标题，给个默认值
+      }
+    } catch (e) {
+      // 如果产生跨域限制（Cross-Origin），无法读取 title，则给个默认值
+      document.title = 'Introduction';
+    }
+
+    var wait = Math.max(0, MIN_SHOW - (performance.now() - t0));
+    setTimeout(reveal, wait);
+  });
+
+  iframe.src = 'Introduction.html';
+})();
+</script>
 </body>
-<script src="./api.js"></script>
 </html>
