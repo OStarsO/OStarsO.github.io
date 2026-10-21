@@ -157,9 +157,9 @@
         .hero-sub { color: #94a3b8; font-size: 14px; letter-spacing: 1px; }
 
         /* =========================================================
-           液态玻璃 3D 卡片样式
+           液态玻璃 3D 卡片样式 (统一应用到所有卡片)
         ========================================================= */
-        .card-widget, #page {
+        .card-widget {
             position: relative;
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(20px);
@@ -178,7 +178,7 @@
         }
         
         /* 鼠标经过时的边缘微光 */
-        .card-widget:hover, #page:hover {
+        .card-widget:hover {
             border-color: rgba(110, 231, 255, 0.3);
             box-shadow: 
                 0 0 20px rgba(110, 231, 255, 0.1),
@@ -187,7 +187,7 @@
         }
         
         /* 鼠标跟随光斑 */
-        .card-widget::before, #page::before {
+        .card-widget::before {
             content: "";
             position: absolute;
             top: var(--my, -1000px);
@@ -200,7 +200,7 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .card-widget:hover::before, #page:hover::before {
+        .card-widget:hover::before {
             opacity: 1;
         }
 
@@ -220,13 +220,15 @@
         #hitokoto, 
         #jinrishici-sentence,
         .webinfo,
-        #page h2,
-        .page-lead,
-        .skill,
-        .tool a {
+        .visitor-map-container,
+        .page-card h2,
+        .page-card .page-lead,
+        .page-card .skill,
+        .page-card .tool a {
             transition: transform 0.1s ease-out;
         }
 
+        /* 侧边栏层级 */
         .card-info-avatar { transform: translateZ(30px); }
         .author-info__name { transform: translateZ(20px); }
         .author-info__description { transform: translateZ(15px); }
@@ -234,11 +236,13 @@
         .item-headline { transform: translateZ(20px); }
         #hitokoto, #jinrishici-sentence { transform: translateZ(10px); }
         .webinfo { transform: translateZ(15px); }
+        .visitor-map-container { transform: translateZ(20px); }
         
-        #page h2 { transform: translateZ(25px); }
-        .page-lead { transform: translateZ(15px); }
-        .skill { transform: translateZ(20px); }
-        .tool a { transform: translateZ(15px); }
+        /* 主内容卡片层级 */
+        .page-card h2 { transform: translateZ(25px); }
+        .page-card .page-lead { transform: translateZ(15px); }
+        .page-card .skill { transform: translateZ(20px); }
+        .page-card .tool a { transform: translateZ(15px); }
 
         /* =========================================================
            侧边栏
@@ -266,7 +270,6 @@
             margin-bottom: 16px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             animation: pulse 4s infinite alternate;
-            /* 头像层级继承自 .card-info-avatar */
         }
         .avatar-img:hover { 
             transform: scale(1.1) rotate(10deg); 
@@ -334,14 +337,51 @@
         .webinfo-item span:first-child { color: #94a3b8; }
         .webinfo-item span:last-child { color: #e2e8f0; font-weight: 500; }
 
+        /* 访客地图容器 */
+        .visitor-map-container {
+            margin-top: 16px;
+            width: 100%;
+            height: 140px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(110, 231, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        .visitor-map-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            opacity: 0.9;
+        }
+        .map-overlay-text {
+            position: absolute;
+            bottom: 6px; left: 10px;
+            font-size: 10px;
+            color: #6ee7ff;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            pointer-events: none;
+            text-shadow: 0 0 5px rgba(110,231,255,0.5);
+        }
+
         /* =========================================================
-           主内容区
+           主内容区 (由卡片容器改为 flex 竖排)
         ========================================================= */
         #page {
             flex: 1;
-            padding: 36px;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* 卡片之间的间距 */
         }
+        
+        /* 每个独立卡片的内边距 */
+        .page-card .article-container {
+            padding: 36px;
+        }
+
         h2 {
             font-size: 1.3rem;
             color: #fff;
@@ -361,14 +401,8 @@
         .page-lead {
             color: #94a3b8;
             font-size: 14px;
-            margin-bottom: 20px;
+            margin-bottom: 0; /* 原 margin 针对 hr，现移除 */
             line-height: 1.8;
-        }
-        hr {
-            border: none;
-            height: 1px;
-            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
-            margin: 30px 0;
         }
 
         /* 技能条 */
@@ -428,14 +462,13 @@
             font-weight: 500;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
-            /* 已有 translateZ(15px) */
         }
         .tool a i { color: #a78bfa; font-size: 16px; transition: color 0.3s; }
         .tool a:hover {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(110, 231, 255, 0.3);
             box-shadow: 0 0 20px rgba(110, 231, 255, 0.15);
-            transform: translateY(-2px); /* 悬浮微移 */
+            transform: translateY(-2px);
             color: #fff;
         }
         .tool a:hover i { color: #6ee7ff; }
@@ -464,7 +497,8 @@
             }
             #aside_content { width: 100%; flex-direction: row; flex-wrap: wrap; }
             #aside_content .card-widget { flex: 1 1 280px; }
-            #page { width: 100%; padding: 24px; }
+            #page { width: 100%; }
+            .page-card .article-container { padding: 24px; }
             .rot-line { font-size: 1.6rem; }
             #nav { height: 260px; }
         }
@@ -539,6 +573,7 @@
                         </div>
                     </div>
 
+                    <!-- 联系我卡片（加入了实时访客地图） -->
                     <div class="card-widget card-webinfo">
                         <div class="card-content">
                             <div class="item-headline">
@@ -552,52 +587,75 @@
                                     <span>微信</span><span>无</span>
                                 </div>
                             </div>
+                            
+                            <!-- 实时访客地图 -->
+                            <div class="visitor-map-container" id="visitorMapContainer">
+                                <canvas id="visitorCanvas"></canvas>
+                                <div class="map-overlay-text">LIVE VISITORS</div>
+                            </div>
                         </div>
                     </div>
                 </aside>
 
-                <!-- 正文 -->
+                <!-- 正文 (三张独立卡片) -->
                 <article id="page">
-                    <div class="article-container">
-                        <h2>欢迎访问</h2>
-                        <p class="page-lead">
-                            这里是 OStarsO 的小站 —— 一个偶尔写写代码、折腾服务器、并且对电脑DIY保持着深度热爱的角落。下方是我的技能面板与导航入口。
-                        </p>
-                        <hr>
+                    
+                    <!-- 卡片 1：欢迎访问 -->
+                    <div class="card-widget page-card">
+                        <div class="article-container">
+                            <h2>欢迎访问</h2>
+                            <p class="page-lead">
+                                这里是 OStarsO 的小站 —— 一个偶尔写写代码、折腾服务器、并且对电脑DIY保持着深度热爱的角落。下方是我的技能面板与导航入口。
+                            </p>
+                        </div>
+                    </div>
 
-                        <h2>技能</h2>
-                        <div class="skillbox">
-                            <div class="skill" style="--w:20%;--c1:#ff2d78;--c2:#ff00cc">
-                                <div class="skill-head"><span>Python</span><span>20%</span></div>
-                                <div class="skill-track"><div class="skill-fill"></div></div>
-                            </div>
-                            <div class="skill" style="--w:80%;--c1:#8b5cf6;--c2:#d946ef">
-                                <div class="skill-head"><span>我的世界开服</span><span>80%</span></div>
-                                <div class="skill-track"><div class="skill-fill"></div></div>
-                            </div>
-                            <div class="skill" style="--w:40%;--c1:#2196f3;--c2:#42a5f5">
-                                <div class="skill-head"><span>HTML</span><span>40%</span></div>
-                                <div class="skill-track"><div class="skill-fill"></div></div>
-                            </div>
-                            <div class="skill" style="--w:5%;--c1:#00bcd4;--c2:#80deea">
-                                <div class="skill-head"><span>JavaScript</span><span>5%</span></div>
-                                <div class="skill-track"><div class="skill-fill"></div></div>
-                            </div>
-                            <div class="skill" style="--w:40%;--c1:#ff7a18;--c2:#f54009">
-                                <div class="skill-head"><span>AI</span><span>40%</span></div>
-                                <div class="skill-track"><div class="skill-fill"></div></div>
+                    <!-- 卡片 2：技能 -->
+                    <div class="card-widget page-card">
+                        <div class="article-container">
+                            <h2>技能</h2>
+                            <div class="skillbox">
+                                <div class="skill" style="--w:20%;--c1:#ff2d78;--c2:#ff00cc">
+                                    <div class="skill-head"><span>Python</span><span>20%</span></div>
+                                    <div class="skill-track"><div class="skill-fill"></div></div>
+                                </div>
+                                <div class="skill" style="--w:80%;--c1:#8b5cf6;--c2:#d946ef">
+                                    <div class="skill-head"><span>我的世界开服</span><span>80%</span></div>
+                                    <div class="skill-track"><div class="skill-fill"></div></div>
+                                </div>
+                                <div class="skill" style="--w:40%;--c1:#2196f3;--c2:#42a5f5">
+                                    <div class="skill-head"><span>HTML</span><span>40%</span></div>
+                                    <div class="skill-track"><div class="skill-fill"></div></div>
+                                </div>
+                                <div class="skill" style="--w:5%;--c1:#00bcd4;--c2:#80deea">
+                                    <div class="skill-head"><span>JavaScript</span><span>5%</span></div>
+                                    <div class="skill-track"><div class="skill-fill"></div></div>
+                                </div>
+                                <div class="skill" style="--w:40%;--c1:#ff7a18;--c2:#f54009">
+                                    <div class="skill-head"><span>AI</span><span>40%</span></div>
+                                    <div class="skill-track"><div class="skill-fill"></div></div>
+                                </div>
+								<div class="skill" style="--w:40%;--c1:#ADFF2F;--c2:#90EE90">
+								    <div class="skill-head"><span>摄影</span><span>40%</span></div>
+								    <div class="skill-track"><div class="skill-fill"></div></div>
+								</div>
                             </div>
                         </div>
-                        <hr>
-
-                        <h2>综合</h2>
-                        <ul class="tool">
-                            <li><a href="../"><i class="fa fa-compass"></i><span>OST 引导大厅</span></a></li>
-                            <li><a href="搜索/"><i class="fa fa-search"></i><span>ST 搜索</span></a></li>
-                            <li><a href="小游戏/"><i class="fa fa-gamepad"></i><span>小游戏大厅</span></a></li>
-                            <li><a href="https://stats.uptimerobot.com/AzJw7trVAR" target="_blank" rel="noopener"><i class="fa fa-heartbeat"></i><span>网页状态</span></a></li>
-                        </ul>
                     </div>
+
+                    <!-- 卡片 3：综合 -->
+                    <div class="card-widget page-card">
+                        <div class="article-container">
+                            <h2>综合</h2>
+                            <ul class="tool">
+                                <li><a href="../"><i class="fa fa-compass"></i><span>OST 引导大厅</span></a></li>
+                                <li><a href="搜索/"><i class="fa fa-search"></i><span>ST 搜索</span></a></li>
+                                <li><a href="小游戏/"><i class="fa fa-gamepad"></i><span>小游戏大厅</span></a></li>
+                                <li><a href="https://stats.uptimerobot.com/AzJw7trVAR" target="_blank" rel="noopener"><i class="fa fa-heartbeat"></i><span>网页状态</span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </article>
             </div>
         </main>
@@ -772,13 +830,12 @@
         })();
 
         /* =========================================================
-           3. 磁吸附 3D 卡片
+           3. 磁吸附 3D 卡片 (现在包含所有 .card-widget 卡片)
         ========================================================= */
         (function () {
-            // 仅在有指针设备（桌面端）开启
             if (window.matchMedia('(hover: none)').matches) return;
             
-            var cards = document.querySelectorAll('.card-widget, #page');
+            var cards = document.querySelectorAll('.card-widget');
             
             cards.forEach(function (el) {
                 el.addEventListener('pointermove', function (e) {
@@ -786,28 +843,22 @@
                     var x = e.clientX - r.left;
                     var y = e.clientY - r.top;
                     
-                    // 1. 光斑位置
                     el.style.setProperty('--mx', x + 'px');
                     el.style.setProperty('--my', y + 'px');
 
-                    // 2. 3D 倾斜计算
                     var centerX = r.width / 2;
                     var centerY = r.height / 2;
                     
-                    // 倾斜角度限制在 ±6 度以内
                     var rotateX = Math.max(-6, Math.min(6, ((y - centerY) / centerY) * -6));
                     var rotateY = Math.max(-6, Math.min(6, ((x - centerX) / centerX) * 6));
                     
-                    // 磁吸位移限制在 ±8px 以内
                     var moveX = Math.max(-8, Math.min(8, ((x - centerX) / centerX) * 8));
                     var moveY = Math.max(-8, Math.min(8, ((y - centerY) / centerY) * 8));
 
-                    // 3. 应用变换 (透视 + 磁吸位移 + 3D 旋转 + 轻微放大)
                     el.style.transform = `perspective(1000px) translate3d(${moveX}px, ${moveY}px, 0) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
                 });
 
                 el.addEventListener('pointerleave', function () {
-                    // 鼠标离开时平滑复位
                     el.style.transform = `perspective(1000px) translate3d(0, 0, 0) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
                 });
             });
@@ -836,7 +887,151 @@
         })();
 
         /* =========================================================
-           5. 浏览器搞笑标题
+           5. 实时访客光点地图
+        ========================================================= */
+        (function () {
+            var container = document.getElementById('visitorMapContainer');
+            var canvas = document.getElementById('visitorCanvas');
+            if (!container || !canvas) return;
+            
+            var ctx = canvas.getContext('2d');
+            var W = 0, H = 0, DPR = 1;
+            var visitors = [];
+            var startTime = Date.now();
+
+            var cities = [
+                { name: '北京', lat: 39.9, lon: 116.4 },
+                { name: '纽约', lat: 40.7, lon: -74.0 },
+                { name: '伦敦', lat: 51.5, lon: -0.1 },
+                { name: '悉尼', lat: -33.8, lon: 151.2 },
+                { name: '东京', lat: 35.6, lon: 139.6 },
+                { name: '莫斯科', lat: 55.7, lon: 37.6 },
+                { name: '开普敦', lat: -33.9, lon: 18.4 },
+                { name: '圣保罗', lat: -23.5, lon: -46.6 },
+                { name: '洛杉矶', lat: 34.0, lon: -118.2 },
+                { name: '上海', lat: 31.2, lon: 121.4 },
+                { name: '广州', lat: 23.1, lon: 113.2 },
+                { name: '深圳', lat: 22.5, lon: 114.0 }
+            ];
+
+            function resize() {
+                var rect = container.getBoundingClientRect();
+                W = rect.width;
+                H = rect.height;
+                DPR = Math.min(window.devicePixelRatio || 1, 2);
+                canvas.width = W * DPR;
+                canvas.height = H * DPR;
+                ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+            }
+
+            function project(lat, lon) {
+                var x = (lon + 180) / 360 * W;
+                var y = (90 - lat) / 180 * H;
+                return { x: x, y: y };
+            }
+
+            function addVisitor() {
+                var city = cities[Math.floor(Math.random() * cities.length)];
+                var pt = project(city.lat, city.lon);
+                visitors.push({
+                    x: pt.x,
+                    y: pt.y,
+                    life: 1,
+                    pulse: 0,
+                    isNew: true
+                });
+                
+                if (visitors.length > 15) {
+                    visitors.shift();
+                }
+            }
+
+            for (var i = 0; i < 5; i++) {
+                addVisitor();
+                visitors[visitors.length - 1].life = 0.5 + Math.random() * 0.5;
+                visitors[visitors.length - 1].isNew = false;
+            }
+
+            function drawGrid() {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+                ctx.lineWidth = 1;
+                var step = 20;
+                for (var i = 0; i < W; i += step) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+                }
+                for (var j = 0; j < H; j += step) {
+                    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(W, j); ctx.stroke();
+                }
+            }
+
+            function render() {
+                var now = Date.now();
+                var dt = (now - startTime) / 1000;
+                startTime = now;
+
+                ctx.clearRect(0, 0, W, H);
+                drawGrid();
+
+                for (var i = visitors.length - 1; i >= 0; i--) {
+                    var v = visitors[i];
+                    
+                    v.life -= dt * 0.05; 
+                    if (v.life <= 0) {
+                        visitors.splice(i, 1);
+                        continue;
+                    }
+
+                    if (v.isNew) {
+                        v.pulse += dt * 2.5;
+                        if (v.pulse >= 1) {
+                            v.isNew = false;
+                        }
+                        
+                        if (v.isNew) {
+                            ctx.beginPath();
+                            ctx.arc(v.x, v.y, v.pulse * 15, 0, Math.PI * 2);
+                            ctx.strokeStyle = `rgba(110, 231, 255, ${1 - v.pulse})`;
+                            ctx.lineWidth = 1.5;
+                            ctx.stroke();
+                        }
+                    }
+
+                    var glowSize = 4 + Math.sin(dt * 3 + i) * 1.5;
+                    var grd = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, glowSize * 3);
+                    grd.addColorStop(0, `rgba(110, 231, 255, ${v.life * 0.8})`);
+                    grd.addColorStop(0.5, `rgba(167, 139, 250, ${v.life * 0.3})`);
+                    grd.addColorStop(1, `rgba(167, 139, 250, 0)`);
+                    
+                    ctx.fillStyle = grd;
+                    ctx.beginPath();
+                    ctx.arc(v.x, v.y, glowSize * 3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = `rgba(255, 255, 255, ${v.life})`;
+                    ctx.beginPath();
+                    ctx.arc(v.x, v.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                requestAnimationFrame(render);
+            }
+
+            function scheduleNextVisitor() {
+                var delay = 2000 + Math.random() * 3000;
+                setTimeout(function () {
+                    addVisitor();
+                    scheduleNextVisitor();
+                }, delay);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            requestAnimationFrame(render);
+            scheduleNextVisitor();
+        })();
+
+        /* =========================================================
+           6. 浏览器搞笑标题
         ========================================================= */
         var OriginTitle = document.title;
         var titleTime;
