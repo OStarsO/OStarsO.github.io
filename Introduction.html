@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,58 +8,485 @@
     <meta name="description" content="专业人士">
     <meta name="keywords" content="Java,Golang,个人博客，微信小程序，博客">
     <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#04050c">
     <link rel="shortcut icon" href="favicon.ico">
-    <link rel="stylesheet" href="css/index.css">
+    
+    <!-- 引入 FontAwesome 图标库 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
-    <script type="text/javascript">
-        if (!!window.ActiveXObject || "ActiveXObject" in window) { //is IE?
-            alert('朋友，上古浏览器不支持呢~');
+    
+    <style>
+        /* =========================================================
+           基础与全局重置 (星空背景、全局字体)
+        ========================================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            position: relative;
+            background-color: #04050c;
+            color: #e2e8f0;
+            font-size: 14px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            /* 隐藏默认鼠标，使用自定义光标（如果不喜欢可以删掉这行） */
+            cursor: url(https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/cursor/texto.cur),auto;
         }
-    </script>
-    <script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-    </script>
+        
+        /* 自定义链接鼠标样式 */
+        a {
+            cursor: url(https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/cursor/ayuda.cur),auto;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* =========================================================
+           星空背景层 & 光效层
+        ========================================================= */
+        #starfield {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: -3;
+            pointer-events: none;
+        }
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -2;
+            pointer-events: none;
+            opacity: 0.45;
+        }
+        .nebula-1 { width: 600px; height: 600px; background: rgba(110, 231, 255, 0.15); top: -10%; left: -10%; }
+        .nebula-2 { width: 700px; height: 700px; background: rgba(167, 139, 250, 0.15); bottom: -20%; right: -10%; }
+        .nebula-3 { width: 500px; height: 500px; background: rgba(255, 45, 120, 0.1); top: 40%; left: 30%; }
+        
+        /* 鼠标跟随光晕 */
+        #cursor-glow {
+            position: fixed;
+            top: 0; left: 0;
+            width: 400px; height: 400px;
+            margin: -200px 0 0 -200px;
+            background: radial-gradient(circle, rgba(110, 231, 255, 0.08) 0%, rgba(110, 231, 255, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* =========================================================
+           布局框架
+        ========================================================= */
+        #body-wrap {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            z-index: 1;
+        }
+        
+        main {
+            flex: 1;
+            padding-bottom: 2rem;
+        }
+
+        .layout_page {
+            display: flex;
+            align-items: flex-start;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            gap: 20px;
+            margin-top: -60px; /* 与头部产生重叠 */
+            position: relative;
+            z-index: 10;
+        }
+
+        /* =========================================================
+           顶部 Hero 区域
+        ========================================================= */
+        #nav {
+            position: relative;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 40px;
+            background: radial-gradient(ellipse at top, rgba(110, 231, 255, 0.1), transparent 70%);
+        }
+        .hero-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: #6ee7ff;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .hero-status i {
+            display: inline-block;
+            width: 6px; height: 6px;
+            background: #6ee7ff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #6ee7ff;
+        }
+        
+        /* 文字轮播容器 */
+        .rotator {
+            height: 60px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .rot-line {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 60px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+            background: linear-gradient(135deg, #fff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px rgba(167, 139, 250, 0.3);
+        }
+        .rot-line.is-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .rot-line.is-leaving {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        .hero-sub {
+            color: #94a3b8;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        /* =========================================================
+           液态玻璃卡片通用样式
+        ========================================================= */
+        .card-widget, #page {
+            position: relative;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* 卡片悬停光效 */
+        .card-widget:hover, #page:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 48px 0 rgba(110, 231, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* 鼠标跟随光斑 */
+        .card-widget::before, #page::before {
+            content: "";
+            position: absolute;
+            top: var(--my, -1000px);
+            left: var(--mx, -1000px);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 50%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .card-widget:hover::before, #page:hover::before {
+            opacity: 1;
+        }
+
+        /* =========================================================
+           侧边栏
+        ========================================================= */
+        #aside_content {
+            width: 300px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card-content {
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .is-center { text-align: center; }
+        
+        /* 头像 */
+        .avatar-img {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, #6ee7ff, #a78bfa);
+            margin-bottom: 16px;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            animation: pulse 4s infinite alternate;
+        }
+        .avatar-img:hover { transform: scale(1.1) rotate(10deg); }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(110, 231, 255, 0.4); }
+            100% { box-shadow: 0 0 0 15px rgba(110, 231, 255, 0); }
+        }
+        
+        .author-info__name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .author-info__description {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+        .author-info__description s { opacity: 0.6; }
+        .card-info-social-icons { display: flex; justify-content: center; gap: 12px; }
+        .social-icon {
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .social-icon:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #6ee7ff;
+            border-color: #6ee7ff;
+            box-shadow: 0 0 15px rgba(110, 231, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .item-headline {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6ee7ff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #hitokoto, #jinrishici-sentence {
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.8;
+        }
+        .webinfo-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        .webinfo-item:last-child { border-bottom: none; }
+        .webinfo-item span:first-child { color: #94a3b8; }
+        .webinfo-item span:last-child { color: #e2e8f0; font-weight: 500; }
+
+        /* =========================================================
+           主内容区
+        ========================================================= */
+        #page {
+            flex: 1;
+            padding: 36px;
+            min-width: 0;
+        }
+        h2 {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px; height: 16px;
+            background: linear-gradient(to bottom, #6ee7ff, #a78bfa);
+            border-radius: 2px;
+        }
+        .page-lead {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+        hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
+            margin: 30px 0;
+        }
+
+        /* 技能条 */
+        .skillbox { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+        .skill-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #cbd5e1;
+        }
+        .skill-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .skill-fill {
+            height: 100%;
+            width: var(--w);
+            background: linear-gradient(90deg, var(--c1), var(--c2));
+            border-radius: 10px;
+            position: relative;
+            transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 0 10px var(--c1);
+        }
+        /* 技能条光泽扫过动画 */
+        .skill-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: translateX(-100%);
+            animation: sweep 2s infinite;
+        }
+        @keyframes sweep {
+            100% { transform: translateX(100%); }
+        }
+
+        /* 导航按钮 */
+        .tool {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .tool a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #cbd5e1;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .tool a i { color: #a78bfa; font-size: 16px; transition: color 0.3s; }
+        .tool a:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(110, 231, 255, 0.3);
+            box-shadow: 0 0 20px rgba(110, 231, 255, 0.15);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+        .tool a:hover i { color: #6ee7ff; }
+
+        /* =========================================================
+           页脚
+        ========================================================= */
+        #footer-wrap {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #64748b;
+            font-size: 13px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        /* =========================================================
+           响应式适配
+        ========================================================= */
+        @media screen and (max-width: 900px) {
+            .layout_page {
+                flex-direction: column;
+                margin-top: -30px;
+                padding: 0 15px;
+            }
+            #aside_content { width: 100%; flex-direction: row; flex-wrap: wrap; }
+            #aside_content .card-widget { flex: 1 1 280px; }
+            #page { width: 100%; padding: 24px; }
+            .rot-line { font-size: 1.6rem; }
+            #nav { height: 260px; }
+        }
+        @media screen and (max-width: 600px) {
+            #aside_content { flex-direction: column; }
+            .rot-line { font-size: 1.3rem; }
+        }
+    </style>
 </head>
+
 <body>
+    <!-- 背景层 -->
+    <canvas id="starfield" aria-hidden="true"></canvas>
+    <div class="nebula nebula-1" aria-hidden="true"></div>
+    <div class="nebula nebula-2" aria-hidden="true"></div>
+    <div class="nebula nebula-3" aria-hidden="true"></div>
+    <div id="cursor-glow" aria-hidden="true"></div>
+
     <div id="body-wrap">
-        <nav class="not_index_bg" id="nav">
-            <div id="page_site-info">
-                <div id="site-title">
-                    <span class="blogtitle"></span>
-                    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
-                    <script>
-                        var typed = new Typed(".blogtitle", {
-                            strings: ['欢迎访问OStarsO的网站', '你离开打开标签页网站会改名字哦', '欢迎━(*｀∀´*)ノ亻!', 'OStarsO是f.w', '俗话说我这个404是不是做的有点抽象', 'O(∩_∩)O哈哈~'],
-                            startDelay: 300,
-                            typeSpeed: 100,
-                            loop: true,
-                            backSpeed: 50,
-                            showCursor: true
-                        });
-                    </script>
+        <!-- 顶部 Hero -->
+        <nav id="nav">
+            <div class="hero">
+                <div class="hero-status"><i></i><span>ONLINE</span></div>
+                
+                <!-- 动态文字轮播 -->
+                <div id="site-title" class="rotator">
+                    <div class="rot-line is-active">欢迎访问 OStarsO 的网站</div>
+                    <div class="rot-line">你离开打开标签页网站会改名字哦</div>
+                    <div class="rot-line">欢迎━(*｀∀´*)ノ亻!</div>
+                    <div class="rot-line">OStarsO 是 f.w</div>
+                    <div class="rot-line">俗话说我这个 404 是不是做的有点抽象</div>
+                    <div class="rot-line">O(∩_∩)O 哈哈~</div>
                 </div>
+                
+                <p class="hero-sub">电脑DIY深度爱好者 · 在代码与星海之间漫游</p>
             </div>
         </nav>
-        <main id="content-outer">
+
+        <main>
             <div class="layout_page" id="content-inner">
-                <div class="aside_content" id="aside_content">
+                <!-- 侧边栏 -->
+                <aside class="aside_content" id="aside_content">
                     <div class="card-widget card-info">
                         <div class="card-content">
                             <div class="card-info-avatar is-center">
-                                <img class="avatar-img"
-                                    src="OStarsO.jpg"
-                                    alt="avatar">
-                                <div class="author-info__name">OStarsO</div>
-                                <div class="author-info__description">电脑深度爱好者, <s>114514年</s>互联网经验</div>
+                                <!-- 替换为你自己的头像图片路径，这里用了占位图 -->
+                                <img class="avatar-img" src="OStarsO.jpg" alt="avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=OStarsO'">
                             </div>
+                            <div class="author-info__name is-center">OStarsO</div>
+                            <div class="author-info__description is-center">电脑DIY深度爱好者，<s>114514 年</s>互联网经验</div>
                             <div class="card-info-social-icons is-center">
-                                <a class="social-icon" href="https://github.com/OStarsO/OStarsO.github.io" target="_blank">
+                                <a class="social-icon" href="https://github.com/OStarsO/OStarsO.github.io" target="_blank" rel="noopener" title="GitHub">
                                     <i class="fa fa-github"></i>
                                 </a>
                             </div>
@@ -70,194 +496,303 @@ var _hmt = _hmt || [];
                     <div class="card-widget card-announcement">
                         <div class="card-content">
                             <div class="item-headline">
-                                <i class="fa fa-bullhorn" aria-hidden="true"></i>
-                                <span>一言</span>
+                                <i class="fa fa-bullhorn" aria-hidden="true"></i><span>一言</span>
                             </div>
-                            <div id="hitokoto"></div>
+                            <div id="hitokoto">加载中...</div>
                         </div>
                     </div>
+
                     <div class="card-widget card-announcement">
                         <div class="card-content">
                             <div class="item-headline">
-                                <i class="fa fa-calendar" aria-hidden="true"></i>
-                                <span>今日诗词</span>
+                                <i class="fa fa-calendar" aria-hidden="true"></i><span>今日诗词</span>
                             </div>
-                            <div id="jinrishici-sentence"></div>
+                            <div id="jinrishici-sentence">加载中...</div>
                         </div>
                     </div>
 
                     <div class="card-widget card-webinfo">
                         <div class="card-content">
                             <div class="item-headline">
-                                <i class="fa fa-line-chart" aria-hidden="true"></i>
-                                <span>联系我</span>
+                                <i class="fa fa-paper-plane" aria-hidden="true"></i><span>联系我</span>
                             </div>
                             <div class="webinfo">
                                 <div class="webinfo-item">
-                                    <div class="webinfo-site-uv-name">邮箱：2413361317@qq.com</div>
-                                    <div class="webinfo-site-uv-count" id="busuanzi_value_site_uv"></div>
+                                    <span>邮箱</span><span>2413361317@qq.com</span>
                                 </div>
                                 <div class="webinfo-item">
-                                    <div class="webinfo-site-name">wx：无</div>
-                                    <div class="webinfo-site-pv-count" id="busuanzi_value_site_pv"></div>
+                                    <span>微信</span><span>无</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </aside>
+
+                <!-- 正文 -->
                 <article id="page">
                     <div class="article-container">
-                        <h2>欢迎访问！</h2>
+                        <h2>欢迎访问</h2>
+                        <p class="page-lead">
+                            这里是 OStarsO 的小站 —— 一个偶尔写写代码、折腾服务器、并且对电脑DIY保持着深度热爱的角落。下方是我的技能面板与导航入口。
+                        </p>
                         <hr>
+
                         <h2>技能</h2>
                         <div class="skillbox">
-                            <div class="skillbar">
-                                <div class="skillbar-title"
-                                    style="background: linear-gradient(to right, #FF0066 0%, #FF00CC 100%); width: 20%">
-                                    <span>python</span>
-                                </div>
-                                <div class="skill-bar-percent">20%</div>
+                            <div class="skill" style="--w:20%;--c1:#ff2d78;--c2:#ff00cc">
+                                <div class="skill-head"><span>Python</span><span>20%</span></div>
+                                <div class="skill-track"><div class="skill-fill"></div></div>
                             </div>
-                            <div class="skillbar">
-                                <div class="skillbar-title"
-                                    style="background: linear-gradient(to right, #9900FF 0%, #CC66FF 100%); width: 80%">
-                                    <span>我的世界面开服</span>
-                                </div>
-                                <div class="skill-bar-percent">80%</div>
+                            <div class="skill" style="--w:80%;--c1:#8b5cf6;--c2:#d946ef">
+                                <div class="skill-head"><span>我的世界开服</span><span>80%</span></div>
+                                <div class="skill-track"><div class="skill-fill"></div></div>
                             </div>
-                            <div class="skillbar">
-                                <div class="skillbar-title"
-                                    style="background: linear-gradient(to right, #2196F3 0%, #42A5F5 100%); width: 40%">
-                                    <span>html</span>
-                                </div>
-                                <div class="skill-bar-percent">40%</div>
+                            <div class="skill" style="--w:40%;--c1:#2196f3;--c2:#42a5f5">
+                                <div class="skill-head"><span>HTML</span><span>40%</span></div>
+                                <div class="skill-track"><div class="skill-fill"></div></div>
                             </div>
-                            <div class="skillbar">
-                                <div class="skillbar-title"
-                                    style="background: linear-gradient(to right, #00BCD4 0%, #80DEEA 100%); width: 5%">
-                                    <span>js</span>
-                                </div>
-                                <div class="skill-bar-percent">5%</div>
+                            <div class="skill" style="--w:5%;--c1:#00bcd4;--c2:#80deea">
+                                <div class="skill-head"><span>JavaScript</span><span>5%</span></div>
+                                <div class="skill-track"><div class="skill-fill"></div></div>
                             </div>
-                            <div class="skillbar">
-                                <div class="skillbar-title"
-                                    style="background: linear-gradient(to right, #00BCD4 0%, #f54009 100%); width: 40%">
-                                    <span>AI</span>
-                                </div>
-                                <div class="skill-bar-percent">40%</div>
-                            </div>
-                            <div class="skillbar">
-                                <div class="skillbar-title"
-                                    style="background: linear-gradient(to right, #4CAF50 0%, #81C784 100%); width: 50%">
-                                    <span>摄影</span>
-                                </div>
-                                <div class="skill-bar-percent">50%</div>
-                            </div>
-                            <div class="skillbar">
-                                <div class="skillbar-title"
-                                    style="background: linear-gradient(to right, #FFEB3B 0%, #FFF176 100%); width: 0%">
-                                    <span>无</span>
-                                </div>
-                                <div class="skill-bar-percent">0%</div>
+                            <div class="skill" style="--w:40%;--c1:#ff7a18;--c2:#f54009">
+                                <div class="skill-head"><span>AI</span><span>40%</span></div>
+                                <div class="skill-track"><div class="skill-fill"></div></div>
                             </div>
                         </div>
                         <hr>
+
                         <h2>综合</h2>
-                        <div class="tool">
-				<!--<li><a href="https://ostarso.g6i.cn/新年快乐">新年快乐</a></li>-->
-				<li><a href="../">OST引导大厅</a></li>
-	                        <li><a href="搜索/">ST搜索</a></li>
-				<li><a href="小游戏/">小游戏大厅</a></li>
-                                <li><a href="https://stats.uptimerobot.com/AzJw7trVAR">网页状态</a></li>
-				
-                        </div>
+                        <ul class="tool">
+                            <li><a href="../"><i class="fa fa-compass"></i><span>OST 引导大厅</span></a></li>
+                            <li><a href="搜索/"><i class="fa fa-search"></i><span>ST 搜索</span></a></li>
+                            <li><a href="小游戏/"><i class="fa fa-gamepad"></i><span>小游戏大厅</span></a></li>
+                            <li><a href="https://stats.uptimerobot.com/AzJw7trVAR" target="_blank" rel="noopener"><i class="fa fa-heartbeat"></i><span>网页状态</span></a></li>
+                        </ul>
                     </div>
                 </article>
             </div>
         </main>
+
         <footer id="footer">
             <div id="footer-wrap">
                 <div class="copyright">&copy;2023 - 2026 BY OStarsO</div>
             </div>
         </footer>
     </div>
+
+    <!-- 外部 JS 库 -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
     <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/instant.page@3.0.0/instantpage.js" type="module"></script>
 
-    <!--   一言、今日诗词   -->
+    <!-- 一言、今日诗词 -->
     <script src="https://v1.hitokoto.cn/?encode=js&select=%23hitokoto" defer></script>
     <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
 
-   <!--鼠标点击效果-->
-    <script src="https://cdn.jsdelivr.net/gh/TRHX/CDN-for-itrhx.com@3.0.8/js/maodian.js"></script>
+    <script>
+        /* =========================================================
+           1. 星空背景（Canvas：星点闪烁 + 视差 + 流星）
+        ========================================================= */
+        (function () {
+            var canvas = document.getElementById('starfield');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var W = 0, H = 0, DPR = 1;
+            var stars = [], meteors = [];
+            var nextMeteorAt = 3000;
+            var pointer = { x: 0.5, y: 0.5, cx: 0.5, cy: 0.5 };
 
-    <script type="text/javascript">
-        console.log("%c 有朋自远方来, 不亦说乎.", "background:#24272A; color:#ffffff", "");
+            function resize() {
+                DPR = Math.min(window.devicePixelRatio || 1, 2);
+                W = window.innerWidth;
+                H = window.innerHeight;
+                canvas.width = Math.floor(W * DPR);
+                canvas.height = Math.floor(H * DPR);
+                canvas.style.width = W + 'px';
+                canvas.style.height = H + 'px';
+                ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+                buildStars();
+            }
 
-
-        (function ($) {
-            $.fn.snow = function (options) {
-                var $flake = $('<div id="snowbox" />').css({ 'position': 'absolute', 'z-index': '9999', 'top': '-50px' }).html('&#10052;'),
-                    documentHeight = $(document).height(),
-                    documentWidth = $(document).width(),
-                    defaults = {
-                        minSize: 10,
-                        maxSize: 20,
-                        newOn: 1000,
-                        flakeColor: "#AFDAEF" /* 此处可以定义雪花颜色，若要白色可以改为#FFFFFF */
-                    },
-                    options = $.extend({}, defaults, options);
-                var interval = setInterval(function () {
-                    var startPositionLeft = Math.random() * documentWidth - 100,
-                        startOpacity = 0.5 + Math.random(),
-                        sizeFlake = options.minSize + Math.random() * options.maxSize,
-                        endPositionTop = documentHeight - 200,
-                        endPositionLeft = startPositionLeft - 500 + Math.random() * 500,
-                        durationFall = documentHeight * 10 + Math.random() * 5000;
-                    $flake.clone().appendTo('body').css({
-                        left: startPositionLeft,
-                        opacity: startOpacity,
-                        'font-size': sizeFlake,
-                        color: options.flakeColor
-                    }).animate({
-                        top: endPositionTop,
-                        left: endPositionLeft,
-                        opacity: 0.2
-                    }, durationFall, 'linear', function () {
-                        $(this).remove()
+            function buildStars() {
+                var count = Math.min(340, Math.max(110, Math.floor(W * H / 7200)));
+                stars = [];
+                for (var i = 0; i < count; i++) {
+                    var big = Math.random() > 0.86;
+                    stars.push({
+                        x: Math.random() * W,
+                        y: Math.random() * H,
+                        z: 0.25 + Math.random() * 0.75,
+                        r: big ? 1.2 + Math.random() * 1.1 : 0.35 + Math.random() * 0.85,
+                        a: 0.2 + Math.random() * 0.8,
+                        va: 0.002 + Math.random() * 0.010,
+                        dir: Math.random() < 0.5 ? -1 : 1,
+                        tint: Math.random() < 0.22
                     });
-                }, options.newOn);
-            };
-        })(jQuery);
-        $(function () {
-            $.fn.snow({
-                minSize: 5, /* 定义雪花最小尺寸 */
-                maxSize: 70,/* 定义雪花最大尺寸 */
-                newOn: 800  /* 定义密集程度，数字越小越密集 */
-            });
-        });
+                }
+            }
 
-        // 浏览器搞笑标题
+            function spawnMeteor() {
+                meteors.push({
+                    x: Math.random() * W * 0.85 + W * 0.05,
+                    y: Math.random() * H * 0.35,
+                    vx: 3.5 + Math.random() * 3,
+                    vy: 1.8 + Math.random() * 1.6,
+                    len: 110 + Math.random() * 170,
+                    life: 1
+                });
+            }
+
+            function draw(now) {
+                ctx.clearRect(0, 0, W, H);
+                pointer.cx += (pointer.x - pointer.cx) * 0.045;
+                pointer.cy += (pointer.y - pointer.cy) * 0.045;
+                var px = (pointer.cx - 0.5) * 46;
+                var py = (pointer.cy - 0.5) * 46;
+
+                for (var i = 0; i < stars.length; i++) {
+                    var s = stars[i];
+                    s.a += s.va * s.dir;
+                    if (s.a >= 1) { s.a = 1; s.dir = -1; }
+                    if (s.a <= 0.08) { s.a = 0.08; s.dir = 1; }
+
+                    var x = s.x + px * s.z;
+                    var y = s.y + py * s.z;
+
+                    if (s.r > 1.1) {
+                        var g = ctx.createRadialGradient(x, y, 0, x, y, s.r * 7);
+                        g.addColorStop(0, 'rgba(198,232,255,' + (s.a * 0.85) + ')');
+                        g.addColorStop(1, 'rgba(198,232,255,0)');
+                        ctx.fillStyle = g;
+                        ctx.beginPath();
+                        ctx.arc(x, y, s.r * 7, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    ctx.fillStyle = s.tint ? 'hsla(198, 95%, 84%, ' + s.a + ')' : 'rgba(255,255,255,' + s.a + ')';
+                    ctx.beginPath();
+                    ctx.arc(x, y, s.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                if (now > nextMeteorAt) {
+                    spawnMeteor();
+                    nextMeteorAt = now + 3800 + Math.random() * 6500;
+                }
+                for (var j = meteors.length - 1; j >= 0; j--) {
+                    var m = meteors[j];
+                    m.x += m.vx;
+                    m.y += m.vy;
+                    m.life -= 0.006;
+
+                    var speed = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
+                    var tx = m.x - (m.vx / speed) * m.len;
+                    var ty = m.y - (m.vy / speed) * m.len;
+                    var life = Math.max(0, m.life);
+
+                    var lg = ctx.createLinearGradient(m.x, m.y, tx, ty);
+                    lg.addColorStop(0, 'rgba(255,255,255,' + life + ')');
+                    lg.addColorStop(0.35, 'rgba(150,220,255,' + (life * 0.55) + ')');
+                    lg.addColorStop(1, 'rgba(150,220,255,0)');
+
+                    ctx.strokeStyle = lg;
+                    ctx.lineWidth = 1.6;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(m.x, m.y);
+                    ctx.lineTo(tx, ty);
+                    ctx.stroke();
+
+                    if (m.life <= 0 || m.x > W + 300 || m.y > H + 300) meteors.splice(j, 1);
+                }
+
+                requestAnimationFrame(draw);
+            }
+
+            document.addEventListener('pointermove', function (e) {
+                pointer.x = e.clientX / W;
+                pointer.y = e.clientY / H;
+            }, { passive: true });
+
+            window.addEventListener('resize', resize);
+            resize();
+            requestAnimationFrame(draw);
+        })();
+
+        /* =========================================================
+           2. 鼠标跟随光晕
+        ========================================================= */
+        (function () {
+            var glow = document.getElementById('cursor-glow');
+            if (!glow) return;
+            if (window.matchMedia('(pointer: coarse)').matches) { glow.style.display = 'none'; return; }
+
+            var tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+            var cx = tx, cy = ty;
+
+            document.addEventListener('pointermove', function (e) {
+                tx = e.clientX; ty = e.clientY;
+            }, { passive: true });
+
+            (function loop() {
+                cx += (tx - cx) * 0.10;
+                cy += (ty - cy) * 0.10;
+                glow.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0)';
+                requestAnimationFrame(loop);
+            })();
+        })();
+
+        /* =========================================================
+           3. 卡片鼠标光斑跟随
+        ========================================================= */
+        (function () {
+            var cards = document.querySelectorAll('.card-widget, #page');
+            cards.forEach(function (el) {
+                el.addEventListener('pointermove', function (e) {
+                    var r = el.getBoundingClientRect();
+                    el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+                    el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+                }, { passive: true });
+            });
+        })();
+
+        /* =========================================================
+           4. 顶部文字轮播 (替换打字机)
+        ========================================================= */
+        (function () {
+            var lines = Array.prototype.slice.call(document.querySelectorAll('.rot-line'));
+            if (lines.length < 2) return;
+            var idx = 0;
+            setInterval(function () {
+                var cur = lines[idx];
+                idx = (idx + 1) % lines.length;
+                var next = lines[idx];
+
+                cur.classList.remove('is-active');
+                cur.classList.add('is-leaving');
+                next.classList.remove('is-leaving');
+                void next.offsetWidth; // 触发重绘
+                next.classList.add('is-active');
+
+                setTimeout(function () { cur.classList.remove('is-leaving'); }, 760);
+            }, 3600);
+        })();
+
+        /* =========================================================
+           5. 浏览器搞笑标题
+        ========================================================= */
         var OriginTitle = document.title;
         var titleTime;
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) {
-                // $('[rel="icon"]').attr('href', "/funny.ico");
                 document.title = '点我';
                 clearTimeout(titleTime);
-            }
-            else {
-                $('[rel="icon"]').attr('href', "/favicon.ico");
-                document.title = '当我没说' + OriginTitle;
-                titleTime = setTimeout(function () {
-                    document.title = OriginTitle;
-                }, 2000);
+            } else {
+                document.title = '当我没说 ' + OriginTitle;
+                titleTime = setTimeout(function () { document.title = OriginTitle; }, 2000);
             }
         });
     </script>
-	 <!-- 这里就是显示网页内容的地方，也就是放播放器代码的地方！ -->
-<div id="xf-MusicPlayer" data-cdnName="https://player.xfyun.club/js"></div>
-<script src="https://player.xfyun.club/js/xf-MusicPlayer/js/xf-MusicPlayer.min.js"></script>
 </body>
 </html>
