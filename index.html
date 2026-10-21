@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>正在进入…</title>
+<!-- 引入 UAParser.js 用于解析设备与浏览器信息 -->
+<script src="https://cdn.jsdelivr.net/npm/ua-parser-js@2.0.9/dist/ua-parser.pack.js"></script>
 <style>
   * { box-sizing: border-box; }
 
@@ -13,6 +15,77 @@
     background: #04060c;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* ================= 顶部设备信息栏 ================= */
+  #device-info-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px 20px;
+    padding: 10px 16px;
+    background: rgba(4, 6, 12, 0.75);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(150, 200, 255, 0.15);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: rgba(190, 214, 255, 0.9);
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    transition: opacity 0.5s ease, visibility 0.5s; /* 添加过渡效果 */
+  }
+
+  /* 新增：加载完成后的隐藏状态 */
+  #device-info-bar.hide {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  #device-info-bar .info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  #device-info-bar .info-item .label {
+    color: rgba(120, 160, 210, 0.7);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  #device-info-bar .info-item .value {
+    color: #e0ecff;
+    font-weight: 500;
+  }
+
+  #device-info-bar .info-item .value.loading {
+    color: rgba(150, 180, 220, 0.5);
+    animation: blink 1.2s steps(1, end) infinite;
+  }
+
+  @keyframes blink {
+    0%, 49%   { opacity: 1; }
+    50%, 100% { opacity: 0.3; }
+  }
+
+  /* 响应式：小屏幕下隐藏部分次要信息 */
+  @media (max-width: 600px) {
+    #device-info-bar {
+      gap: 8px 12px;
+      font-size: 10px;
+      padding: 8px 10px;
+    }
+    #device-info-bar .info-item .label {
+      display: none;
+    }
   }
 
   /* ================= 星空画布 ================= */
@@ -122,14 +195,29 @@
     opacity: 0;
     transform: translateX(-50%) translateY(14px);
   }
-
-  @keyframes blink {
-    0%, 49%   { opacity: 1; }
-    50%, 100% { opacity: 0.12; }
-  }
 </style>
 </head>
 <body>
+
+  <!-- 顶部设备与网络信息栏 -->
+  <div id="device-info-bar">
+    <div class="info-item">
+      <span class="label">设备</span>
+      <span class="value loading" id="info-device">检测中...</span>
+    </div>
+    <div class="info-item">
+      <span class="label">浏览器</span>
+      <span class="value loading" id="info-browser">检测中...</span>
+    </div>
+    <div class="info-item">
+      <span class="label">IP</span>
+      <span class="value loading" id="info-ip">获取中...</span>
+    </div>
+    <div class="info-item">
+      <span class="label">地区</span>
+      <span class="value loading" id="info-region">获取中...</span>
+    </div>
+  </div>
 
   <canvas id="stars"></canvas>
 
@@ -151,6 +239,7 @@
   var frame  = document.getElementById('frame');
   var iframe = document.getElementById('page');
   var hint   = document.getElementById('hint');
+  var infoBar = document.getElementById('device-info-bar'); // 获取信息栏元素
 
   /* =========================================================
      一、星空：白色像素点，从远处朝观察者（屏幕外）飞来
@@ -252,7 +341,91 @@
   window.addEventListener('resize', resize);
 
   /* =========================================================
-     二、加载 Introduction.html，完成后让它"冲向观察者"
+     二、获取并显示设备、浏览器、IP及地区信息
+     ========================================================= */
+  
+  function setInfo(id, text) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.textContent = text;
+      el.classList.remove('loading');
+    }
+  }
+
+  try {
+    var parser = new UAParser();
+    var result = parser.getResult();
+
+    var deviceType = result.device.type || 'desktop';
+    var deviceVendor = result.device.vendor || '';
+    var deviceModel = result.device.model || '';
+    
+    var deviceText = '';
+    if (deviceType === 'desktop') {
+      deviceText = 'Desktop';
+    } else if (deviceType === 'mobile') {
+      deviceText = 'Mobile';
+    } else if (deviceType === 'tablet') {
+      deviceText = 'Tablet';
+    } else {
+      deviceText = deviceType;
+    }
+    if (deviceVendor) deviceText += ' · ' + deviceVendor;
+    if (deviceModel) deviceText += ' ' + deviceModel;
+    setInfo('info-device', deviceText);
+
+    var browserName = result.browser.name || '未知浏览器';
+    var browserVersion = result.browser.version || '';
+    var browserText = browserName + (browserVersion ? ' ' + browserVersion.split('.')[0] : '');
+    setInfo('info-browser', browserText);
+
+  } catch (e) {
+    setInfo('info-device', '未知设备');
+    setInfo('info-browser', '未知浏览器');
+  }
+
+  fetch('https://ipwho.is/')
+    .then(function(response) {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(function(data) {
+      if (data.success === false) {
+        throw new Error(data.message || 'API returned error');
+      }
+      setInfo('info-ip', data.ip || '未知');
+      
+      var regionParts = [];
+      if (data.city) regionParts.push(data.city);
+      if (data.region) regionParts.push(data.region);
+      if (data.country) regionParts.push(data.country);
+      var regionText = regionParts.length > 0 ? regionParts.join(', ') : '未知地区';
+      setInfo('info-region', regionText);
+    })
+    .catch(function(error) {
+      console.warn('IP 地理位置获取失败，尝试备用 API...', error);
+      return fetch('https://ip-api.com/json')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.status === 'success') {
+            setInfo('info-ip', data.query || '未知');
+            var regionParts = [];
+            if (data.city) regionParts.push(data.city);
+            if (data.regionName) regionParts.push(data.regionName);
+            if (data.country) regionParts.push(data.country);
+            setInfo('info-region', regionParts.length > 0 ? regionParts.join(', ') : '未知地区');
+          } else {
+            throw new Error('Backup API failed');
+          }
+        });
+    })
+    .catch(function() {
+      setInfo('info-ip', '获取失败');
+      setInfo('info-region', '获取失败');
+    });
+
+  /* =========================================================
+     三、加载 Introduction.html，完成后让它"冲向观察者"
      ========================================================= */
   var revealed  = false;
   var t0        = performance.now();
@@ -265,6 +438,12 @@
     clearTimeout(hardTimer);
 
     hint.classList.add('hide');
+    
+    // 【修改点】：让顶部信息栏也淡出消失
+    if (infoBar) {
+      infoBar.classList.add('hide');
+    }
+    
     frame.style.pointerEvents = 'auto';
 
     // ① 先放大并略微"过冲"，制造冲过来的速度感
@@ -291,16 +470,14 @@
   }
 
   iframe.addEventListener('load', function () {
-    // 尝试获取内嵌页面的标题并修改当前标签页的标题
     try {
       var innerTitle = iframe.contentDocument.title;
       if (innerTitle) {
         document.title = innerTitle;
       } else {
-        document.title = 'Introduction'; // 如果没有标题，给个默认值
+        document.title = 'Introduction';
       }
     } catch (e) {
-      // 如果产生跨域限制（Cross-Origin），无法读取 title，则给个默认值
       document.title = 'Introduction';
     }
 
