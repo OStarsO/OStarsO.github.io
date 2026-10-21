@@ -24,6 +24,101 @@
             position: relative;
         }
 
+        /* ================= 左上角毛玻璃返回按钮 ================= */
+        .back-home-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px; /* 改为左上角 */
+            right: auto;
+            z-index: 9999;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            box-shadow:
+                0 4px 24px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        /* 顶部玻璃高光弧线 */
+        .back-home-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 10%;
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* 悬浮时扫过的光晕 */
+        .back-home-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(136,176,255,0.25), transparent);
+            transition: left 0.6s ease;
+            pointer-events: none;
+        }
+
+        .back-home-btn:hover::after {
+            left: 100%;
+        }
+
+        .back-home-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(136, 176, 255, 0.6);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.35),
+                0 0 20px rgba(136, 176, 255, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .back-home-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-home-btn svg {
+            transition: transform 0.35s ease;
+            flex-shrink: 0;
+        }
+
+        .back-home-btn:hover svg {
+            transform: translateX(-4px);
+        }
+
+        /* 小屏适配 */
+        @media (max-width: 600px) {
+            .back-home-btn {
+                top: 16px;
+                left: 16px; /* 小屏左上角 */
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+        }
+
         /* 星空画布 */
         #starCanvas {
             position: absolute;
@@ -45,7 +140,7 @@
             flex-direction: column;
             align-items: center;
             transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-            justify-content: center; 
+            justify-content: center;
             padding: 20px;
         }
 
@@ -145,7 +240,7 @@
             transition: all 0.3s;
             opacity: 0.8;
         }
-        
+
         .search-btn:hover {
             opacity: 1;
             transform: scale(1.05);
@@ -218,8 +313,7 @@
             width: 100%;
             max-width: 600px;
             margin-top: 30px;
-            /* 保持占位以便测量尺寸，由卡片自身控制透明度 */
-            opacity: 1; 
+            opacity: 1;
             pointer-events: none;
             overflow-y: auto;
             max-height: calc(100vh - 220px);
@@ -243,10 +337,9 @@
             border-radius: 12px;
             backdrop-filter: blur(5px);
             cursor: pointer;
-            /* 隐藏但保留占位 */
             opacity: 0;
             transform: translateY(10px) scale(0.95);
-            visibility: hidden; 
+            visibility: hidden;
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s, visibility 0s;
         }
 
@@ -336,7 +429,6 @@
             margin-top: -6px;
             border-radius: 50%;
             background: #fff;
-            /* 制造发光光晕 */
             box-shadow: 0 0 15px 3px #fff, 0 0 30px 6px #88b0ff, 0 0 50px 12px rgba(136, 176, 255, 0.6);
             z-index: 100;
             pointer-events: none;
@@ -346,6 +438,14 @@
 </head>
 <body>
 
+    <!-- 左上角毛玻璃返回按钮 -->
+    <a href="../Introduction.html" class="back-home-btn" id="backHomeBtn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span>返回介绍</span>
+    </a>
+
     <canvas id="starCanvas"></canvas>
     <div class="warp-mask" id="warpMask"></div>
 
@@ -353,7 +453,7 @@
         <div class="header-area">
             <div class="greeting" id="greeting">晚上好，现在是 20:00</div>
             <div class="logo">ST 导航</div>
-            
+
             <div class="search-box-wrapper">
                 <div class="search-box" id="searchBox">
                     <input type="text" class="search-input" id="searchInput" placeholder="搜索或输入网址..." autocomplete="off" />
@@ -362,23 +462,23 @@
             </div>
 
             <div class="shortcuts">
-                <a href="#" class="shortcut-item">
+                <a href="https://www.bilibili.com/" class="shortcut-item">
                     <div class="shortcut-icon" style="color: #fb7299;">📺</div>
                     <div class="shortcut-text">哔哩哔哩</div>
                 </a>
-                <a href="#" class="shortcut-item">
+                <a href="https://www.zhihu.com/" class="shortcut-item">
                     <div class="shortcut-icon" style="color: #0084ff;">💡</div>
                     <div class="shortcut-text">知乎</div>
                 </a>
-                <a href="#" class="shortcut-item">
+                <a href="https://weibo.com/" class="shortcut-item">
                     <div class="shortcut-icon" style="color: #ff8200;">🔥</div>
                     <div class="shortcut-text">微博</div>
                 </a>
-                <a href="#" class="shortcut-item">
+                <a href="https://github.com/" class="shortcut-item">
                     <div class="shortcut-icon" style="color: #fff;">🐙</div>
                     <div class="shortcut-text">GitHub</div>
                 </a>
-                <a href="#" class="shortcut-item">
+                <a href="https://www.douban.com/" class="shortcut-item">
                     <div class="shortcut-icon" style="color: #00b96b;">📚</div>
                     <div class="shortcut-text">豆瓣</div>
                 </a>
@@ -396,11 +496,11 @@
            ========================================== */
         const canvas = document.getElementById('starCanvas');
         const ctx = canvas.getContext('2d');
-        
+
         let width, height;
         let stars = [];
-        const numStars = 800; 
-        const speed = { idle: 0.5, prepare: 4, warp: 60 }; 
+        const numStars = 800;
+        const speed = { idle: 0.5, prepare: 4, warp: 60 };
         let currentState = 'idle';
         let currentSpeed = speed.idle;
 
@@ -418,7 +518,7 @@
             reset() {
                 this.x = (Math.random() - 0.5) * width * 3;
                 this.y = (Math.random() - 0.5) * height * 3;
-                this.z = Math.random() * width; 
+                this.z = Math.random() * width;
                 this.color = `rgba(255, 255, 255, ${Math.random() * 0.8 + 0.2})`;
                 this.size = Math.random() * 1.5 + 0.5;
             }
@@ -426,14 +526,14 @@
                 this.z -= currentSpeed;
                 if (this.z <= 0) {
                     this.reset();
-                    this.z = width; 
+                    this.z = width;
                 }
             }
             draw() {
                 const screenX = (this.x / this.z) * (width / 2) + width / 2;
                 const screenY = (this.y / this.z) * (height / 2) + height / 2;
                 const scale = (1 - this.z / width) * this.size * 3;
-                
+
                 if (scale > 0.1) {
                     ctx.beginPath();
                     ctx.arc(screenX, screenY, scale, 0, Math.PI * 2);
@@ -533,41 +633,35 @@
                     <div class="result-desc">${item.desc}</div>
                 </div>
             `).join('');
-            
+
             // 3. 等待 DOM 布局稳定（搜索框滑动到位）后开始发射星星
             setTimeout(() => {
                 if (currentToken !== searchToken) return;
                 launchStarsToCards(currentToken);
-            }, 400); // 400ms 足够搜索框上移完毕
+            }, 400);
         }
 
         // 核心：依次发射星星砸中卡片
         function launchStarsToCards(token) {
             const cards = document.querySelectorAll('.result-item');
-            
-            // 遍历每个卡片
+
             cards.forEach((card, index) => {
-                // 获取卡片在屏幕上的绝对中心位置
                 const rect = card.getBoundingClientRect();
                 const targetX = rect.left + rect.width / 2;
                 const targetY = rect.top + rect.height / 2;
 
-                // 依次延迟发射 (0ms, 200ms, 400ms...)
                 setTimeout(() => {
                     if (token !== searchToken) return;
-                    
-                    // 创建一颗飞行的星星
+
                     createFlyingStar(targetX, targetY, () => {
                         if (token !== searchToken) return;
-                        // 星星砸中目标后，卡片显现
                         card.style.visibility = 'visible';
-                        void card.offsetWidth; // 强制重绘，确保 transition 生效
+                        void card.offsetWidth;
                         card.classList.add('visible');
                     });
-                }, index * 180); // 间隔 180ms 依次砸下
+                }, index * 180);
             });
 
-            // 所有的星星发射并飞行完毕后，恢复星空状态
             const totalTime = cards.length * 180 + 600;
             setTimeout(() => {
                 if (token !== searchToken) return;
@@ -583,30 +677,28 @@
             star.className = 'flying-star';
             document.body.appendChild(star);
 
-            // 起始位置：屏幕中心偏下方（模拟从跃迁的深处向你飞来）
             const startX = window.innerWidth / 2 + (Math.random() - 0.5) * 200;
             const startY = window.innerHeight * 0.6 + (Math.random() - 0.5) * 200;
 
             star.style.left = `${startX}px`;
             star.style.top = `${startY}px`;
-            
+
             const deltaX = targetX - startX;
             const deltaY = targetY - startY;
 
-            // 使用 Web Animations API 实现平滑加速飞行
             const animation = star.animate([
                 { transform: `translate(0, 0) scale(0.1)`, opacity: 0 },
                 { transform: `translate(${deltaX * 0.2}px, ${deltaY * 0.2}px) scale(1.5)`, opacity: 1, offset: 0.2 },
                 { transform: `translate(${deltaX}px, ${deltaY}px) scale(0.8)`, opacity: 0.8 }
             ], {
-                duration: 500, // 飞行耗时 500ms
-                easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)', // 先加速后减速
+                duration: 500,
+                easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
                 fill: 'forwards'
             });
 
             animation.onfinish = () => {
-                star.remove(); // 移除星星DOM
-                if(onComplete) onComplete(); // 触发卡片显现
+                star.remove();
+                if (onComplete) onComplete();
             };
         }
 
@@ -617,13 +709,12 @@
 
         // 返回首页（打断所有动画）
         backBtn.addEventListener('click', () => {
-            searchToken++; // 使所有未完成的定时器和动画失效
+            searchToken++;
             body.classList.remove('is-searching');
             searchInput.value = '';
             currentState = 'idle';
             currentSpeed = speed.idle;
-            
-            // 清理所有正在飞行的星星
+
             document.querySelectorAll('.flying-star').forEach(el => el.remove());
 
             setTimeout(() => {
