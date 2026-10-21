@@ -1143,6 +1143,95 @@
     <script src="https://v1.hitokoto.cn/?encode=js&select=%23hitokoto" defer></script>
     <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
 
+    <!-- =========================================================
+         新增：控制台彩蛋 (Console Easter Egg)
+    ========================================================== -->
+    <script>
+    (function () {
+        // 1. ASCII 签名
+        console.log(
+            '%c\n' +
+            '  ██████╗ ███████╗████████╗ █████╗ ██████╗ ███████╗ ██████╗ \n' +
+            ' ██╔═══██╗██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██╔═══██╗\n' +
+            ' ██║   ██║███████╗   ██║   ███████║██████╔╝███████╗██║   ██║\n' +
+            ' ██║   ██║╚════██║   ██║   ██╔══██║██╔══██╗╚════██║██║   ██║\n' +
+            ' ╚██████╔╝███████║   ██║   ██║  ██║██║  ██║███████║╚██████╔╝\n' +
+            '  ╚═════╝ ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ \n',
+            'color: #6ee7ff; font-weight: bold; font-family: monospace; font-size: 12px;'
+        );
+
+        // 2. 运行天数
+        const startDate = new Date('2023-01-01');
+        const today = new Date();
+        const diffTime = Math.abs(today - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        console.log(
+            `%c 🚀 OStarsO 博客已安全运行 %c ${diffDays} %c 天！`,
+            'background: #10b981; color: #fff; border-radius: 3px 0 0 3px; padding: 4px 8px;',
+            'background: #059669; color: #fff; font-weight: bold; padding: 4px 8px;',
+            'background: #10b981; color: #fff; border-radius: 0 3px 3px 0; padding: 4px 8px;'
+        );
+
+        // 3. 冷笑话 API
+        console.log('%c 📡 正在获取今日冷笑话...', 'color: #f59e0b; font-size: 12px;');
+        fetch('https://api.vvhan.com/api/text/joke')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    console.log(
+                        '%c 冷笑话 ',
+                        'background: #8b5cf6; color: #fff; border-radius: 3px; padding: 2px 6px; margin-top: 5px;',
+                        data.data.content
+                    );
+                } else {
+                    throw new Error('API Error');
+                }
+            })
+            .catch(() => {
+                console.log(
+                    '%c 冷笑话 ',
+                    'background: #8b5cf6; color: #fff; border-radius: 3px; padding: 2px 6px;',
+                    '为什么程序员总是分不清万圣节和圣诞节？因为 Oct 31 == Dec 25。'
+                );
+            });
+
+        // 4. 谜题与互动
+        setTimeout(() => {
+            console.log(
+                '%c⚠️ 安全警告',
+                'color: #ef4444; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 0px #000;'
+            );
+            console.log(
+                '%c请不要在此粘贴任何代码或文本，这可能会导致你的信息泄露。\n不过，如果你是真正的极客，请在控制台输入：%cOStarsO.hack()',
+                'color: #f87171; font-size: 14px; line-height: 1.5;',
+                'color: #a78bfa; font-weight: bold; font-size: 16px; background: rgba(167, 139, 250, 0.1); padding: 2px 6px; border-radius: 4px;'
+            );
+
+            // 定义全局彩蛋触发函数
+            window.OStarsO = {
+                hack: function () {
+                    console.log(
+                        '%c🎉 恭喜你发现了隐藏彩蛋！\n你是真正的极客！🌟',
+                        'font-size: 20px; color: #6ee7ff; font-weight: bold; text-shadow: 0 0 10px rgba(110,231,255,0.5);'
+                    );
+                    console.log(
+                        '%c✨ 系统检测到黑客指令，正在为你点亮整个星空...',
+                        'color: #a78bfa; font-size: 14px;'
+                    );
+                    
+                    // 触发星空爆闪特效（简单的 DOM 操作模拟）
+                    const canvas = document.getElementById('starfield');
+                    if (canvas) {
+                        canvas.style.transition = 'opacity 0.3s ease';
+                        canvas.style.opacity = '0';
+                        setTimeout(() => { canvas.style.opacity = '1'; }, 300);
+                    }
+                }
+            };
+        }, 1000);
+    })();
+    </script>
+
     <script>
         /* =========================================================
            1. 星空背景
