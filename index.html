@@ -38,10 +38,9 @@
     color: rgba(190, 214, 255, 0.9);
     letter-spacing: 0.5px;
     pointer-events: none;
-    transition: opacity 0.5s ease, visibility 0.5s; /* 添加过渡效果 */
+    transition: opacity 0.5s ease, visibility 0.5s;
   }
 
-  /* 新增：加载完成后的隐藏状态 */
   #device-info-bar.hide {
     opacity: 0;
     visibility: hidden;
@@ -109,12 +108,12 @@
     pointer-events: none;
   }
 
-  /* 被加载页面的容器：初始是"缩在远处"的小窗 */
+  /* 被加载页面的容器 */
   .frame {
     position: relative;
     width: 100vw;
     height: 100vh;
-    transform: scale(0.28);          /* 远处的小窗 */
+    transform: scale(0.28);
     transform-origin: 50% 50%;
     border-radius: 18px;
     overflow: hidden;
@@ -123,7 +122,7 @@
       0 0 0 1px rgba(150, 200, 255, 0.30),
       0 0 60px rgba(90, 150, 255, 0.32),
       0 0 180px rgba(60, 110, 255, 0.18);
-    pointer-events: none;
+    pointer-events: auto;
     will-change: transform;
     transition:
       transform 1.05s cubic-bezier(0.22, 0.9, 0.28, 1),
@@ -141,12 +140,12 @@
     background: #060a12;
   }
 
-  /* 加载中盖在页面上的"暗纱"（加载完成后淡出，露出真实页面） */
+  /* 加载中盖在页面上的"暗纱" */
   .veil {
     position: absolute;
     inset: 0;
     z-index: 2;
-    pointer-events: none;
+    pointer-events: auto;
     opacity: 1;
     transition: opacity 0.9s ease;
     background:
@@ -161,7 +160,96 @@
         transparent 3px);
   }
 
-  .frame.reveal .veil { opacity: 0; }
+  /* 加载完成后：淡出并让出点击事件 */
+  .frame.reveal .veil { 
+    opacity: 0; 
+    pointer-events: none;
+  }
+
+  /* ================= 点击提示弹窗 ================= */
+  #loading-tip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    z-index: 20;
+    background: rgba(8, 14, 26, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(150, 200, 255, 0.3);
+    border-radius: 12px;
+    padding: 20px 28px;
+    color: #e0ecff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.3s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 30px rgba(90, 150, 255, 0.2);
+  }
+
+  #loading-tip.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  #loading-tip .tip-icon {
+    display: block;
+    margin: 0 auto 12px;
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(150, 200, 255, 0.3);
+    border-top-color: #a8caff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  #loading-tip .tip-time {
+    color: #a8caff;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  /* ================= 底部加载耗时提示 ================= */
+  #load-time-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 12vh; /* 位于底部偏上一点 */
+    transform: translate(-50%, 20px);
+    z-index: 30;
+    background: rgba(8, 14, 26, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(150, 200, 255, 0.3);
+    border-radius: 30px;
+    padding: 12px 24px;
+    color: #e0ecff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 30px rgba(90, 150, 255, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s;
+  }
+
+  #load-time-toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }
+
+  #load-time-toast .time-val {
+    color: #a8caff;
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0 4px;
+  }
 
   /* ================= 底部提示 ================= */
   .hint {
@@ -228,6 +316,20 @@
     </div>
   </div>
 
+  <!-- 点击提示框 -->
+  <div id="loading-tip">
+    <div class="tip-icon"></div>
+    <div>网页正在努力加载中，请稍候…</div>
+    <div style="margin-top: 8px; font-size: 12px; color: rgba(150, 180, 220, 0.8);">
+      已等待 <span class="tip-time">0.0 秒</span>
+    </div>
+  </div>
+
+  <!-- 加载完成耗时提示 -->
+  <div id="load-time-toast">
+    本次加载耗时 <span class="time-val" id="final-time">0.0</span> 秒
+  </div>
+
   <div class="hint" id="hint">正在加载</div>
 
 <script>
@@ -239,17 +341,24 @@
   var frame  = document.getElementById('frame');
   var iframe = document.getElementById('page');
   var hint   = document.getElementById('hint');
-  var infoBar = document.getElementById('device-info-bar'); // 获取信息栏元素
+  var infoBar = document.getElementById('device-info-bar');
+  
+  var veil = document.querySelector('.veil');
+  var tip = document.getElementById('loading-tip');
+  var tipTime = tip.querySelector('.tip-time');
+  
+  var timeToast = document.getElementById('load-time-toast');
+  var finalTimeSpan = document.getElementById('final-time');
 
   /* =========================================================
      一、星空：白色像素点，从远处朝观察者（屏幕外）飞来
      ========================================================= */
   var W = 0, H = 0, CX = 0, CY = 0, DPR = 1;
 
-  var FOV   = 520;    // 焦距（越大越"广角"）
-  var FAR   = 1400;   // 最远深度
-  var SPEED = 10;     // 每帧推进的深度
-  var COUNT = 340;    // 星星数量
+  var FOV   = 520;
+  var FAR   = 1400;
+  var SPEED = 10;
+  var COUNT = 340;
 
   var stars   = [];
   var running = true;
@@ -261,7 +370,7 @@
     s.x = rand(-1, 1) * 1800;
     s.y = rand(-1, 1) * 1800;
     s.z = initial ? rand(40, FAR) : FAR + rand(0, 500);
-    s.b = rand(0.45, 1);            // 亮度系数
+    s.b = rand(0.45, 1);
   }
 
   function initStars() {
@@ -297,10 +406,9 @@
     if (!lastT) lastT = now;
     var dt = now - lastT;
     lastT = now;
-    if (dt > 120) dt = 120;          // 切标签页回来时防止大跳帧
+    if (dt > 120) dt = 120;
     var f = dt / 16.667;
 
-    /* 半透明擦除 => 残留短暂拖尾，像光线划过 */
     ctx.globalAlpha = 1;
     ctx.fillStyle = 'rgba(4, 6, 12, 0.42)';
     ctx.fillRect(0, 0, W, H);
@@ -310,25 +418,24 @@
     for (var i = 0; i < stars.length; i++) {
       var s = stars[i];
 
-      s.z -= SPEED * f;              // 向观察者推进
+      s.z -= SPEED * f;
       if (s.z <= 14) { spawn(s, false); continue; }
 
-      var k  = FOV / s.z;            // 透视缩放
+      var k  = FOV / s.z;
       var sx = CX + s.x * k;
       var sy = CY + s.y * k;
 
-      // 飞出屏幕就回收重生
       if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) {
         spawn(s, false);
         continue;
       }
 
-      var t     = 1 - s.z / FAR;                                  // 0 = 远, 1 = 近
-      var size  = Math.max(1, Math.round(1 + t * 3.2));           // 像素块大小 1~4
+      var t     = 1 - s.z / FAR;
+      var size  = Math.max(1, Math.round(1 + t * 3.2));
       var alpha = Math.min(1, 0.12 + t * 1.5) * s.b;
 
       ctx.globalAlpha = alpha;
-      ctx.fillRect(sx | 0, sy | 0, size, size);                   // 整数对齐 => 硬边像素感
+      ctx.fillRect(sx | 0, sy | 0, size, size);
     }
 
     ctx.globalAlpha = 1;
@@ -343,7 +450,6 @@
   /* =========================================================
      二、获取并显示设备、浏览器、IP及地区信息
      ========================================================= */
-  
   function setInfo(id, text) {
     var el = document.getElementById(id);
     if (el) {
@@ -355,21 +461,10 @@
   try {
     var parser = new UAParser();
     var result = parser.getResult();
-
     var deviceType = result.device.type || 'desktop';
     var deviceVendor = result.device.vendor || '';
     var deviceModel = result.device.model || '';
-    
-    var deviceText = '';
-    if (deviceType === 'desktop') {
-      deviceText = 'Desktop';
-    } else if (deviceType === 'mobile') {
-      deviceText = 'Mobile';
-    } else if (deviceType === 'tablet') {
-      deviceText = 'Tablet';
-    } else {
-      deviceText = deviceType;
-    }
+    var deviceText = deviceType === 'desktop' ? 'Desktop' : (deviceType === 'mobile' ? 'Mobile' : (deviceType === 'tablet' ? 'Tablet' : deviceType));
     if (deviceVendor) deviceText += ' · ' + deviceVendor;
     if (deviceModel) deviceText += ' ' + deviceModel;
     setInfo('info-device', deviceText);
@@ -378,7 +473,6 @@
     var browserVersion = result.browser.version || '';
     var browserText = browserName + (browserVersion ? ' ' + browserVersion.split('.')[0] : '');
     setInfo('info-browser', browserText);
-
   } catch (e) {
     setInfo('info-device', '未知设备');
     setInfo('info-browser', '未知浏览器');
@@ -390,17 +484,13 @@
       return response.json();
     })
     .then(function(data) {
-      if (data.success === false) {
-        throw new Error(data.message || 'API returned error');
-      }
+      if (data.success === false) throw new Error(data.message || 'API returned error');
       setInfo('info-ip', data.ip || '未知');
-      
       var regionParts = [];
       if (data.city) regionParts.push(data.city);
       if (data.region) regionParts.push(data.region);
       if (data.country) regionParts.push(data.country);
-      var regionText = regionParts.length > 0 ? regionParts.join(', ') : '未知地区';
-      setInfo('info-region', regionText);
+      setInfo('info-region', regionParts.length > 0 ? regionParts.join(', ') : '未知地区');
     })
     .catch(function(error) {
       console.warn('IP 地理位置获取失败，尝试备用 API...', error);
@@ -425,58 +515,106 @@
     });
 
   /* =========================================================
-     三、加载 Introduction.html，完成后让它"冲向观察者"
+     三、加载计时与点击提示逻辑
      ========================================================= */
   var revealed  = false;
-  var t0        = performance.now();
-  var MIN_SHOW  = 1900;                                  // 最短展示时间，避免一闪而过
-  var hardTimer = setTimeout(function () { reveal(); }, 20000);  // 兜底
+  var t0        = performance.now(); // 记录加载开始时间
+  var MIN_SHOW  = 1900;
+  var hardTimer = setTimeout(function () { reveal(); }, 20000);
 
+  var tipInterval = null;
+  var tipTimer    = null;
+
+  // 点击提示框触发函数
+  function showLoadingTip() {
+    if (revealed) return;
+    
+    tip.classList.add('show');
+    
+    function updateTime() {
+      var elapsed = (performance.now() - t0) / 1000;
+      tipTime.textContent = elapsed.toFixed(1) + ' 秒';
+    }
+    
+    updateTime();
+    
+    if (tipInterval) clearInterval(tipInterval);
+    if (tipTimer) clearTimeout(tipTimer);
+    
+    tipInterval = setInterval(updateTime, 100);
+    tipTimer = setTimeout(function() {
+      tip.classList.remove('show');
+      if (tipInterval) clearInterval(tipInterval);
+    }, 3000);
+  }
+
+  // 拦截用户点击遮罩层
+  veil.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    showLoadingTip();
+  });
+  
+  veil.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    showLoadingTip();
+  }, { passive: false });
+
+
+  /* =========================================================
+     四、加载完成动画与耗时提示
+     ========================================================= */
   function reveal() {
     if (revealed) return;
     revealed = true;
-    clearTimeout(hardTimer);
-
-    hint.classList.add('hide');
     
-    // 【修改点】：让顶部信息栏也淡出消失
+    // 1. 计算最终耗时（秒），保留1位小数
+    var elapsed = ((performance.now() - t0) / 1000).toFixed(1);
+    
+    // 清理计时器
+    clearTimeout(hardTimer);
+    if (tipTimer) clearTimeout(tipTimer);
+    if (tipInterval) clearInterval(tipInterval);
+    tip.classList.remove('show');
+
+    // 隐藏顶部与底部提示
+    hint.classList.add('hide');
     if (infoBar) {
       infoBar.classList.add('hide');
     }
     
-    frame.style.pointerEvents = 'auto';
-
-    // ① 先放大并略微"过冲"，制造冲过来的速度感
-    frame.style.transition = 'transform 1.05s cubic-bezier(0.22, 0.9, 0.28, 1),' +
-                             ' border-radius 1s ease, box-shadow 1s ease';
+    // 触发飞入动画
+    frame.style.transition = 'transform 1.05s cubic-bezier(0.22, 0.9, 0.28, 1), border-radius 1s ease, box-shadow 1s ease';
     frame.style.transform  = 'scale(1.06)';
-    frame.classList.add('reveal');          // 暗纱淡出，页面真正显现
+    frame.classList.add('reveal');
 
-    // ② 回弹到正好满屏
     setTimeout(function () {
       frame.style.transition = 'transform 0.55s cubic-bezier(0.33, 1, 0.42, 1)';
       frame.style.transform  = 'scale(1)';
     }, 980);
 
-    // ③ 去掉外发光和圆角，彻底变成"正常页面"
     setTimeout(function () {
       frame.style.transition = 'border-radius 0.8s ease, box-shadow 0.8s ease';
       frame.style.borderRadius = '0px';
       frame.style.boxShadow    = 'none';
     }, 1150);
 
-    // ④ 关掉星空动画省电（已被 iframe 完全覆盖）
     setTimeout(function () { running = false; }, 2600);
+
+    // 2. 弹出耗时提示
+    finalTimeSpan.textContent = elapsed;
+    timeToast.classList.add('show');
+    
+    // 4秒后自动隐藏耗时提示
+    setTimeout(function() {
+      timeToast.classList.remove('show');
+    }, 4000);
   }
 
   iframe.addEventListener('load', function () {
     try {
       var innerTitle = iframe.contentDocument.title;
-      if (innerTitle) {
-        document.title = innerTitle;
-      } else {
-        document.title = 'Introduction';
-      }
+      document.title = innerTitle || 'Introduction';
     } catch (e) {
       document.title = 'Introduction';
     }
