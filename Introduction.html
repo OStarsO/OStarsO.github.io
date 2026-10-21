@@ -16,7 +16,7 @@
     
     <style>
         /* =========================================================
-           基础与全局重置 (星空背景、全局字体)
+           基础与全局重置
         ========================================================= */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { height: 100%; }
@@ -28,11 +28,9 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
             overflow-x: hidden;
-            /* 隐藏默认鼠标，使用自定义光标（如果不喜欢可以删掉这行） */
             cursor: url(https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/cursor/texto.cur),auto;
         }
         
-        /* 自定义链接鼠标样式 */
         a {
             cursor: url(https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/cursor/ayuda.cur),auto;
             color: inherit;
@@ -40,7 +38,7 @@
         }
 
         /* =========================================================
-           星空背景层 & 光效层
+           星空背景层
         ========================================================= */
         #starfield {
             position: fixed;
@@ -61,7 +59,6 @@
         .nebula-2 { width: 700px; height: 700px; background: rgba(167, 139, 250, 0.15); bottom: -20%; right: -10%; }
         .nebula-3 { width: 500px; height: 500px; background: rgba(255, 45, 120, 0.1); top: 40%; left: 30%; }
         
-        /* 鼠标跟随光晕 */
         #cursor-glow {
             position: fixed;
             top: 0; left: 0;
@@ -85,10 +82,7 @@
             z-index: 1;
         }
         
-        main {
-            flex: 1;
-            padding-bottom: 2rem;
-        }
+        main { flex: 1; padding-bottom: 2rem; }
 
         .layout_page {
             display: flex;
@@ -97,9 +91,10 @@
             margin: 0 auto;
             padding: 0 20px;
             gap: 20px;
-            margin-top: -60px; /* 与头部产生重叠 */
+            margin-top: -60px;
             position: relative;
             z-index: 10;
+            perspective: 1500px; /* 给整个布局添加透视景深 */
         }
 
         /* =========================================================
@@ -137,7 +132,6 @@
             box-shadow: 0 0 8px #6ee7ff;
         }
         
-        /* 文字轮播容器 */
         .rotator {
             height: 60px;
             position: relative;
@@ -158,22 +152,12 @@
             -webkit-text-fill-color: transparent;
             text-shadow: 0 4px 20px rgba(167, 139, 250, 0.3);
         }
-        .rot-line.is-active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .rot-line.is-leaving {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        .hero-sub {
-            color: #94a3b8;
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
+        .rot-line.is-active { opacity: 1; transform: translateY(0); }
+        .rot-line.is-leaving { opacity: 0; transform: translateY(-30px); }
+        .hero-sub { color: #94a3b8; font-size: 14px; letter-spacing: 1px; }
 
         /* =========================================================
-           液态玻璃卡片通用样式
+           液态玻璃 3D 卡片样式
         ========================================================= */
         .card-widget, #page {
             position: relative;
@@ -183,15 +167,23 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            
+            /* 3D 核心属性 */
+            transform-style: preserve-3d;
+            /* 使用 clip-path 代替 overflow: hidden，避免破坏 3D 空间 */
+            clip-path: inset(0 round 20px);
+            /* 鼠标移动时跟手平滑过渡 */
+            transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform;
         }
         
-        /* 卡片悬停光效 */
+        /* 鼠标经过时的边缘微光 */
         .card-widget:hover, #page:hover {
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 12px 48px 0 rgba(110, 231, 255, 0.1);
-            transform: translateY(-2px);
+            border-color: rgba(110, 231, 255, 0.3);
+            box-shadow: 
+                0 0 20px rgba(110, 231, 255, 0.1),
+                0 20px 50px 0 rgba(0, 0, 0, 0.4),
+                inset 0 0 20px rgba(110, 231, 255, 0.05);
         }
         
         /* 鼠标跟随光斑 */
@@ -211,6 +203,42 @@
         .card-widget:hover::before, #page:hover::before {
             opacity: 1;
         }
+
+        /* 内部容器开启 3D 继承 */
+        .card-content, .article-container {
+            transform-style: preserve-3d;
+        }
+
+        /* =========================================================
+           内部元素 Z 轴分层（裸眼 3D 效果）
+        ========================================================= */
+        .card-info-avatar, 
+        .author-info__name, 
+        .author-info__description, 
+        .card-info-social-icons,
+        .item-headline,
+        #hitokoto, 
+        #jinrishici-sentence,
+        .webinfo,
+        #page h2,
+        .page-lead,
+        .skill,
+        .tool a {
+            transition: transform 0.1s ease-out;
+        }
+
+        .card-info-avatar { transform: translateZ(30px); }
+        .author-info__name { transform: translateZ(20px); }
+        .author-info__description { transform: translateZ(15px); }
+        .card-info-social-icons { transform: translateZ(25px); }
+        .item-headline { transform: translateZ(20px); }
+        #hitokoto, #jinrishici-sentence { transform: translateZ(10px); }
+        .webinfo { transform: translateZ(15px); }
+        
+        #page h2 { transform: translateZ(25px); }
+        .page-lead { transform: translateZ(15px); }
+        .skill { transform: translateZ(20px); }
+        .tool a { transform: translateZ(15px); }
 
         /* =========================================================
            侧边栏
@@ -236,10 +264,14 @@
             padding: 4px;
             background: linear-gradient(135deg, #6ee7ff, #a78bfa);
             margin-bottom: 16px;
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             animation: pulse 4s infinite alternate;
+            /* 头像层级继承自 .card-info-avatar */
         }
-        .avatar-img:hover { transform: scale(1.1) rotate(10deg); }
+        .avatar-img:hover { 
+            transform: scale(1.1) rotate(10deg); 
+            box-shadow: 0 0 20px rgba(110, 231, 255, 0.6);
+        }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(110, 231, 255, 0.4); }
             100% { box-shadow: 0 0 0 15px rgba(110, 231, 255, 0); }
@@ -365,7 +397,6 @@
             transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
             box-shadow: 0 0 10px var(--c1);
         }
-        /* 技能条光泽扫过动画 */
         .skill-fill::after {
             content: '';
             position: absolute;
@@ -374,9 +405,7 @@
             transform: translateX(-100%);
             animation: sweep 2s infinite;
         }
-        @keyframes sweep {
-            100% { transform: translateX(100%); }
-        }
+        @keyframes sweep { 100% { transform: translateX(100%); } }
 
         /* 导航按钮 */
         .tool {
@@ -399,13 +428,14 @@
             font-weight: 500;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            /* 已有 translateZ(15px) */
         }
         .tool a i { color: #a78bfa; font-size: 16px; transition: color 0.3s; }
         .tool a:hover {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(110, 231, 255, 0.3);
             box-shadow: 0 0 20px rgba(110, 231, 255, 0.15);
-            transform: translateY(-2px);
+            transform: translateY(-2px); /* 悬浮微移 */
             color: #fff;
         }
         .tool a:hover i { color: #6ee7ff; }
@@ -459,7 +489,6 @@
             <div class="hero">
                 <div class="hero-status"><i></i><span>ONLINE</span></div>
                 
-                <!-- 动态文字轮播 -->
                 <div id="site-title" class="rotator">
                     <div class="rot-line is-active">欢迎访问 OStarsO 的网站</div>
                     <div class="rot-line">你离开打开标签页网站会改名字哦</div>
@@ -480,7 +509,6 @@
                     <div class="card-widget card-info">
                         <div class="card-content">
                             <div class="card-info-avatar is-center">
-                                <!-- 替换为你自己的头像图片路径，这里用了占位图 -->
                                 <img class="avatar-img" src="OStarsO.jpg" alt="avatar" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=OStarsO'">
                             </div>
                             <div class="author-info__name is-center">OStarsO</div>
@@ -592,7 +620,7 @@
 
     <script>
         /* =========================================================
-           1. 星空背景（Canvas：星点闪烁 + 视差 + 流星）
+           1. 星空背景
         ========================================================= */
         (function () {
             var canvas = document.getElementById('starfield');
@@ -744,21 +772,49 @@
         })();
 
         /* =========================================================
-           3. 卡片鼠标光斑跟随
+           3. 磁吸附 3D 卡片
         ========================================================= */
         (function () {
+            // 仅在有指针设备（桌面端）开启
+            if (window.matchMedia('(hover: none)').matches) return;
+            
             var cards = document.querySelectorAll('.card-widget, #page');
+            
             cards.forEach(function (el) {
                 el.addEventListener('pointermove', function (e) {
                     var r = el.getBoundingClientRect();
-                    el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-                    el.style.setProperty('--my', (e.clientY - r.top) + 'px');
-                }, { passive: true });
+                    var x = e.clientX - r.left;
+                    var y = e.clientY - r.top;
+                    
+                    // 1. 光斑位置
+                    el.style.setProperty('--mx', x + 'px');
+                    el.style.setProperty('--my', y + 'px');
+
+                    // 2. 3D 倾斜计算
+                    var centerX = r.width / 2;
+                    var centerY = r.height / 2;
+                    
+                    // 倾斜角度限制在 ±6 度以内
+                    var rotateX = Math.max(-6, Math.min(6, ((y - centerY) / centerY) * -6));
+                    var rotateY = Math.max(-6, Math.min(6, ((x - centerX) / centerX) * 6));
+                    
+                    // 磁吸位移限制在 ±8px 以内
+                    var moveX = Math.max(-8, Math.min(8, ((x - centerX) / centerX) * 8));
+                    var moveY = Math.max(-8, Math.min(8, ((y - centerY) / centerY) * 8));
+
+                    // 3. 应用变换 (透视 + 磁吸位移 + 3D 旋转 + 轻微放大)
+                    el.style.transform = `perspective(1000px) translate3d(${moveX}px, ${moveY}px, 0) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+
+                el.addEventListener('pointerleave', function () {
+                    // 鼠标离开时平滑复位
+                    el.style.transform = `perspective(1000px) translate3d(0, 0, 0) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
+                });
             });
         })();
 
         /* =========================================================
-           4. 顶部文字轮播 (替换打字机)
+           4. 顶部文字轮播
         ========================================================= */
         (function () {
             var lines = Array.prototype.slice.call(document.querySelectorAll('.rot-line'));
@@ -772,7 +828,7 @@
                 cur.classList.remove('is-active');
                 cur.classList.add('is-leaving');
                 next.classList.remove('is-leaving');
-                void next.offsetWidth; // 触发重绘
+                void next.offsetWidth;
                 next.classList.add('is-active');
 
                 setTimeout(function () { cur.classList.remove('is-leaving'); }, 760);
