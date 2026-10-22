@@ -62,39 +62,184 @@
         .nebula-2 { width: 700px; height: 700px; background: rgba(167, 139, 250, 0.15); bottom: -20%; right: -10%; }
         .nebula-3 { width: 500px; height: 500px; background: rgba(255, 45, 120, 0.1); top: 40%; left: 30%; }
         
-        /* 阳光普照背景（默认隐藏） */
+        /* =========================================================
+           阳光普照背景（默认隐藏）—— 深蓝天空 + 左上斜射阳光 + 彩色色散
+        ========================================================= */
         #sunlight-bg {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            inset: 0;
             z-index: -4;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 1s ease;
-            background: #f4f7fc;
             overflow: hidden;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+
+            /* 天光：左上角暖白太阳区 + 深蓝天光渐变 */
+            background:
+                radial-gradient(95% 95% at -6% -10%,
+                    rgba(255, 255, 255, 0.78) 0%,
+                    rgba(255, 252, 238, 0.46) 11%,
+                    rgba(214, 236, 255, 0.16) 28%,
+                    rgba(255, 255, 255, 0) 52%),
+                linear-gradient(178deg,
+                    #08307a 0%,
+                    #0b3d8e 12%,
+                    #104ea4 26%,
+                    #165fb6 42%,
+                    #2074c6 58%,
+                    #2f8bd2 74%,
+                    #4aa3dd 88%,
+                    #6bb8e7 100%);
         }
-        .sun-rays {
+
+        /* 太阳本体：左上角画外的强光源，柔和呼吸 */
+        #sunlight-bg .sun-core {
             position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, 0.25) 0deg 10deg, transparent 10deg 20deg);
-            animation: rotateRays 120s linear infinite;
-            opacity: 0.6;
-        }
-        .sun-glow {
-            position: absolute;
-            top: 10%; left: 10%;
-            width: 80vw; height: 80vw;
+            top: -42vmax;
+            left: -36vmax;
+            width: 96vmax;
+            height: 96vmax;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 245, 200, 0.9) 0%, rgba(255, 230, 150, 0.4) 30%, transparent 70%);
-            filter: blur(40px);
-            animation: breatheGlow 10s ease-in-out infinite alternate;
+            background: radial-gradient(circle at 50% 50%,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 254, 245, 0.92) 15%,
+                rgba(255, 249, 224, 0.62) 30%,
+                rgba(255, 244, 210, 0.28) 46%,
+                rgba(226, 240, 255, 0.08) 60%,
+                rgba(255, 255, 255, 0) 74%);
+            filter: blur(18px);
+            animation: sunBreathe 16s ease-in-out infinite alternate;
         }
-        @keyframes rotateRays { 100% { transform: rotate(360deg); } }
-        @keyframes breatheGlow {
-            0% { transform: scale(0.9) translate(0,0); opacity: 0.7; }
-            100% { transform: scale(1.1) translate(20px, 20px); opacity: 1; }
+
+        /* 斜射光束：以画外太阳为圆心，向屏幕右下方向放射 */
+        #sunlight-bg .sun-rays {
+            position: absolute;
+            inset: -12%;
+            background: repeating-conic-gradient(
+                from 2deg at -38vmax -42vmax,
+                rgba(255, 255, 255, 0.00) 0deg,
+                rgba(255, 255, 255, 0.40) 2.2deg,
+                rgba(255, 255, 255, 0.00) 4.6deg,
+                rgba(255, 255, 255, 0.00) 9.4deg,
+                rgba(255, 255, 255, 0.24) 11.2deg,
+                rgba(255, 255, 255, 0.00) 13.4deg,
+                rgba(255, 255, 255, 0.00) 18.6deg,
+                rgba(255, 255, 255, 0.44) 20.4deg,
+                rgba(255, 255, 255, 0.00) 22.8deg,
+                rgba(255, 255, 255, 0.00) 28.6deg,
+                rgba(255, 255, 255, 0.28) 30.4deg,
+                rgba(255, 255, 255, 0.00) 32.8deg,
+                rgba(255, 255, 255, 0.00) 39.4deg,
+                rgba(255, 255, 255, 0.38) 41.2deg,
+                rgba(255, 255, 255, 0.00) 43.8deg,
+                rgba(255, 255, 255, 0.00) 51.4deg,
+                rgba(255, 255, 255, 0.20) 53.2deg,
+                rgba(255, 255, 255, 0.00) 55.8deg,
+                rgba(255, 255, 255, 0.00) 64.6deg,
+                rgba(255, 255, 255, 0.46) 66.4deg,
+                rgba(255, 255, 255, 0.00) 69.2deg,
+                rgba(255, 255, 255, 0.00) 78.8deg,
+                rgba(255, 255, 255, 0.26) 80.6deg,
+                rgba(255, 255, 255, 0.00) 83.4deg,
+                rgba(255, 255, 255, 0.00) 94.2deg,
+                rgba(255, 255, 255, 0.34) 96.0deg,
+                rgba(255, 255, 255, 0.00) 98.8deg,
+                rgba(255, 255, 255, 0.00) 112deg
+            );
+            filter: blur(1.2px);
+            opacity: 0.9;
+            mix-blend-mode: screen;
+            -webkit-mask-image: radial-gradient(120% 120% at 0% 0%,
+                rgba(0, 0, 0, 1) 0%,
+                rgba(0, 0, 0, 0.85) 18%,
+                rgba(0, 0, 0, 0.45) 40%,
+                rgba(0, 0, 0, 0.12) 62%,
+                rgba(0, 0, 0, 0) 82%);
+            mask-image: radial-gradient(120% 120% at 0% 0%,
+                rgba(0, 0, 0, 1) 0%,
+                rgba(0, 0, 0, 0.85) 18%,
+                rgba(0, 0, 0, 0.45) 40%,
+                rgba(0, 0, 0, 0.12) 62%,
+                rgba(0, 0, 0, 0) 82%);
+            animation: rayBreathe 9s ease-in-out infinite;
+        }
+
+        /* 彩色光晕（色散）：从太阳方向铺开的彩虹薄雾 */
+        #sunlight-bg .sun-chroma {
+            position: absolute;
+            inset: 0;
+            background: conic-gradient(
+                from 14deg at -38vmax -42vmax,
+                rgba(255, 120, 80, 0.00) 0deg,
+                rgba(255, 150, 100, 0.24) 10deg,
+                rgba(255, 205, 120, 0.20) 22deg,
+                rgba(170, 255, 160, 0.16) 34deg,
+                rgba(120, 215, 255, 0.22) 46deg,
+                rgba(140, 155, 255, 0.18) 58deg,
+                rgba(215, 145, 255, 0.14) 70deg,
+                rgba(255, 140, 110, 0.06) 84deg,
+                rgba(255, 120, 80, 0.00) 100deg
+            );
+            filter: blur(34px) saturate(160%);
+            mix-blend-mode: screen;
+            opacity: 0.85;
+            -webkit-mask-image: radial-gradient(125% 125% at 0% 0%,
+                rgba(0, 0, 0, 1) 0%,
+                rgba(0, 0, 0, 0.7) 24%,
+                rgba(0, 0, 0, 0.3) 46%,
+                rgba(0, 0, 0, 0.06) 66%,
+                rgba(0, 0, 0, 0) 82%);
+            mask-image: radial-gradient(125% 125% at 0% 0%,
+                rgba(0, 0, 0, 1) 0%,
+                rgba(0, 0, 0, 0.7) 24%,
+                rgba(0, 0, 0, 0.3) 46%,
+                rgba(0, 0, 0, 0.06) 66%,
+                rgba(0, 0, 0, 0) 82%);
+        }
+
+        /* 镜头眩光：光线打向用户视角时在右侧形成的彩色光晕 */
+        #sunlight-bg .lens-flare {
+            position: absolute;
+            top: 6%;
+            right: 4%;
+            width: 38vmax;
+            height: 38vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(255, 234, 186, 0.16) 0%,
+                rgba(255, 204, 148, 0.10) 24%,
+                rgba(176, 222, 255, 0.07) 46%,
+                rgba(196, 168, 255, 0.04) 62%,
+                rgba(255, 255, 255, 0) 76%);
+            filter: blur(40px);
+            mix-blend-mode: screen;
+            opacity: 0.75;
+        }
+
+        /* 右下远空薄雾：增加空气感与纵深 */
+        #sunlight-bg .sky-veil {
+            position: absolute;
+            right: -22%;
+            bottom: -32%;
+            width: 115vmax;
+            height: 115vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(150, 196, 255, 0.30) 0%,
+                rgba(124, 174, 244, 0.17) 26%,
+                rgba(100, 152, 224, 0.06) 48%,
+                rgba(255, 255, 255, 0) 66%);
+            filter: blur(52px);
+            opacity: 0.8;
+        }
+
+        @keyframes sunBreathe {
+            0%   { transform: scale(1);    opacity: 0.86; }
+            100% { transform: scale(1.06); opacity: 1; }
+        }
+        @keyframes rayBreathe {
+            0%, 100% { opacity: 0.72; }
+            50%      { opacity: 0.96; }
         }
 
         #cursor-glow {
@@ -778,106 +923,173 @@
         }
 
         /* =========================================================
-           浅色主题：阳光普照 (Body.light)
+           浅色主题：深蓝天空 + 左上斜射阳光 + 玻璃受光 (Body.light)
         ========================================================= */
         body.light {
-            background-color: #f4f7fc;
-            color: #334155;
+            background-color: #0a3d8f;
+            color: #e6eefb;
         }
         
         body.light #starfield { opacity: 0; }
         body.light #sunlight-bg { opacity: 1; }
         body.light #cursor-glow {
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 70%);
+            background: radial-gradient(circle, rgba(160, 205, 255, 0.14) 0%, rgba(160, 205, 255, 0) 70%);
         }
 
-        body.light .nebula { opacity: 0.4; mix-blend-mode: multiply; }
-        body.light .nebula-1 { background: rgba(255, 180, 100, 0.5); }
-        body.light .nebula-2 { background: rgba(100, 200, 255, 0.5); }
-        body.light .nebula-3 { background: rgba(255, 150, 180, 0.4); }
+        /* 星云在深蓝下化作极淡的冷色薄云 */
+        body.light .nebula {
+            opacity: 0.22;
+            mix-blend-mode: screen;
+        }
+        body.light .nebula-1 { background: rgba(170, 205, 255, 0.20); }
+        body.light .nebula-2 { background: rgba(130, 175, 255, 0.16); }
+        body.light .nebula-3 { background: rgba(190, 215, 255, 0.10); }
 
-        body.light #nav { background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.8), transparent 70%); }
+        body.light #nav {
+            background: radial-gradient(ellipse at 4% -6%, rgba(255, 255, 255, 0.26), transparent 64%);
+        }
         body.light .rot-line {
-            background: linear-gradient(135deg, #1e293b, #8b5cf6);
+            background: linear-gradient(135deg, #ffffff, #a9d4ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: none;
+            text-shadow: 0 4px 30px rgba(80, 150, 255, 0.4);
         }
-        body.light .hero-sub { color: #475569; }
+        body.light .hero-sub { color: #b4cae4; }
         body.light .hero-status {
-            background: rgba(255, 255, 255, 0.5);
-            border-color: rgba(0, 0, 0, 0.05);
-            color: #0284c7;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.28);
+            color: #cfe6ff;
+            box-shadow: 0 2px 14px rgba(0, 15, 45, 0.28);
+            backdrop-filter: blur(12px);
         }
-        body.light .hero-status i { background: #0284c7; box-shadow: 0 0 8px #0284c7; }
+        body.light .hero-status i { background: #a9d8ff; box-shadow: 0 0 10px #a9d8ff; }
 
+        /* ---------- 玻璃卡片：深色玻璃 + 阳光直射后的自然受光 ---------- */
         body.light .card-widget {
-            background: rgba(255, 255, 255, 0.65);
-            border-color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
-        }
-        body.light .card-widget:hover {
-            border-color: rgba(255, 255, 255, 1);
-            box-shadow: 0 20px 50px rgba(31, 38, 135, 0.1), inset 0 0 20px rgba(255,255,255,0.5);
-        }
-        body.light .card-widget::before {
-            background: radial-gradient(circle, rgba(0,0,0,0.04) 0%, transparent 50%);
+            background:
+                linear-gradient(148deg,
+                    rgba(36, 72, 122, 0.55) 0%,
+                    rgba(20, 46, 86, 0.46) 40%,
+                    rgba(12, 30, 60, 0.42) 100%);
+            border-color: rgba(180, 215, 255, 0.28);
+            backdrop-filter: blur(24px) saturate(150%);
+            -webkit-backdrop-filter: blur(24px) saturate(150%);
+            box-shadow:
+                /* 受光的上/左边 —— 玻璃厚度的亮边 */
+                inset 1px 1px 0 rgba(255, 255, 255, 0.42),
+                /* 背光侧深蓝收边 */
+                inset -1px -1px 0 rgba(0, 20, 50, 0.35),
+                /* 环境投影：深色、柔和，模拟深空环境 */
+                0 14px 44px -12px rgba(0, 8, 26, 0.60),
+                0 0 70px -24px rgba(120, 180, 255, 0.30);
         }
 
-        body.light h2, 
-        body.light .author-info__name, 
-        body.light .page-lead,
-        body.light .item-headline {
-            color: #1e293b;
+        body.light .card-widget:hover {
+            border-color: rgba(210, 235, 255, 0.45);
+            box-shadow:
+                inset 1px 1px 0 rgba(255, 255, 255, 0.55),
+                inset -1px -1px 0 rgba(0, 20, 50, 0.30),
+                0 22px 60px -14px rgba(0, 8, 26, 0.70),
+                0 0 90px -22px rgba(140, 195, 255, 0.40);
         }
-        body.light .author-info__description { color: #64748b; }
+
+        /* 鼠标跟随的高光：深色玻璃上的暖白反光 */
+        body.light .card-widget::before {
+            background: radial-gradient(circle,
+                rgba(255, 248, 225, 0.22) 0%,
+                rgba(255, 245, 215, 0.08) 34%,
+                transparent 62%);
+        }
+
+        /* 光打在玻璃上：左上暖白高光 + 薄膜干涉彩虹 + 斜向反光条 */
+        body.light .card-widget::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 3;
+            background:
+                /* 1) 太阳直射面的暖白泛光 */
+                radial-gradient(118% 118% at -8% -14%,
+                    rgba(255, 255, 255, 0.42) 0%,
+                    rgba(255, 250, 228, 0.24) 16%,
+                    rgba(200, 230, 255, 0.08) 34%,
+                    rgba(255, 255, 255, 0) 56%),
+                /* 2) 玻璃薄膜干涉：沿受光角的彩虹晕 */
+                radial-gradient(150% 150% at -20% -30%,
+                    rgba(255, 175, 115, 0.14) 0%,
+                    rgba(255, 228, 140, 0.11) 12%,
+                    rgba(165, 255, 195, 0.08) 24%,
+                    rgba(120, 212, 255, 0.11) 36%,
+                    rgba(155, 150, 255, 0.07) 48%,
+                    rgba(255, 255, 255, 0) 62%),
+                /* 3) 斜向掠射反光条 */
+                linear-gradient(128deg,
+                    rgba(255, 255, 255, 0) 28%,
+                    rgba(255, 255, 255, 0.12) 39%,
+                    rgba(255, 255, 255, 0.02) 47%,
+                    rgba(255, 255, 255, 0) 55%);
+            box-shadow: inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.40);
+            transition: opacity 0.4s ease;
+        }
+
+        body.light h2,
+        body.light .author-info__name {
+            color: #eef5ff;
+        }
+        body.light .page-lead { color: #c2d6ec; }
+        body.light .item-headline { color: #8fd0ff; }
+        body.light .author-info__description { color: #a3bfdd; }
         body.light .social-icon {
-            background: rgba(0, 0, 0, 0.05);
-            border-color: rgba(0, 0, 0, 0.05);
-            color: #475569;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.16);
+            color: #dceafb;
+            box-shadow: 0 2px 10px rgba(0, 10, 30, 0.25);
         }
         body.light .social-icon:hover {
-            background: rgba(59, 130, 246, 0.1);
-            color: #0284c7;
-            border-color: #0284c7;
-            box-shadow: 0 0 15px rgba(2, 132, 199, 0.3);
+            background: rgba(255, 255, 255, 0.20);
+            color: #bfe2ff;
+            border-color: rgba(190, 225, 255, 0.60);
+            box-shadow: 0 4px 20px rgba(120, 180, 255, 0.35);
         }
 
-        body.light #hitokoto, body.light #jinrishici-sentence { color: #475569; }
-        body.light .webinfo-item { border-bottom-color: rgba(0, 0, 0, 0.08); }
-        body.light .webinfo-item span:first-child { color: #64748b; }
-        body.light .webinfo-item span:last-child { color: #1e293b; }
+        body.light #hitokoto, body.light #jinrishici-sentence { color: #bcd2ea; }
+        body.light .webinfo-item { border-bottom-color: rgba(255, 255, 255, 0.12); }
+        body.light .webinfo-item span:first-child { color: #a3bfdd; }
+        body.light .webinfo-item span:last-child { color: #eaf3ff; }
         
         body.light .visitor-map-container {
-            background: rgba(255, 255, 255, 0.5);
-            border-color: rgba(0, 0, 0, 0.05);
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+            background: rgba(4, 20, 44, 0.45);
+            border-color: rgba(150, 200, 255, 0.22);
+            box-shadow: inset 0 0 24px rgba(0, 10, 30, 0.45);
         }
-        body.light .map-overlay-text { color: #0284c7; text-shadow: none; }
+        body.light .map-overlay-text { color: #8fd0ff; text-shadow: 0 0 8px rgba(110, 190, 255, 0.5); }
 
-        body.light .skill-head { color: #475569; }
+        body.light .skill-head { color: #c2d6ec; }
         body.light .skill-track {
-            background: rgba(0, 0, 0, 0.05);
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.10);
+            box-shadow: inset 0 1px 3px rgba(0, 10, 30, 0.40);
         }
         body.light .tool a {
-            background: rgba(255, 255, 255, 0.6);
-            border-color: rgba(0, 0, 0, 0.08);
-            color: #334155;
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.14);
+            color: #d6e6f8;
+            box-shadow: 0 2px 12px rgba(0, 10, 30, 0.20);
         }
         body.light .tool a:hover {
-            background: rgba(255, 255, 255, 0.9);
-            border-color: rgba(59, 130, 246, 0.3);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
-            color: #0f172a;
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(170, 215, 255, 0.45);
+            box-shadow: 0 8px 28px rgba(0, 10, 30, 0.30), 0 0 30px -10px rgba(140, 195, 255, 0.40);
+            color: #ffffff;
         }
-        body.light .tool a i { color: #8b5cf6; }
-        body.light .tool a:hover i { color: #3b82f6; }
+        body.light .tool a i { color: #a9b8ff; }
+        body.light .tool a:hover i { color: #9fdcff; }
 
         body.light #footer-wrap {
-            color: #94a3b8;
-            border-top-color: rgba(0, 0, 0, 0.05);
-            background: rgba(255, 255, 255, 0.3);
+            color: #8fa9c6;
+            border-top-color: rgba(255, 255, 255, 0.10);
+            background: rgba(2, 14, 34, 0.30);
         }
 
         /* 浅色下的右键菜单 */
@@ -907,10 +1119,13 @@
     <!-- 背景层 -->
     <canvas id="starfield" aria-hidden="true"></canvas>
     
-    <!-- 阳光背景（浅色模式专用） -->
+    <!-- 天空背景（浅色模式专用）：深蓝天空 + 左上斜射阳光 + 彩色光晕 -->
     <div id="sunlight-bg" aria-hidden="true">
+        <div class="sun-core"></div>
         <div class="sun-rays"></div>
-        <div class="sun-glow"></div>
+        <div class="sun-chroma"></div>
+        <div class="lens-flare"></div>
+        <div class="sky-veil"></div>
     </div>
 
     <div class="nebula nebula-1" aria-hidden="true"></div>
@@ -1498,7 +1713,7 @@
 
             function drawGrid() {
                 var isLight = document.body.classList.contains('light');
-                ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.04)';
+                ctx.strokeStyle = isLight ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.04)';
                 ctx.lineWidth = 1;
                 var step = 20;
                 for (var i = 0; i < W; i += step) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke(); }
@@ -1510,7 +1725,7 @@
                 var isLight = document.body.classList.contains('light');
                 var text = (city || '') + (country ? ' · ' + country : '');
                 ctx.font = '11px -apple-system, "Segoe UI", sans-serif';
-                ctx.fillStyle = isLight ? 'rgba(2, 132, 199, 0.85)' : 'rgba(110, 231, 255, 0.85)';
+                ctx.fillStyle = isLight ? 'rgba(143, 208, 255, 0.85)' : 'rgba(110, 231, 255, 0.85)';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'top';
                 ctx.fillText(text, 12, 10);
@@ -1531,22 +1746,22 @@
                         var prog = age / 3;
                         ctx.beginPath();
                         ctx.arc(pt.x, pt.y, 4 + prog * 28, 0, Math.PI * 2);
-                        ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, ' + (1 - prog) + ')' : 'rgba(110, 231, 255, ' + (1 - prog) + ')';
+                        ctx.strokeStyle = isLight ? 'rgba(143, 208, 255, ' + (1 - prog) + ')' : 'rgba(110, 231, 255, ' + (1 - prog) + ')';
                         ctx.lineWidth = 1.5;
                         ctx.stroke();
                     }
 
                     var breathe = 4 + Math.sin(now / 400) * 1.8;
                     var grd = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, breathe * 3.5);
-                    grd.addColorStop(0, isLight ? 'rgba(2, 132, 199, 0.85)' : 'rgba(110, 231, 255, 0.85)');
-                    grd.addColorStop(0.45, isLight ? 'rgba(139, 92, 246, 0.35)' : 'rgba(167, 139, 250, 0.35)');
-                    grd.addColorStop(1, isLight ? 'rgba(139, 92, 246, 0)' : 'rgba(167, 139, 250, 0)');
+                    grd.addColorStop(0, isLight ? 'rgba(143, 208, 255, 0.85)' : 'rgba(110, 231, 255, 0.85)');
+                    grd.addColorStop(0.45, isLight ? 'rgba(167, 139, 250, 0.35)' : 'rgba(167, 139, 250, 0.35)');
+                    grd.addColorStop(1, isLight ? 'rgba(167, 139, 250, 0)' : 'rgba(167, 139, 250, 0)');
                     ctx.fillStyle = grd;
                     ctx.beginPath();
                     ctx.arc(pt.x, pt.y, breathe * 3.5, 0, Math.PI * 2);
                     ctx.fill();
 
-                    ctx.fillStyle = isLight ? 'rgba(2, 132, 199, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+                    ctx.fillStyle = isLight ? 'rgba(220, 238, 255, 0.95)' : 'rgba(255, 255, 255, 0.95)';
                     ctx.beginPath();
                     ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
                     ctx.fill();
@@ -1554,12 +1769,12 @@
                     drawLabel(visitor.city, visitor.country);
                 } else {
                     ctx.font = '11px -apple-system, "Segoe UI", sans-serif';
-                    ctx.fillStyle = isLight ? 'rgba(100, 116, 139, 0.7)' : 'rgba(148, 163, 184, 0.7)';
+                    ctx.fillStyle = isLight ? 'rgba(163, 191, 221, 0.7)' : 'rgba(148, 163, 184, 0.7)';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('正在获取真实位置…', W / 2, H / 2 - 8);
                     
-                    ctx.fillStyle = isLight ? 'rgba(148, 163, 184, 0.5)' : 'rgba(100, 116, 139, 0.5)';
+                    ctx.fillStyle = isLight ? 'rgba(140, 170, 200, 0.5)' : 'rgba(100, 116, 139, 0.5)';
                     ctx.font = '10px -apple-system, "Segoe UI", sans-serif';
                     ctx.fillText('基于 IP 定位，精度约为城市级', W / 2, H / 2 + 10);
                 }
