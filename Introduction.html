@@ -1388,6 +1388,51 @@
             .settings-option{ height: 40px; padding: 0 14px; font-size: 12.5px; }
             .settings-options{ right: calc(100% + 10px); gap: 8px; }
         }
+
+        /* ========== 飘落雪花（pc.html 同款 ❄ 飘落，原生实现） ========== */
+        #snow-layer{
+            position: fixed;
+            inset: 0;
+            z-index: 20;                /* 内容层 .layout_page 为 10，抬高到内容之上；仍远低于按钮9000/菜单9999/toast10000 */
+            pointer-events: none;
+            overflow: hidden;
+            transition: opacity .5s ease;
+        }
+        #snow-layer.is-off{ opacity: 0; }
+
+        .snowflake{
+            position: absolute;
+            top: -40px;
+            left: 0;
+            color: #AFDAEF;
+            line-height: 1;
+            user-select: none;
+            will-change: transform, opacity;
+            text-shadow: 0 0 6px rgba(175, 218, 239, .35);
+            animation-name: snowFall;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+        }
+        @keyframes snowFall{
+            0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+            100% { transform: translate3d(var(--drift, 0), 110vh, 0) rotate(360deg); }
+        }
+
+        /* 开关激活态（皮肤/雪花共用）：让 is-on 有可见状态 */
+        .settings-option.is-on{
+            border-color: rgba(110,231,255,.5);
+            color: #ffffff;
+            background:
+                linear-gradient(150deg, rgba(110,231,255,.20) 0%, rgba(167,139,250,.14) 100%),
+                rgba(16,22,38,.88);
+        }
+        body.light .settings-option.is-on{
+            border-color: rgba(205,238,255,.62);
+            color: #ffffff;
+            background:
+                linear-gradient(150deg, rgba(130,195,255,.34) 0%, rgba(150,160,255,.22) 100%),
+                rgba(20,46,86,.85);
+        }
     </style>
 </head>
 
@@ -1647,6 +1692,21 @@
             </svg>
           </span>
           <span class="so-text">皮肤切换</span>
+        </button>
+        <button class="settings-option" id="btnSnow" type="button" style="--i:1" aria-pressed="true">
+          <span class="so-icon">
+            <svg class="ico-snow" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2v20"/>
+              <path d="M2 12h20"/>
+              <path d="M4.93 4.93l14.14 14.14"/>
+              <path d="M19.07 4.93L4.93 19.07"/>
+              <path d="M12 5l-2.5-2.5M12 5l2.5-2.5"/>
+              <path d="M12 19l-2.5 2.5M12 19l2.5 2.5"/>
+              <path d="M5 12l-2.5-2.5M5 12l-2.5 2.5"/>
+              <path d="M19 12l2.5-2.5M19 12l2.5 2.5"/>
+            </svg>
+          </span>
+          <span class="so-text">雪花开关</span>
         </button>
       </div>
 
@@ -2311,7 +2371,7 @@
         }
       }
 
-    /* ========== 右下角设置按钮逻辑 ========== */
+    /* ========== 右下角设置按钮逻辑（含飘落雪花开关） ========== */
     (function () {
         'use strict';
 
@@ -2319,6 +2379,7 @@
         var btn      = document.getElementById('settingsBtn');
         var options  = document.getElementById('settingsOptions');
         var themeBtn = document.getElementById('btnTheme');
+        var snowBtn  = document.getElementById('btnSnow');
         var toastEl  = document.getElementById('toast');
 
         if (!dock || !btn) return;
@@ -2357,6 +2418,94 @@
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && isOpen) setOpen(false);
         });
+
+        /* =========================================================
+           飘落雪花引擎（pc.html 同款 ❄ 飘落，原生实现）
+        ========================================================= */
+        var snowLayer = null;
+        var snowTimer = null;
+        var snowOn = true;
+
+        function ensureSnowLayer() {
+            if (snowLayer) return snowLayer;
+            snowLayer = document.createElement('div');
+            snowLayer.id = 'snow-layer';
+            snowLayer.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(snowLayer);
+            return snowLayer;
+        }
+
+        function spawnFlake() {
+            var layer = ensureSnowLayer();
+            var vw = document.documentElement.clientWidth;
+            var startLeft = Math.random() * vw;
+            var size = 8 + Math.random() * 22;              /* pc 里 5~70 太大，这里收敛到 8~30 */
+            var duration = 8000 + Math.random() * 9000;
+            var drift = (Math.random() - 0.5) * 200;
+
+            var flake = document.createElement('span');
+            flake.className = 'snowflake';
+            flake.textContent = '\u2744';                   /* ❄ */
+            flake.style.left = startLeft + 'px';
+            flake.style.fontSize = size + 'px';
+            flake.style.opacity = (0.35 + Math.random() * 0.6).toFixed(2);
+            flake.style.setProperty('--drift', drift.toFixed(1) + 'px');
+            flake.style.animationDuration = duration + 'ms';
+
+            flake.addEventListener('animationend', function () {
+                flake.remove();
+            });
+
+            layer.appendChild(flake);
+        }
+
+        function startSnow() {
+            var layer = ensureSnowLayer();
+            layer.classList.remove('is-off');
+            if (snowTimer) return;
+            for (var i = 0; i < 14; i++) spawnFlake();      /* 先铺一批，立刻有雪 */
+            snowTimer = setInterval(spawnFlake, 700);       /* 近似 pc 的 newOn: 800 */
+        }
+
+        function stopSnow() {
+            if (snowTimer) {
+                clearInterval(snowTimer);
+                snowTimer = null;
+            }
+            if (snowLayer) {
+                snowLayer.classList.add('is-off');
+                setTimeout(function () {
+                    if (!snowOn && snowLayer) snowLayer.innerHTML = '';
+                }, 500);
+            }
+        }
+
+        function applySnow(state, silent) {
+            snowOn = state;
+            if (state) startSnow();
+            else stopSnow();
+
+            if (snowBtn) {
+                snowBtn.classList.toggle('is-on', state);
+                snowBtn.setAttribute('aria-pressed', state ? 'true' : 'false');
+            }
+            if (!silent) toast(state ? '雪花已开启 ❄' : '雪花已关闭 ❄');
+
+            try { localStorage.setItem('ostars-snow', state ? 'on' : 'off'); } catch (e) {}
+        }
+
+        /* 初始化：读 localStorage，默认开启 */
+        try {
+            var saved = localStorage.getItem('ostars-snow');
+            if (saved === 'off') snowOn = false;
+        } catch (e) {}
+        applySnow(snowOn, true);
+
+        if (snowBtn) {
+            snowBtn.addEventListener('click', function () {
+                applySnow(!snowOn);
+            });
+        }
 
         /* —— 皮肤切换 —— */
         if (themeBtn) {
