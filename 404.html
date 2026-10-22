@@ -22,18 +22,26 @@
             justify-content: center;
         }
 
+        #bg,
         #stars {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+        }
+
+        #bg {
             z-index: 1;
+        }
+
+        #stars {
+            z-index: 2;
         }
 
         .container {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             text-align: center;
             color: #fff;
             animation: fadeIn 2s ease-in-out;
@@ -60,6 +68,8 @@
         }
 
         .home-btn {
+            position: relative;
+            overflow: hidden;
             padding: 15px 40px;
             font-size: 1.1rem;
             background: linear-gradient(45deg, #673ab7, #4fc3f7);
@@ -73,9 +83,38 @@
             display: inline-block;
         }
 
+        .home-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+            pointer-events: none;
+        }
+
+        .home-btn:hover::before {
+            left: 100%;
+        }
+
         .home-btn:hover {
             transform: scale(1.1);
             box-shadow: 0 0 30px rgba(103, 58, 183, 0.6);
+        }
+
+        .loading-text {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 24px;
+            letter-spacing: 1px;
+            opacity: 1;
+            transition: opacity 1s ease;
+        }
+
+        .loading-text.hide {
+            opacity: 0;
         }
 
         @keyframes fadeIn {
@@ -99,77 +138,120 @@
     </style>
 </head>
 <body>
+    <canvas id="bg"></canvas>
     <canvas id="stars"></canvas>
 
     <div class="container">
         <h1 class="title-404">404</h1>
         <p class="subtitle">页面迷失在浩瀚星空中</p>
         <a href="Introduction.html" class="home-btn">返回首页</a>
+        <p class="loading-text" id="loadingText">正在星际定位失联页面...</p>
     </div>
 
     <script>
+        const HOME_URL = 'pc.html';
+
+        const bgCanvas = document.getElementById('bg');
+        const bgCtx = bgCanvas.getContext('2d');
+
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        let W = window.innerWidth;
+        let H = window.innerHeight;
 
-        // 星空穿梭核心配置
+        let mouseX = W / 2;
+        let mouseY = H / 2;
+
+        const speed = 0.9;
+        const gravityStrength = 0.08;
+
         const stars = [];
         const shootingStars = [];
-        const starsCount = 600; // 增加星星数量，穿梭效果更震撼
-        const speed = 0.9; // 移动速度（可调整）
+        const burstParticles = [];
 
-        // 随机数工具
         function random(min, max) {
             return Math.random() * (max - min) + min;
         }
 
-        // 🔥 3D穿梭星星类（向用户方向移动）
+        function resize() {
+            W = window.innerWidth;
+            H = window.innerHeight;
+
+            bgCanvas.width = W;
+            bgCanvas.height = H;
+
+            canvas.width = W;
+            canvas.height = H;
+
+            mouseX = W / 2;
+            mouseY = H / 2;
+        }
+
         class Star {
             constructor() {
-                // 3D坐标：x/y 平面位置，z 深度（越靠近用户z越小）
-                this.x = random(-canvas.width, canvas.width);
-                this.y = random(-canvas.height, canvas.height);
-                this.z = random(1, canvas.width);
+                this.reset(true);
+            }
+
+            reset(init = false) {
+                this.x = random(-W, W);
+                this.y = random(-H, H);
+                this.z = init ? random(1, W) : W;
                 this.origZ = this.z;
+
+                const colors = [
+                    '255, 255, 255',
+                    '180, 220, 255',
+                    '210, 180, 255',
+                    '255, 230, 200'
+                ];
+                this.color = colors[Math.floor(random(0, colors.length))];
             }
 
             update() {
-                // 核心：z轴减小 = 向用户方向移动
                 this.z -= speed;
-                
-                // 星星飞出屏幕后，重置到远处，循环效果
-                if (this.z <= 0) {
-                    this.z = canvas.width;
-                    this.x = random(-canvas.width, canvas.width);
-                    this.y = random(-canvas.height, canvas.height);
-                    this.origZ = this.z;
+
+                if (this.z < 1) {
+                    this.reset();
+                    return;
                 }
 
-                // 3D转2D屏幕坐标（近大远小）
-                const scale = canvas.width / this.z;
-                const screenX = this.x * scale + canvas.width / 2;
-                const screenY = this.y * scale + canvas.height / 2;
-                const radius = scale * 2; // 越近越大
-                const brightness = 1 - (this.z / this.origZ) * 0.5; // 越近越亮
+                const scale = W / this.z;
 
-                // 绘制星星
+                let screenX = this.x * scale + W / 2;
+                let screenY = this.y * scale + H / 2;
+
+                const dx = mouseX - screenX;
+                const dy = mouseY - screenY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 250) {
+                    const force = (1 - dist / 250) * gravityStrength;
+                    screenX += dx * force;
+                    screenY += dy * force;
+                }
+
+                const radius = Math.min(scale * 2, 4);
+                const brightness = 1 - (this.z / this.origZ) * 0.5;
+
                 ctx.beginPath();
                 ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${brightness})`;
+                ctx.fillStyle = `rgba(${this.color}, ${brightness})`;
                 ctx.fill();
             }
         }
 
-        // 流星类（保留原效果）
         class ShootingStar {
             constructor() {
-                this.x = random(0, canvas.width);
-                this.y = 0;
+                this.reset();
+            }
+
+            reset() {
+                this.x = random(0, W);
+                this.y = random(-H * 0.2, H * 0.2);
                 this.length = random(50, 150);
                 this.speed = random(10, 20);
-                this.angle = Math.PI / 6;
+                this.angle = random(Math.PI / 6, Math.PI / 3);
                 this.opacity = 1;
             }
 
@@ -179,7 +261,10 @@
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y);
-                ctx.lineTo(this.x + this.length * Math.cos(this.angle), this.y + this.length * Math.sin(this.angle));
+                ctx.lineTo(
+                    this.x + this.length * Math.cos(this.angle),
+                    this.y + this.length * Math.sin(this.angle)
+                );
                 ctx.stroke();
                 ctx.restore();
             }
@@ -188,42 +273,191 @@
                 this.x += this.speed * Math.cos(this.angle);
                 this.y += this.speed * Math.sin(this.angle);
                 this.opacity -= 0.015;
-                this.draw();
+
+                if (this.opacity > 0) {
+                    this.draw();
+                }
             }
         }
 
-        // 初始化星星
-        for (let i = 0; i < starsCount; i++) {
-            stars.push(new Star());
+        class BurstParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = random(-6, 6);
+                this.vy = random(-6, 6);
+                this.life = 1;
+                this.size = random(1, 3);
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 0.02;
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+
+                if (this.life <= 0) return;
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.life})`;
+                ctx.fill();
+            }
         }
 
-        // 随机生成流星
+        function drawNebula() {
+            bgCtx.fillStyle = '#000';
+            bgCtx.fillRect(0, 0, W, H);
+
+            const r1 = Math.max(350, Math.min(W, H) * 0.45);
+            const gradient1 = bgCtx.createRadialGradient(
+                W * 0.2, H * 0.3, 0,
+                W * 0.2, H * 0.3, r1
+            );
+            gradient1.addColorStop(0, 'rgba(103, 58, 183, 0.15)');
+            gradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            bgCtx.fillStyle = gradient1;
+            bgCtx.fillRect(0, 0, W, H);
+
+            const r2 = Math.max(400, Math.min(W, H) * 0.5);
+            const gradient2 = bgCtx.createRadialGradient(
+                W * 0.8, H * 0.7, 0,
+                W * 0.8, H * 0.7, r2
+            );
+            gradient2.addColorStop(0, 'rgba(79, 195, 247, 0.12)');
+            gradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            bgCtx.fillStyle = gradient2;
+            bgCtx.fillRect(0, 0, W, H);
+        }
+
+        // 已删除 drawPlanet 函数
+
+        function drawBackground() {
+            drawNebula();
+            // 星球调用已移除
+        }
+
+        function buildStars() {
+            stars.length = 0;
+            const count = W <= 768 ? 200 : 600;
+
+            for (let i = 0; i < count; i++) {
+                stars.push(new Star());
+            }
+        }
+
+        resize();
+        buildStars();
+        drawBackground();
+
+        window.addEventListener('resize', () => {
+            resize();
+            buildStars();
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target.closest && e.target.closest('a, button')) return;
+
+            for (let i = 0; i < 30; i++) {
+                burstParticles.push(new BurstParticle(e.clientX, e.clientY));
+            }
+        });
+
         setInterval(() => {
             if (Math.random() > 0.97) {
                 shootingStars.push(new ShootingStar());
             }
         }, 200);
 
-        // 动画循环
+        const loadingText = document.getElementById('loadingText');
+        const tipTexts = [
+            '正在星际定位失联页面...',
+            '扫描深空信号...',
+            '未找到目标坐标...'
+        ];
+        let tipIndex = 0;
+
+        const tipTimer = setInterval(() => {
+            tipIndex++;
+
+            if (tipIndex >= tipTexts.length) {
+                clearInterval(tipTimer);
+                loadingText.classList.add('hide');
+                return;
+            }
+
+            loadingText.textContent = tipTexts[tipIndex];
+        }, 1400);
+
+        const konamiCode = [
+            'ArrowUp', 'ArrowUp',
+            'ArrowDown', 'ArrowDown',
+            'ArrowLeft', 'ArrowRight',
+            'ArrowLeft', 'ArrowRight',
+            'KeyB', 'KeyA'
+        ];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === konamiCode[konamiIndex]) {
+                konamiIndex++;
+
+                if (konamiIndex === konamiCode.length) {
+                    for (let i = 0; i < 20; i++) {
+                        setTimeout(() => {
+                            shootingStars.push(new ShootingStar());
+                        }, i * 100);
+                    }
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+
+            const tag = document.activeElement && document.activeElement.tagName;
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+
+            if (['Space', 'Enter', 'Escape'].includes(e.code)) {
+                e.preventDefault();
+                window.location.href = HOME_URL;
+            }
+        });
+
         function animate() {
-            // 拖影效果，让移动更丝滑
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // 星星层用 destination-out 做透明拖尾，避免盖住背景层
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, W, H);
+            ctx.globalCompositeOperation = 'source-over';
+
+            drawBackground();
 
             stars.forEach(star => star.update());
-            shootingStars.forEach((star, i) => {
+
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const star = shootingStars[i];
                 star.update();
-                if (star.opacity <= 0) shootingStars.splice(i, 1);
-            });
+                if (star.opacity <= 0) {
+                    shootingStars.splice(i, 1);
+                }
+            }
+
+            for (let i = burstParticles.length - 1; i >= 0; i--) {
+                const p = burstParticles[i];
+                p.update();
+                if (p.life <= 0) {
+                    burstParticles.splice(i, 1);
+                }
+            }
 
             requestAnimationFrame(animate);
         }
-
-        // 窗口适配
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
 
         animate();
     </script>
