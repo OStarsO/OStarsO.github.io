@@ -1112,6 +1112,282 @@
         body.light .ctx-submenu { background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(246,247,253,.88)); border-color: rgba(15,18,32,.09); box-shadow: 0 20px 46px -10px rgba(20,25,50,.24), inset 0 1px 0 rgba(255,255,255,.95); }
         body.light .ctx-arrow { color: rgba(23,26,38,.35); }
         body.light .toast { color: #171a26; background: rgba(255,255,255,.86); border-color: rgba(15,18,32,.1); box-shadow: 0 14px 38px rgba(20,25,50,.18), inset 0 1px 0 rgba(255,255,255,.9); }
+
+        /* ========== 右下角设置按钮 ========== */
+        .settings-dock{
+            position: fixed;
+            right: 28px;
+            bottom: 28px;
+            z-index: 9000;
+            display: flex;
+            align-items: center;
+        }
+
+        /* —— 主按钮 —— */
+        .settings-btn{
+            position: relative;
+            z-index: 2;
+            width: 56px;
+            height: 56px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,.14);
+            background:
+                linear-gradient(150deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,.02) 100%),
+                rgba(14,18,30,.72);
+            backdrop-filter: blur(22px) saturate(180%);
+            -webkit-backdrop-filter: blur(22px) saturate(180%);
+            color: #cfe6ff;
+            cursor: pointer;
+            outline: none;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.18),
+                inset 0 -1px 0 rgba(0,0,0,.35),
+                0 10px 30px -8px rgba(0,0,0,.70),
+                0 0 34px -12px rgba(110,231,255,.55);
+            transition:
+                transform .5s cubic-bezier(.16,1,.3,1),
+                box-shadow .4s ease,
+                border-color .4s ease,
+                background .4s ease,
+                color .4s ease;
+        }
+        .settings-btn:hover{
+            transform: translateY(-2px) scale(1.05);
+            border-color: rgba(110,231,255,.45);
+            color: #ffffff;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.28),
+                inset 0 -1px 0 rgba(0,0,0,.35),
+                0 16px 40px -10px rgba(0,0,0,.75),
+                0 0 44px -10px rgba(110,231,255,.75);
+        }
+        .settings-btn:active{ transform: translateY(0) scale(.96); }
+        .settings-btn:focus-visible{
+            box-shadow:
+                0 0 0 3px rgba(4,5,12,.9),
+                0 0 0 5px rgba(110,231,255,.65),
+                0 12px 34px -10px rgba(0,0,0,.7);
+        }
+
+        /* 环绕旋转的流光 */
+        .settings-btn::before{
+            content: "";
+            position: absolute;
+            inset: -1.5px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                rgba(110,231,255,0) 0deg,
+                rgba(110,231,255,0) 205deg,
+                rgba(110,231,255,.95) 296deg,
+                rgba(167,139,250,1) 344deg,
+                rgba(167,139,250,0) 360deg
+            );
+            -webkit-mask-image: radial-gradient(farthest-side,
+                transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+            mask-image: radial-gradient(farthest-side,
+                transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+            animation: settingsRingSpin 5.5s linear infinite;
+            pointer-events: none;
+            opacity: .9;
+            transition: opacity .4s ease;
+        }
+        @keyframes settingsRingSpin{ to{ transform: rotate(360deg); } }
+
+        /* 待机呼吸脉冲 */
+        .settings-btn::after{
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            animation: settingsPulse 3.4s ease-out infinite;
+            pointer-events: none;
+        }
+        @keyframes settingsPulse{
+            0%   { box-shadow: 0 0 0 0 rgba(110,231,255,.42); }
+            70%  { box-shadow: 0 0 0 15px rgba(110,231,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(110,231,255,0); }
+        }
+
+        .sb-gear{
+            position: relative;
+            z-index: 2;
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: transform .65s cubic-bezier(.16,1,.3,1);
+        }
+        .settings-btn:hover .sb-gear{ transform: rotate(60deg); }
+        .settings-dock.open .sb-gear{ transform: rotate(135deg); }
+        .settings-dock.open .settings-btn::after{ animation: none; }
+        .settings-dock.open .settings-btn{
+            border-color: rgba(110,231,255,.45);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.25),
+                0 10px 30px -8px rgba(0,0,0,.7),
+                0 0 40px -8px rgba(110,231,255,.7);
+        }
+
+        /* —— 选项容器：锚定在按钮左侧 —— */
+        .settings-options{
+            position: absolute;
+            right: calc(100% + 14px);   /* 按钮左边 14px 处 */
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: row-reverse; /* 选项向左边铺开 */
+            gap: 10px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* —— 单个选项 —— */
+        .settings-option{
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 44px;
+            padding: 0 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.12);
+            background:
+                linear-gradient(150deg, rgba(255,255,255,.13) 0%, rgba(255,255,255,.03) 100%),
+                rgba(14,18,30,.78);
+            backdrop-filter: blur(22px) saturate(180%);
+            -webkit-backdrop-filter: blur(22px) saturate(180%);
+            color: #dbeafe;
+            font-family: inherit;
+            font-size: 13px;
+            letter-spacing: .02em;
+            white-space: nowrap;
+            cursor: pointer;
+            outline: none;
+
+            /* 收起状态：藏在按钮里 */
+            opacity: 0;
+            transform: translateX(26px) scale(.82);
+            transform-origin: right center;
+            pointer-events: none;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.16),
+                0 8px 24px -10px rgba(0,0,0,.7);
+            transition:
+                opacity .30s ease,
+                transform .46s cubic-bezier(.16,1,.3,1),
+                background .3s ease,
+                border-color .3s ease,
+                box-shadow .3s ease,
+                color .3s ease;
+            transition-delay: 0s;
+        }
+
+        /* 展开：从按钮处向左依次弹出 */
+        .settings-dock.open .settings-option{
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            pointer-events: auto;
+            transition-delay: calc(60ms + var(--i, 0) * 60ms);
+        }
+
+        .settings-dock.open .settings-option:hover{
+            transform: translateX(0) scale(1.05);
+            border-color: rgba(110,231,255,.5);
+            color: #ffffff;
+            background:
+                linear-gradient(150deg, rgba(110,231,255,.20) 0%, rgba(167,139,250,.14) 100%),
+                rgba(16,22,38,.88);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,.25),
+                0 10px 30px -10px rgba(0,0,0,.75),
+                0 0 28px -8px rgba(110,231,255,.65);
+        }
+
+        /* 图标：日 / 月 交叉淡入 */
+        .so-icon{
+            position: relative;
+            width: 18px;
+            height: 18px;
+            flex: none;
+        }
+        .so-icon svg{
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: opacity .45s ease, transform .55s cubic-bezier(.16,1,.3,1);
+        }
+        .ico-moon{ opacity: 1; transform: rotate(0deg) scale(1); }
+        .ico-sun { opacity: 0; transform: rotate(-90deg) scale(.4); }
+        body.light .ico-moon{ opacity: 0; transform: rotate(90deg) scale(.4); }
+        body.light .ico-sun { opacity: 1; transform: rotate(0deg) scale(1); }
+
+        .so-text{
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        /* —— 浅色（阳光）主题适配 —— */
+        body.light .settings-btn{
+            background:
+                linear-gradient(150deg, rgba(58,104,164,.66) 0%, rgba(16,38,72,.58) 100%),
+                rgba(12,30,60,.42);
+            border-color: rgba(180,215,255,.34);
+            color: #e8f2ff;
+            box-shadow:
+                inset 1px 1px 0 rgba(255,255,255,.40),
+                inset -1px -1px 0 rgba(0,20,50,.35),
+                0 12px 34px -10px rgba(0,8,26,.65),
+                0 0 44px -14px rgba(140,195,255,.85);
+        }
+        body.light .settings-btn:hover{
+            border-color: rgba(210,235,255,.55);
+            box-shadow:
+                inset 1px 1px 0 rgba(255,255,255,.55),
+                0 18px 44px -12px rgba(0,8,26,.72),
+                0 0 60px -12px rgba(150,205,255,.95);
+        }
+        body.light .settings-option{
+            background:
+                linear-gradient(150deg, rgba(58,104,164,.70) 0%, rgba(16,38,72,.62) 100%),
+                rgba(12,30,60,.45);
+            border-color: rgba(180,215,255,.32);
+            color: #eaf3ff;
+            box-shadow:
+                inset 1px 1px 0 rgba(255,255,255,.34),
+                0 10px 28px -12px rgba(0,8,26,.65);
+        }
+        body.light .settings-dock.open .settings-option:hover{
+            background:
+                linear-gradient(150deg, rgba(130,195,255,.34) 0%, rgba(150,160,255,.22) 100%),
+                rgba(20,46,86,.85);
+            border-color: rgba(205,238,255,.62);
+            color: #ffffff;
+            box-shadow:
+                inset 1px 1px 0 rgba(255,255,255,.5),
+                0 12px 32px -12px rgba(0,8,26,.7),
+                0 0 34px -10px rgba(150,205,255,.85);
+        }
+
+        /* —— 移动端微调 —— */
+        @media (max-width: 600px){
+            .settings-dock{ right: 16px; bottom: 18px; }
+            .settings-btn{ width: 50px; height: 50px; }
+            .settings-option{ height: 40px; padding: 0 14px; font-size: 12.5px; }
+            .settings-options{ right: calc(100% + 10px); gap: 8px; }
+        }
     </style>
 </head>
 
@@ -1353,6 +1629,35 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- ========== 右下角设置按钮 ========== -->
+    <div class="settings-dock" id="settingsDock">
+      <div class="settings-options" id="settingsOptions">
+        <button class="settings-option" id="btnTheme" type="button" style="--i:0">
+          <span class="so-icon">
+            <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2"/><path d="M12 20v2"/>
+              <path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/>
+              <path d="M2 12h2"/><path d="M20 12h2"/>
+              <path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
+            </svg>
+          </span>
+          <span class="so-text">皮肤切换</span>
+        </button>
+      </div>
+
+      <button class="settings-btn" id="settingsBtn" type="button"
+              aria-label="设置" aria-expanded="false" aria-controls="settingsOptions">
+        <svg class="sb-gear" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
 
     <!-- 外部 JS 库 -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
@@ -2006,6 +2311,72 @@
         }
       }
 
+    /* ========== 右下角设置按钮逻辑 ========== */
+    (function () {
+        'use strict';
+
+        var dock     = document.getElementById('settingsDock');
+        var btn      = document.getElementById('settingsBtn');
+        var options  = document.getElementById('settingsOptions');
+        var themeBtn = document.getElementById('btnTheme');
+        var toastEl  = document.getElementById('toast');
+
+        if (!dock || !btn) return;
+
+        var isOpen = false;
+        var toastTimer = null;
+
+        function toast(msg) {
+            if (!toastEl) return;
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function () {
+                toastEl.classList.remove('show');
+            }, 1900);
+        }
+
+        function setOpen(state) {
+            isOpen = state;
+            dock.classList.toggle('open', state);
+            btn.setAttribute('aria-expanded', state ? 'true' : 'false');
+            if (options) options.setAttribute('aria-hidden', state ? 'false' : 'true');
+        }
+
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setOpen(!isOpen);
+        });
+
+        /* 点击外部关闭 */
+        document.addEventListener('pointerdown', function (e) {
+            if (isOpen && !dock.contains(e.target)) setOpen(false);
+        });
+
+        /* Esc 关闭 */
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && isOpen) setOpen(false);
+        });
+
+        /* —— 皮肤切换 —— */
+        if (themeBtn) {
+            /* 初始状态同步（如果页面默认就是 light） */
+            if (document.body.classList.contains('light')) {
+                themeBtn.classList.add('is-on');
+            }
+
+            themeBtn.addEventListener('click', function () {
+                var nowLight = document.body.classList.toggle('light');
+                themeBtn.classList.toggle('is-on', nowLight);
+                toast(nowLight ? '已切换到阳光普照 ☀' : '已切换到星空漫游 🌙');
+            });
+        }
+
+        /* 移动端滚动时收起，避免遮挡 */
+        window.addEventListener('scroll', function () {
+            if (isOpen) setOpen(false);
+        }, { passive: true });
+    })();
     })();
     </script>
 </body>
