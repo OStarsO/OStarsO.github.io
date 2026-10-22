@@ -1,232 +1,853 @@
 <!DOCTYPE html>
-<html >
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GitHub 项目墙</title>
-  <link rel="stylesheet" href="css/reset.min.css">
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GitHub 项目墙 · OStarsO</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;                 /* 用 margin:auto 居中，内容超高时不会被裁掉 */
+    padding: 40px 24px;
+    background: #06070c;
+    color: #e9eefb;
+    font-family: "PingFang SC", "HarmonyOS Sans SC", -apple-system, "Segoe UI",
+                 "Microsoft YaHei", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ——————— 背景层 ——————— */
+  .starfield {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    display: block;
+  }
+
+  /* 背景氛围光 */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(900px 620px at 50% -12%, rgba(58, 122, 255, .20), transparent 70%),
+      radial-gradient(720px 520px at 88% 112%, rgba(168, 62, 255, .15), transparent 70%);
+  }
+  /* 点阵网格 */
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
+            mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
+  }
+
+  /* ——————— 返回按钮（毛玻璃） ——————— */
+  .back-btn {
+    position: fixed;
+    top: 22px;
+    left: 22px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px 10px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .02em;
+    color: rgba(233, 238, 251, .88);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+
+    /* 毛玻璃核心 */
+    background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.045));
+    border: 1px solid rgba(255,255,255,.16);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+            backdrop-filter: blur(18px) saturate(180%);
+    box-shadow:
+      0 10px 28px -12px rgba(0, 0, 0, .9),
+      inset 0 1px 0 rgba(255, 255, 255, .22),
+      inset 0 -1px 0 rgba(255, 255, 255, .05);
+
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+      transform .38s cubic-bezier(.22, 1, .36, 1),
+      border-color .38s ease,
+      box-shadow .38s ease,
+      color .38s ease;
+  }
+
+  /* 高光扫过 */
+  .back-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255, 255, 255, .34) 50%,
+      transparent 70%
+    );
+    transform: translateX(-130%);
+    transition: transform .8s cubic-bezier(.22, 1, .36, 1);
+    pointer-events: none;
+  }
+  .back-btn:hover::before { transform: translateX(130%); }
+
+  /* 悬停柔光 */
+  .back-btn::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      130px circle at 22% 50%,
+      rgba(130, 214, 255, .30),
+      transparent 72%
+    );
+    opacity: 0;
+    transition: opacity .38s ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .back-btn:hover::after { opacity: 1; }
+
+  .back-icon,
+  .back-text { position: relative; z-index: 1; }
+
+  .back-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    transition: transform .38s cubic-bezier(.22, 1, .36, 1);
+  }
+  .back-icon svg { display: block; }
+
+  .back-btn:hover {
+    color: #ffffff;
+    border-color: rgba(140, 200, 255, .55);
+    transform: translateY(-1px);
+    box-shadow:
+      0 14px 34px -14px rgba(58, 122, 255, .85),
+      0 0 0 1px rgba(140, 200, 255, .14),
+      inset 0 1px 0 rgba(255, 255, 255, .32),
+      inset 0 -1px 0 rgba(255, 255, 255, .06);
+  }
+  .back-btn:hover .back-icon { transform: translateX(-3px); }
+
+  .back-btn:active {
+    transform: translateY(0) scale(.97);
+    transition-duration: .12s;
+  }
+
+  .back-btn:focus-visible {
+    outline: none;
+    border-color: rgba(140, 200, 255, .8);
+    box-shadow:
+      0 0 0 3px rgba(110, 231, 255, .25),
+      0 14px 34px -14px rgba(58, 122, 255, .85),
+      inset 0 1px 0 rgba(255, 255, 255, .3);
+  }
+
+  /* ——————— 卡片网格 ——————— */
+  .cards {
+    position: relative;
+    z-index: 1;
+    margin: auto;                 /* 关键：解决顶部卡片被裁切 */
+    display: grid;
+    grid-template-columns: repeat(3, 320px);
+    gap: 40px;
+  }
+
+  /* ——————— 卡片本体 ——————— */
+  .card {
+    display: flex;
+    perspective: 1000px;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card-inner {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, .07);
+    background: linear-gradient(160deg, rgba(40, 48, 76, .92), rgba(13, 16, 26, .97));
+    box-shadow:
+      0 30px 60px -32px rgba(0, 0, 0, .95),
+      inset 0 1px 0 rgba(255, 255, 255, .07);
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    will-change: transform;
+  }
+
+  /* 边缘微光 */
+  .card-border {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(
+      260px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(130, 214, 255, .95),
+      rgba(130, 214, 255, 0) 68%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+    opacity: var(--glow, 0);
+    pointer-events: none;
+  }
+
+  /* 跟随鼠标的柔光 */
+  .card-glare {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      380px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, .10),
+      transparent 62%
+    );
+    opacity: var(--glow, 0);
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+
+  .card-content {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px;
+    transform-style: preserve-3d;
+  }
+
+  .layer { transform: translateZ(var(--z, 0px)); }
+
+  .card-media {
+    position: relative;
+    height: 150px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 18px 30px -18px rgba(0, 0, 0, .9);
+  }
+  .card-media::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, #000, transparent 78%);
+            mask-image: radial-gradient(circle at 50% 50%, #000, transparent 78%);
+  }
+
+  .cover-a {
+    background:
+      radial-gradient(120% 120% at 18% 0%, rgba(110, 231, 255, .85), transparent 55%),
+      radial-gradient(100% 100% at 92% 100%, rgba(129, 140, 248, .9), transparent 60%),
+      linear-gradient(135deg, #0b1f3a, #05070f);
+  }
+  .cover-b {
+    background:
+      radial-gradient(120% 120% at 80% 0%, rgba(244, 114, 182, .8), transparent 55%),
+      radial-gradient(100% 100% at 10% 100%, rgba(251, 191, 36, .75), transparent 60%),
+      linear-gradient(135deg, #2a1030, #0a0510);
+  }
+  .cover-c {
+    background:
+      radial-gradient(120% 120% at 30% 10%, rgba(52, 211, 153, .8), transparent 55%),
+      radial-gradient(100% 100% at 90% 100%, rgba(56, 189, 248, .85), transparent 60%),
+      linear-gradient(135deg, #062b26, #040a10);
+  }
+
+  .card-tag {
+    align-self: flex-start;
+    font-size: 11px;
+    letter-spacing: .14em;
+    padding: 5px 10px;
+    border-radius: 999px;
+    color: #9fd4ff;
+    background: rgba(120, 200, 255, .10);
+    border: 1px solid rgba(120, 200, 255, .25);
+  }
+
+  .card-title {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.36;
+    font-weight: 650;
+    letter-spacing: -.01em;
+    text-shadow: 0 12px 24px rgba(0, 0, 0, .6);
+  }
+
+  .card-text {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.72;
+    color: rgba(214, 224, 245, .62);
+  }
+
+  .card-foot {
+    margin-top: auto;
+    padding-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: rgba(214, 224, 245, .55);
+  }
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: conic-gradient(from 210deg, #6ee7ff, #818cf8, #f472b6, #6ee7ff);
+    box-shadow: 0 0 16px rgba(110, 231, 255, .35);
+  }
+
+  /* ——————— 响应式 ——————— */
+  @media (max-width: 1120px) {
+    .cards { grid-template-columns: repeat(2, minmax(0, 320px)); }
+  }
+  @media (max-width: 760px) {
+    .cards { grid-template-columns: minmax(0, 340px); gap: 28px; }
+    .back-btn {
+      top: 14px;
+      left: 14px;
+      padding: 9px 14px 9px 12px;
+      font-size: 12px;
+    }
+  }
+</style>
 </head>
-
 <body>
-  <ul ontouchstart>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/OStarsO.github.io' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/OStarsO.github.io' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/OStarsO.github.io' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/OStarsO.github.io' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/OStarsO.github.io</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/bet-lite' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/bet-lite' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/bet-lite' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/bet-lite' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/bet-lite</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/HoloISO-China' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/HoloISO-China' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/HoloISO-China' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/HoloISO-China' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/HoloISO-China</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/OStarsO' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/OStarsO' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/OStarsO' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/OStarsO' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/OStarsO</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/Hit-the-squares' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Hit-the-squares' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Hit-the-squares' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Hit-the-squares' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/Hit-the-squares</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/Entertainment' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Entertainment' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Entertainment' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Entertainment' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/Entertainment</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/Snakes' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Snakes' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Snakes' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Snakes' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/Snakes</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/Message-prompt-plug-in' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Message-prompt-plug-in' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Message-prompt-plug-in' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Message-prompt-plug-in' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/Message-prompt-plug-in</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/Fruit-Ninja' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Fruit-Ninja' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Fruit-Ninja' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/Fruit-Ninja' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/Fruit-Ninja</div>
-      </div>
-    </div>
-  </li>
-  <li>
-    <div class='link'>
-      <a href='https://github.com/OStarsO/2848-OStarsOedition' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/2848-OStarsOedition' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/2848-OStarsOedition' target='_blank' rel='noopener'></a>
-      <a href='https://github.com/OStarsO/2848-OStarsOedition' target='_blank' rel='noopener'></a>
-      <div class='cube github'>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div>
-          <svg viewbox='0 0 85 85'>
-            <path class='fill' d='M76.7 19c1.1-4.8 0.6-10.1-1.6-15 -0.7-1.7-2.3-2.9-4.2-3 -0.5-0.1-1.1-0.1-1.6-0.1 -4.6 0-10.7 1.6-15 5C50.4 5 46.4 4.6 42.5 4.6V4.4c-3.9 0-7.9 0.4-11.8 1.3 -4.3-3.4-10.4-5-15-5 -0.5 0-1.1 0-1.6 0.1 -1.9 0.1-3.5 1.3-4.2 3C7.7 8.7 7.2 14 8.3 18.8c-3.3 4.4-5 9.6-5 15.4 0 12.5 4.2 21.4 12.5 26.4 2.6 1.6 5.6 2.9 9 3.7 -0.6 1.7-0.9 3.7-0.9 6.1v11.2h0c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5l0-11c0-4.5 1.5-7.7 4.5-9.7 -1.5-0.1-3.2-0.3-5.2-0.8 -3.8-0.7-7-1.9-9.7-3.6C11.6 52.4 8.3 45.1 8.3 34.4c0-5.6 1.9-10.3 5.6-14.3 -1.7-4.4-1.4-9.6 0.6-14.3 0.4 0 0.8 0 1.2 0 4.9 0 10.8 2.2 13.5 5.5 4.5-1.2 9-1.8 13.3-1.8v0.1c4.3 0 8.8 0.6 13.3 1.8 2.7-3.3 8.6-5.5 13.5-5.5 0.4 0 0.8 0 1.2 0 2 4.7 2.3 9.9 0.6 14.3 3.7 4 5.6 8.7 5.6 14.3 0 10.7-3.3 18-10.2 22.2 -2.7 1.7-5.9 2.9-9.7 3.6 -2 0.5-3.7 0.7-5.2 0.8 3 2 4.5 5.2 4.5 9.7l0 11c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5h0V70.6c0-2.4-0.3-4.4-0.9-6.1 3.4-0.8 6.4-2.1 9-3.7 8.3-5 12.5-13.9 12.5-26.4C81.7 28.6 80 23.4 76.7 19z'></path>
-          </svg>
-        </div>
-        <div>/2848-OStarsOedition</div>
-      </div>
-    </div>
-  </li>
-</ul>
-<svg class='clips' viewbox='0 0 0 0' xmlns='http://www.w3.org/2000/svg'>
-  <defs>
-    <clippath id='clip-right'>
-      <polygon id='right' points='48 0 48 96 0 48'></polygon>
-    </clippath>
-    <clippath id='clip-left'>
-      <polygon id='left' points='0 0 0 96 48 48'></polygon>
-    </clippath>
-    <clippath id='clip-bottom'>
-      <polygon id='bottom' points='96 48 0 48 48 0'></polygon>
-    </clippath>
-    <clippath id='clip-top'>
-      <polygon id='top' points='0 0 96 0 48 48'></polygon>
-    </clippath>
-  </defs>
-</svg>
 
+<canvas id="starfield" class="starfield" aria-hidden="true"></canvas>
+
+<!-- 返回按钮 -->
+<a class="back-btn" href="../Introduction.html" aria-label="返回介绍页">
+  <span class="back-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+         stroke="currentColor" stroke-width="2.2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  </span>
+  <span class="back-text">返回</span>
+</a>
+
+<main class="cards">
+
+  <!-- OStarsO.github.io · 个人网站 -->
+  <a class="card" href="https://github.com/OStarsO/OStarsO.github.io" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-a layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">JavaScript</span>
+        <h2 class="card-title layer" style="--z: 58px">OStarsO.github.io</h2>
+        <p class="card-text layer" style="--z: 36px">一个 OStarsO 的个人网站，本站源码。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>个人网站 · ★1</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- bet-lite · pywebview 小游戏 -->
+  <a class="card" href="https://github.com/OStarsO/bet-lite" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-b layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">HTML</span>
+        <h2 class="card-title layer" style="--z: 58px">bet-lite</h2>
+        <p class="card-text layer" style="--z: 36px">一个使用 Python + pywebview 写的小游戏。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>小游戏 · Python</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- HoloISO-China · Fork -->
+  <a class="card" href="https://github.com/OStarsO/HoloISO-China" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-c layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">Shell · Fork</span>
+        <h2 class="card-title layer" style="--z: 58px">HoloISO-China</h2>
+        <p class="card-text layer" style="--z: 36px">HoloISO 中国本地化分支。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>Fork 仓库</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- OStarsO · Profile -->
+  <a class="card" href="https://github.com/OStarsO/OStarsO" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-a layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">Profile</span>
+        <h2 class="card-title layer" style="--z: 58px">OStarsO</h2>
+        <p class="card-text layer" style="--z: 36px">显示在我 GitHub 主页的内容。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>GitHub 主页</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Hit-the-squares · 打方块 -->
+  <a class="card" href="https://github.com/OStarsO/Hit-the-squares" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-b layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">JavaScript</span>
+        <h2 class="card-title layer" style="--z: 58px">Hit-the-squares</h2>
+        <p class="card-text layer" style="--z: 36px">OStarsO 版打方块小游戏。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>小游戏</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Entertainment · 开心消消乐 -->
+  <a class="card" href="https://github.com/OStarsO/Entertainment" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-c layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">JavaScript</span>
+        <h2 class="card-title layer" style="--z: 58px">Entertainment</h2>
+        <p class="card-text layer" style="--z: 36px">OStarsO 版开心消消乐。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>小游戏</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Snakes · 贪吃蛇 -->
+  <a class="card" href="https://github.com/OStarsO/Snakes" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-a layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">JavaScript</span>
+        <h2 class="card-title layer" style="--z: 58px">Snakes</h2>
+        <p class="card-text layer" style="--z: 36px">OStarsO 版贪吃蛇。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>小游戏</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Message-prompt-plug-in · 消息提示插件 -->
+  <a class="card" href="https://github.com/OStarsO/Message-prompt-plug-in" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-b layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">JavaScript</span>
+        <h2 class="card-title layer" style="--z: 58px">Message-prompt-plug-in</h2>
+        <p class="card-text layer" style="--z: 36px">站内消息提示组件，轻量无依赖。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>组件</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Fruit-Ninja · 水果忍者 -->
+  <a class="card" href="https://github.com/OStarsO/Fruit-Ninja" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-c layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">JavaScript</span>
+        <h2 class="card-title layer" style="--z: 58px">Fruit-Ninja</h2>
+        <p class="card-text layer" style="--z: 36px">OStarsO 版水果忍者。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>小游戏</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 2848-OStarsOedition · 2048 -->
+  <a class="card" href="https://github.com/OStarsO/2848-OStarsOedition" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <div class="card-glare"></div>
+      <div class="card-border"></div>
+      <div class="card-content">
+        <div class="card-media cover-a layer" style="--z: 26px"></div>
+        <span class="card-tag layer" style="--z: 44px">JavaScript</span>
+        <h2 class="card-title layer" style="--z: 58px">2848-OStarsOedition</h2>
+        <p class="card-text layer" style="--z: 36px">简简单单的 2048 · OStarsO 版。</p>
+        <div class="card-foot layer" style="--z: 48px">
+          <span class="avatar"></span>
+          <span>小游戏</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+</main>
+
+<!-- ============ 动态星空背景 ============ -->
+<script>
+(function () {
+  'use strict';
+
+  var canvas = document.getElementById('starfield');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var W = 0, H = 0, DPR = 1;
+  var stars = [];
+  var meteors = [];
+  var meteorTimer = 2.5;
+  var pointer = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
+  var sprites = [];
+
+  /* ---------- 预渲染星点光晕贴图（比逐个画径向渐变快很多） ---------- */
+  function makeSprite(rgb) {
+    var S = 64;
+    var c = document.createElement('canvas');
+    c.width = c.height = S;
+    var g = c.getContext('2d');
+    var grd = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    grd.addColorStop(0.00, 'rgba(255,255,255,1)');
+    grd.addColorStop(0.12, 'rgba(' + rgb + ',0.92)');
+    grd.addColorStop(0.34, 'rgba(' + rgb + ',0.28)');
+    grd.addColorStop(0.64, 'rgba(' + rgb + ',0.055)');
+    grd.addColorStop(1.00, 'rgba(' + rgb + ',0)');
+    g.fillStyle = grd;
+    g.beginPath();
+    g.arc(S / 2, S / 2, S / 2, 0, Math.PI * 2);
+    g.fill();
+    return c;
+  }
+
+  sprites = [
+    makeSprite('200,224,255'),  // 冷白
+    makeSprite('132,196,255'),  // 冰蓝
+    makeSprite('255,214,168')   // 暖金
+  ];
+
+  /* ---------- 生成 / 重建星空 ---------- */
+  function seed() {
+    var count = Math.round(Math.min(420, (W * H) / 6500));
+    stars = [];
+    for (var i = 0; i < count; i++) {
+      var depth = Math.random();            // 0 远 → 1 近
+      var pick = Math.random();
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: 0.30 + depth * 1.05 + Math.random() * 0.45,
+        depth: 0.12 + depth * 0.88,
+        a: 0.22 + Math.random() * 0.72,
+        ph: Math.random() * Math.PI * 2,
+        sp: 0.35 + Math.random() * 1.7,
+        vx: (Math.random() - 0.5) * 5,      // px/s
+        vy: (Math.random() - 0.5) * 5,
+        sprite: pick < 0.60 ? 0 : (pick < 0.92 ? 1 : 2)
+      });
+    }
+    meteors = [];
+    meteorTimer = 2 + Math.random() * 3;
+  }
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    seed();
+    if (reduceMotion) frame(performance.now());
+  }
+
+  /* ---------- 流星 ---------- */
+  function spawnMeteor() {
+    var toRight = Math.random() < 0.5;
+    var speed = 520 + Math.random() * 520;
+    return {
+      x: toRight ? (-140 - Math.random() * 260) : (W + 140 + Math.random() * 260),
+      y: -90 - Math.random() * H * 0.45,
+      vx: (toRight ? 1 : -1) * speed * 0.88,
+      vy: speed * 0.48,
+      life: 0,
+      ttl: 1.0 + Math.random() * 0.9,
+      w: 1.1 + Math.random() * 1.3
+    };
+  }
+
+  /* ---------- 主循环 ---------- */
+  var last = performance.now();
+
+  function frame(now) {
+    var dt = reduceMotion ? 0 : Math.min((now - last) / 1000, 0.05);
+    var t = reduceMotion ? 0 : now / 1000;
+    last = now;
+
+    /* 鼠标视差缓动 */
+    pointer.x += (pointer.tx - pointer.x) * 0.06;
+    pointer.y += (pointer.ty - pointer.y) * 0.06;
+    var px = (pointer.x - 0.5) * 2;
+    var py = (pointer.y - 0.5) * 2;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+
+    /* —— 星点 —— */
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      if (s.x < -50) s.x = W + 50; else if (s.x > W + 50) s.x = -50;
+      if (s.y < -50) s.y = H + 50; else if (s.y > H + 50) s.y = -50;
+
+      var tw = 0.5 + 0.5 * Math.sin(t * s.sp + s.ph);
+      var tw2 = tw * tw * (3 - 2 * tw);              // smoothstep
+      var alpha = s.a * (0.22 + 0.78 * tw2);
+
+      var x = s.x - px * 26 * s.depth;
+      var y = s.y - py * 26 * s.depth;
+      var size = s.r * 11 * (0.65 + tw2 * 0.95) + s.r * 4;
+
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(sprites[s.sprite], x - size / 2, y - size / 2, size, size);
+    }
+
+    /* —— 流星 —— */
+    if (!reduceMotion) {
+      meteorTimer -= dt;
+      if (meteorTimer <= 0) {
+        meteorTimer = 3.2 + Math.random() * 5.5;
+        if (meteors.length < 2) meteors.push(spawnMeteor());
+      }
+    }
+
+    for (var m = meteors.length - 1; m >= 0; m--) {
+      var mt = meteors[m];
+      mt.life += dt;
+      mt.x += mt.vx * dt;
+      mt.y += mt.vy * dt;
+
+      var k = mt.life / mt.ttl;
+      if (k >= 1 || mt.y > H + 240 || mt.x < -400 || mt.x > W + 400) {
+        meteors.splice(m, 1);
+        continue;
+      }
+      var fade = k < 0.18 ? k / 0.18 : 1 - (k - 0.18) / 0.82;
+      if (fade < 0) fade = 0;
+
+      var tailX = mt.x - mt.vx * 0.17;
+      var tailY = mt.y - mt.vy * 0.17;
+
+      var grd = ctx.createLinearGradient(mt.x, mt.y, tailX, tailY);
+      grd.addColorStop(0, 'rgba(255,255,255,' + (0.95 * fade).toFixed(3) + ')');
+      grd.addColorStop(0.22, 'rgba(178,220,255,' + (0.55 * fade).toFixed(3) + ')');
+      grd.addColorStop(0.6, 'rgba(140,185,255,' + (0.16 * fade).toFixed(3) + ')');
+      grd.addColorStop(1, 'rgba(120,170,255,0)');
+
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = grd;
+      ctx.lineWidth = mt.w;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(mt.x, mt.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+
+      ctx.globalAlpha = fade;
+      ctx.drawImage(sprites[0], mt.x - 9, mt.y - 9, 18, 18);
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (!reduceMotion) requestAnimationFrame(frame);
+  }
+
+  /* ---------- 事件 ---------- */
+  window.addEventListener('mousemove', function (e) {
+    pointer.tx = e.clientX / Math.max(W, 1);
+    pointer.ty = e.clientY / Math.max(H, 1);
+  }, { passive: true });
+
+  window.addEventListener('resize', resize);
+
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<!-- ============ 卡片 3D 磁吸交互 ============ -->
+<script>
+(function () {
+  'use strict';
+
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+
+  var items = cards.map(function (card) {
+    return {
+      card: card,
+      inner: card.querySelector('.card-inner'),
+      rect: { left: 0, top: 0, width: 0, height: 0 },
+      cur: { tx: 0, ty: 0, rx: 0, ry: 0, glow: 0 },
+      tgt: { tx: 0, ty: 0, rx: 0, ry: 0, glow: 0 }
+    };
+  });
+
+  var mouse = { x: -1e4, y: -1e4, active: false };
+
+  var RANGE = 300;
+  var TILT  = 13;
+  var SHIFT = 16;
+
+  /* 用「文档坐标」测量，滚动时无需重新测量 */
+  function measure() {
+    items.forEach(function (it) {
+      it.card.style.transform = 'none';
+      it.inner.style.transform = 'none';
+
+      var r = it.card.getBoundingClientRect();
+      it.rect.left   = r.left + window.pageXOffset;
+      it.rect.top    = r.top  + window.pageYOffset;
+      it.rect.width  = r.width;
+      it.rect.height = r.height;
+
+      it.card.style.transform = '';
+      it.inner.style.transform = '';
+    });
+  }
+
+  window.addEventListener('mousemove', function (e) {
+    mouse.x = e.clientX + window.pageXOffset;
+    mouse.y = e.clientY + window.pageYOffset;
+    mouse.active = true;
+  }, { passive: true });
+
+  function reset() {
+    mouse.x = -1e4;
+    mouse.y = -1e4;
+    mouse.active = false;
+  }
+  window.addEventListener('mouseout', function (e) { if (!e.relatedTarget) reset(); });
+  window.addEventListener('blur', reset);
+
+  var last = performance.now();
+
+  function frame(now) {
+    var dt = Math.min((now - last) / 16.667, 3);
+    last = now;
+    var k = 1 - Math.pow(0.80, dt);
+
+    items.forEach(function (it) {
+      var left = it.rect.left, top = it.rect.top;
+      var halfW = it.rect.width / 2 || 1;
+      var halfH = it.rect.height / 2 || 1;
+
+      var dx = mouse.x - (left + halfW);
+      var dy = mouse.y - (top + halfH);
+
+      var ox = Math.max(0, Math.abs(dx) - halfW);
+      var oy = Math.max(0, Math.abs(dy) - halfH);
+      var outside = Math.sqrt(ox * ox + oy * oy);
+
+      var s = mouse.active ? 1 - Math.min(outside / RANGE, 1) : 0;
+      s = s * s * (3 - 2 * s);
+
+      var nx = Math.max(-1, Math.min(1, dx / halfW));
+      var ny = Math.max(-1, Math.min(1, dy / halfH));
+
+      var t = it.tgt;
+      t.rx = -ny * TILT * s;
+      t.ry =  nx * TILT * s;
+      t.tx = Math.max(-SHIFT, Math.min(SHIFT, dx * 0.06)) * s;
+      t.ty = Math.max(-SHIFT, Math.min(SHIFT, dy * 0.06)) * s;
+      t.glow = s;
+
+      var c = it.cur;
+      c.rx   += (t.rx   - c.rx)   * k;
+      c.ry   += (t.ry   - c.ry)   * k;
+      c.tx   += (t.tx   - c.tx)   * k;
+      c.ty   += (t.ty   - c.ty)   * k;
+      c.glow += (t.glow - c.glow) * k;
+
+      it.card.style.transform =
+        'translate3d(' + c.tx.toFixed(2) + 'px, ' + c.ty.toFixed(2) + 'px, 0)';
+
+      it.inner.style.setProperty('--rx', c.rx.toFixed(2) + 'deg');
+      it.inner.style.setProperty('--ry', c.ry.toFixed(2) + 'deg');
+      it.inner.style.setProperty('--mx', (mouse.x - left).toFixed(0) + 'px');
+      it.inner.style.setProperty('--my', (mouse.y - top).toFixed(0) + 'px');
+      it.inner.style.setProperty('--glow', c.glow.toFixed(3));
+    });
+
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', measure);
+  window.addEventListener('load', measure);
+
+  measure();
+  requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
