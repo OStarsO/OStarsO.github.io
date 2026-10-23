@@ -619,11 +619,11 @@
 
             // 2. 生成卡片 DOM（初始不可见，但占据位置）
             const mockData = [
-                { title: `${query} - 维基百科，自由的百科全书`, url: `https://zh.wikipedia.org/wiki/${query}`, desc: `关于 ${query} 的详细百科介绍，涵盖历史、发展、应用等领域，是了解该词条最权威的渠道...` },
-                { title: `${query} 的最新相关信息与新闻`, url: `https://news.example.com/search?q=${query}`, desc: `今日头条、百度新闻等各大媒体关于 ${query} 的最新报道与深度分析...` },
-                { title: `如何评价/使用 ${query}？ - 知乎`, url: `https://www.zhihu.com/search?q=${query}`, desc: `知乎用户关于 ${query} 的热门讨论、经验分享和专业知识解答，看看大家是怎么说的...` },
-                { title: `${query}官网 - 首页`, url: `https://www.${query}.com`, desc: `欢迎访问 ${query} 官方网站，获取第一手资讯与服务。` },
-                { title: `下载 ${query} - 安全无捆绑`, url: `https://download.example.com/${query}`, desc: `提供最新版本的 ${query} 下载，纯净无毒，极速安装...` }
+                { title: `百度搜索：${query}`, url: `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`, desc: `通过百度搜索“${query}”的相关网页、新闻、视频与知道内容...` },
+                { title: `必应搜索：${query}`, url: `https://www.bing.com/search?q=${encodeURIComponent(query)}`, desc: `使用微软必应搜索“${query}”，获取全球网页、图片与资讯结果...` },
+                { title: `Google 搜索：${query}`, url: `https://www.google.com/search?q=${encodeURIComponent(query)}`, desc: `在 Google 中搜索“${query}”，查看来自全球的网页、新闻与知识面板...` },
+                { title: `${query} - 维基百科，自由的百科全书`, url: `https://zh.wikipedia.org/wiki/${encodeURIComponent(query)}`, desc: `关于 ${query} 的详细百科介绍...` },
+                { title: `如何评价/使用 ${query}？ - 知乎`, url: `https://www.zhihu.com/search?q=${encodeURIComponent(query)}&type=content`, desc: `知乎用户关于 ${query} 的热门讨论与经验分享...` }
             ];
 
             resultsContainer.innerHTML = mockData.map((item, index) => `
