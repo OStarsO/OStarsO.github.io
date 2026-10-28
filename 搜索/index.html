@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#050510" />
     <title>ST导航 - 星空搜索</title>
     <style>
         /* ================= 基础样式 ================= */
@@ -11,6 +12,13 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html {
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+            background-color: #050510;
         }
 
         :root { --bg-rgb: 5, 5, 16; }
@@ -24,12 +32,19 @@
             background-color: rgb(var(--bg-rgb));
             color: #fff;
             height: 100vh;
+            height: 100dvh;
+            min-height: 100%;
             overflow: hidden;
+            overscroll-behavior: none;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
             transition: background-color 0.6s ease;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            touch-action: manipulation;
         }
 
         /* ================= 背景层 ================= */
@@ -88,6 +103,38 @@
             background:
                 linear-gradient(180deg, rgba(0, 90, 150, 0.35) 0%, transparent 45%, rgba(0, 20, 60, 0.55) 100%),
                 radial-gradient(60% 40% at 50% 0%, rgba(0, 180, 255, 0.18), transparent 70%);
+        }
+
+        /* ================= 低性能模式 ================= */
+        body.perf-mode .bg-layer::before {
+            animation: none !important;
+        }
+
+        body.perf-mode .time-weather-panel,
+        body.perf-mode .daily-quote-panel,
+        body.perf-mode .search-box,
+        body.perf-mode .search-suggest,
+        body.perf-mode .settings-panel,
+        body.perf-mode .tools-panel,
+        body.perf-mode .corner-btn,
+        body.perf-mode .back-home-btn,
+        body.perf-mode .mod-drag-handle,
+        body.perf-mode .result-item,
+        body.perf-mode .sp-toast {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        body.perf-mode .result-item {
+            transition: opacity 0.25s ease, visibility 0s !important;
+        }
+
+        body.perf-mode .result-item.visible {
+            transform: none !important;
+        }
+
+        body.perf-mode .result-item:not(.visible) {
+            transform: none !important;
         }
 
         /* ================= 左上角毛玻璃返回按钮 ================= */
@@ -509,6 +556,147 @@
         }
         .search-btn:hover { opacity: 1; transform: scale(1.05); }
 
+        /* ================= 搜索联想面板 ================= */
+        .search-suggest {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            max-height: 380px;
+            overflow-y: auto;
+            padding: 6px;
+            border-radius: 14px;
+            background: rgba(14, 18, 34, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            opacity: 0;
+            transform: translateY(-6px);
+            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s;
+        }
+        .search-suggest.open {
+            opacity: 1;
+            transform: none;
+            pointer-events: auto;
+            visibility: visible;
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s;
+        }
+        .search-suggest::-webkit-scrollbar { width: 5px; }
+        .search-suggest::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.16); border-radius: 3px; }
+
+        body.is-searching .search-suggest {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+        }
+
+        .ss-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px 5px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.38);
+        }
+        .ss-clear {
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 11px;
+            cursor: pointer;
+            padding: 2px 7px;
+            border-radius: 6px;
+            transition: all 0.18s;
+            font-family: inherit;
+        }
+        .ss-clear:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+
+        .ss-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.82);
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+            user-select: none;
+        }
+        .ss-item.active, .ss-item:hover {
+            background: rgba(136, 176, 255, 0.16);
+            color: #fff;
+        }
+
+        .ss-icon {
+            width: 18px;
+            flex-shrink: 0;
+            text-align: center;
+            font-size: 13px;
+            opacity: 0.75;
+        }
+
+        .ss-label {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .ss-label mark {
+            background: transparent;
+            color: #88b0ff;
+            font-weight: 600;
+        }
+
+        .ss-type {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            flex-shrink: 0;
+            margin-left: 4px;
+        }
+
+        .ss-del {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            flex-shrink: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.15s;
+        }
+        .ss-item:hover .ss-del, .ss-item.active .ss-del { display: inline-flex; }
+        .ss-del:hover { color: #fff; background: rgba(255, 255, 255, 0.18); }
+
+        .ss-empty {
+            padding: 16px 12px;
+            text-align: center;
+            font-size: 12.5px;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.5px;
+        }
+
+        /* ================= 搜索框聚焦时隐藏下方模块 ================= */
+        body.is-input-focus .mod-wrap[data-mod="shortcuts"],
+        body.is-input-focus .mod-wrap[data-mod="weather"] {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+        }
+
         /* 快捷方式 */
         .shortcuts {
             display: grid;
@@ -540,6 +728,7 @@
             cursor: pointer;
             padding: 10px;
             border-radius: 12px;
+            position: relative;
         }
 
         .shortcut-item:hover {
@@ -578,6 +767,7 @@
             pointer-events: none;
             overflow-y: auto;
             max-height: calc(100vh - 220px);
+            max-height: calc(100dvh - 220px);
             padding-right: 10px;
         }
 
@@ -777,8 +967,10 @@
         }
 
         #settingsFab { font-size: 17px; }
+        #toolsFab { font-size: 17px; }
 
-        body.focus-mode #settingsFab { display: none; }
+        body.focus-mode #settingsFab,
+        body.focus-mode #toolsFab { display: none; }
 
         @media (max-width: 600px) {
             .corner-actions { right: 12px; bottom: 12px; }
@@ -1020,6 +1212,19 @@
             margin: 20px 0;
         }
 
+        kbd {
+            display: inline-block;
+            padding: 1px 6px;
+            margin: 0 2px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            font-family: inherit;
+            font-size: 11px;
+            color: rgba(255,255,255,0.78);
+            line-height: 1.6;
+        }
+
         .sp-toast {
             position: fixed;
             left: 50%;
@@ -1039,8 +1244,291 @@
             backdrop-filter: blur(12px);
         }
         .sp-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ================= 小工具箱 ================= */
+        .tools-panel {
+            position: fixed;
+            right: 20px;
+            bottom: 76px;
+            z-index: 9550;
+            width: 380px;
+            max-width: calc(100vw - 24px);
+            height: 560px;
+            max-height: calc(100vh - 110px);
+            max-height: calc(100dvh - 110px);
+            display: flex;
+            flex-direction: column;
+            border-radius: 18px;
+            background: rgba(12, 14, 28, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            box-shadow: 0 16px 56px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(14px) scale(0.97);
+            transform-origin: bottom right;
+            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0s linear 0.3s;
+        }
+
+        .tools-panel.open {
+            opacity: 1;
+            transform: none;
+            pointer-events: auto;
+            visibility: visible;
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0s;
+        }
+
+        .tp-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px 11px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.92);
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .tp-close {
+            width: 26px;
+            height: 26px;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 17px;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tp-close:hover { color: #fff; background: rgba(255, 255, 255, 0.12); }
+
+        .tp-tabs {
+            display: flex;
+            gap: 6px;
+            padding: 10px 12px;
+            overflow-x: auto;
+            flex-shrink: 0;
+            scrollbar-width: none;
+        }
+        .tp-tabs::-webkit-scrollbar { display: none; }
+
+        .tp-tab {
+            flex-shrink: 0;
+            padding: 6px 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .tp-tab:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+        .tp-tab.active {
+            background: linear-gradient(135deg, rgba(136,176,255,0.32), rgba(76,216,255,0.22));
+            border-color: rgba(136, 176, 255, 0.6);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .tp-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 16px 20px;
+        }
+        .tp-body::-webkit-scrollbar { width: 5px; }
+        .tp-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.16); border-radius: 3px; }
+
+        .tp-pane { display: none; }
+        .tp-pane.active { display: block; animation: tpFade 0.25s ease; }
+        @keyframes tpFade {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .tp-input, .tp-select, .tp-textarea {
+            width: 100%;
+            padding: 9px 11px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            font-family: inherit;
+        }
+        .tp-input:focus, .tp-select:focus, .tp-textarea:focus {
+            border-color: rgba(136, 176, 255, 0.55);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .tp-select option { background: #14172a; color: #fff; }
+        .tp-textarea { resize: vertical; min-height: 76px; line-height: 1.6; }
+
+        .tp-btn {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 12.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .tp-btn:hover { background: rgba(255, 255, 255, 0.13); color: #fff; }
+        .tp-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .tp-btn-primary {
+            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+            border-color: transparent;
+            color: #fff;
+            font-weight: 600;
+        }
+        .tp-btn-primary:hover { filter: brightness(1.1); }
+
+        .tp-row { display: flex; gap: 8px; align-items: center; }
+        .tp-row > * { min-width: 0; }
+
+        .tp-label {
+            font-size: 11.5px;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.45);
+            margin: 12px 0 6px;
+        }
+
+        /* 计算器 */
+        .calc-display {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            text-align: right;
+            font-size: 22px;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 1px;
+            overflow-x: auto;
+            white-space: nowrap;
+            min-height: 50px;
+            color: #fff;
+        }
+        .calc-history {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: right;
+            height: 16px;
+            margin-top: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .calc-keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .calc-key {
+            padding: 13px 0;
+            border-radius: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        .calc-key:hover { background: rgba(255, 255, 255, 0.14); }
+        .calc-key:active { transform: scale(0.96); }
+        .calc-key.op { color: #88b0ff; }
+        .calc-key.fn { color: #ff9ecb; }
+        .calc-key.eq {
+            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+            border-color: transparent;
+            font-weight: 700;
+        }
+
+        /* 计时器 */
+        .timer-display {
+            text-align: center;
+            font-size: 44px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+            color: #fff;
+            margin: 18px 0 4px;
+            text-shadow: 0 0 24px rgba(136, 176, 255, 0.3);
+        }
+        .timer-status {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            height: 16px;
+            letter-spacing: 1px;
+        }
+
+        /* 二维码 */
+        .qr-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 190px;
+            margin-top: 10px;
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        /* 颜色 */
+        .color-preview {
+            height: 72px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .color-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 11px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 12.5px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            color: rgba(255, 255, 255, 0.85);
+            transition: background 0.2s;
+        }
+        .color-item:hover { background: rgba(255, 255, 255, 0.1); }
+
+        @media (max-width: 600px) {
+            .tools-panel {
+                right: 12px;
+                bottom: 60px;
+                width: calc(100vw - 24px);
+                height: calc(100vh - 140px);
+                height: calc(100dvh - 140px);
+                max-height: none;
+            }
+            .timer-display { font-size: 36px; }
+            .calc-display { font-size: 19px; }
+            .search-suggest { max-height: 300px; }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body data-bg="deepspace" data-layout="center">
 
@@ -1081,6 +1569,8 @@
                         <input type="text" class="search-input" id="searchInput" placeholder="搜索或输入网址..." autocomplete="off" />
                         <button class="search-btn" id="searchBtn">搜索</button>
                     </div>
+                    <!-- 搜索联想面板 -->
+                    <div class="search-suggest" id="searchSuggest" role="listbox" aria-label="搜索建议"></div>
                 </div>
             </div>
 
@@ -1135,8 +1625,151 @@
 
     <!-- 角落按钮 -->
     <div class="corner-actions">
+        <button class="corner-btn" id="toolsFab" title="小工具箱">🧰</button>
         <button class="corner-btn" id="focusBtn" title="专注模式">专注</button>
         <button class="corner-btn" id="settingsFab" title="外观与布局设置">⚙</button>
+    </div>
+
+    <!-- 小工具箱 -->
+    <div class="tools-panel" id="toolsPanel" role="dialog" aria-label="小工具箱">
+        <div class="tp-header">
+            <span>🧰 小工具箱</span>
+            <button class="tp-close" id="toolsClose" aria-label="关闭工具箱">×</button>
+        </div>
+        <div class="tp-tabs" id="toolsTabs">
+            <button class="tp-tab active" data-tool="calc">计算器</button>
+            <button class="tp-tab" data-tool="unit">单位换算</button>
+            <button class="tp-tab" data-tool="qr">二维码</button>
+            <button class="tp-tab" data-tool="translate">翻译</button>
+            <button class="tp-tab" data-tool="timer">番茄钟</button>
+            <button class="tp-tab" data-tool="color">取色器</button>
+            <button class="tp-tab" data-tool="base64">Base64</button>
+        </div>
+        <div class="tp-body">
+
+            <!-- 计算器 -->
+            <div class="tp-pane active" data-pane="calc">
+                <div class="calc-display" id="calcDisplay">0</div>
+                <div class="calc-history" id="calcHistory"></div>
+                <div class="calc-keys" id="calcKeys">
+                    <button class="calc-key fn" data-k="C">C</button>
+                    <button class="calc-key fn" data-k="(">(</button>
+                    <button class="calc-key fn" data-k=")">)</button>
+                    <button class="calc-key op" data-k="/">÷</button>
+                    <button class="calc-key" data-k="7">7</button>
+                    <button class="calc-key" data-k="8">8</button>
+                    <button class="calc-key" data-k="9">9</button>
+                    <button class="calc-key op" data-k="*">×</button>
+                    <button class="calc-key" data-k="4">4</button>
+                    <button class="calc-key" data-k="5">5</button>
+                    <button class="calc-key" data-k="6">6</button>
+                    <button class="calc-key op" data-k="-">−</button>
+                    <button class="calc-key" data-k="1">1</button>
+                    <button class="calc-key" data-k="2">2</button>
+                    <button class="calc-key" data-k="3">3</button>
+                    <button class="calc-key op" data-k="+">+</button>
+                    <button class="calc-key" data-k="0">0</button>
+                    <button class="calc-key" data-k=".">.</button>
+                    <button class="calc-key fn" data-k="%">%</button>
+                    <button class="calc-key eq" data-k="=">=</button>
+                    <button class="calc-key fn" data-k="DEL" style="grid-column: span 4;">⌫ 退格</button>
+                </div>
+            </div>
+
+            <!-- 单位换算 -->
+            <div class="tp-pane" data-pane="unit">
+                <div class="tp-label">类别</div>
+                <select class="tp-select" id="unitCategory"></select>
+                <div class="tp-label">数值</div>
+                <div class="tp-row">
+                    <input class="tp-input" id="unitInput" type="number" value="1" style="flex:1;" />
+                    <select class="tp-select" id="unitFrom" style="flex:0 0 42%;"></select>
+                </div>
+                <div class="tp-label">转换为</div>
+                <select class="tp-select" id="unitTo"></select>
+                <div class="tp-label">结果</div>
+                <div class="calc-display" id="unitResult" style="font-size:18px;">—</div>
+            </div>
+
+            <!-- 二维码 -->
+            <div class="tp-pane" data-pane="qr">
+                <div class="tp-label">生成二维码</div>
+                <input class="tp-input" id="qrText" placeholder="输入文本或网址" value="https://" />
+                <div class="tp-row" style="margin-top:8px;">
+                    <button class="tp-btn tp-btn-primary" id="qrGenBtn" style="flex:1;">生成</button>
+                    <button class="tp-btn" id="qrDownloadBtn">下载</button>
+                </div>
+                <div class="qr-box" id="qrBox">
+                    <span style="color:#666;font-size:12px;">二维码将显示在这里</span>
+                </div>
+
+                <div class="tp-label" style="margin-top:16px;">识别二维码</div>
+                <input type="file" id="qrFile" accept="image/*" class="tp-input" style="padding:7px 10px;font-size:12px;" />
+                <div class="tp-textarea" id="qrResult" style="min-height:60px;margin-top:8px;user-select:text;">识别结果将显示在这里</div>
+            </div>
+
+            <!-- 翻译 -->
+            <div class="tp-pane" data-pane="translate">
+                <div class="tp-label">方向</div>
+                <select class="tp-select" id="trDir">
+                    <option value="zh-CN|en">中文 → English</option>
+                    <option value="en|zh-CN">English → 中文</option>
+                </select>
+                <div class="tp-label">原文</div>
+                <textarea class="tp-textarea" id="trInput" placeholder="输入要翻译的短句…"></textarea>
+                <button class="tp-btn tp-btn-primary" id="trBtn" style="width:100%;margin-top:8px;">翻译</button>
+                <div class="tp-label">译文</div>
+                <textarea class="tp-textarea" id="trOutput" readonly placeholder="译文将显示在这里"></textarea>
+                <div class="sp-hint" style="margin-top:6px;">调用免费在线翻译接口，需要联网。</div>
+            </div>
+
+            <!-- 番茄钟 / 倒计时 -->
+            <div class="tp-pane" data-pane="timer">
+                <div class="timer-display" id="timerDisplay">25:00</div>
+                <div class="timer-status" id="timerStatus">专注模式</div>
+                <div class="tp-row" style="justify-content:center;gap:8px;margin-top:12px;">
+                    <button class="tp-btn" data-timer="25">25 分钟</button>
+                    <button class="tp-btn" data-timer="5">5 分钟</button>
+                    <button class="tp-btn" data-timer="1">1 分钟</button>
+                </div>
+                <div class="tp-row" style="justify-content:center;gap:10px;margin-top:10px;">
+                    <button class="tp-btn tp-btn-primary" id="timerStart" style="min-width:92px;">开始</button>
+                    <button class="tp-btn" id="timerReset">重置</button>
+                </div>
+                <div class="tp-label" style="margin-top:16px;">自定义（分钟）</div>
+                <div class="tp-row">
+                    <input class="tp-input" id="timerCustom" type="number" min="1" max="180" value="10" style="flex:1;" />
+                    <button class="tp-btn" id="timerSetCustom">设定</button>
+                </div>
+            </div>
+
+            <!-- 取色器 -->
+            <div class="tp-pane" data-pane="color">
+                <div class="color-preview" id="colorPreview" style="background:#88b0ff;"></div>
+                <div class="tp-row" style="margin-top:10px;">
+                    <input type="color" id="colorInput" value="#88b0ff" style="width:44px;height:38px;border:none;border-radius:9px;background:transparent;cursor:pointer;flex-shrink:0;" />
+                    <button class="tp-btn" id="colorRandom" style="flex:1;">随机颜色</button>
+                </div>
+                <div class="tp-label">点击复制色值</div>
+                <div class="color-item" data-copy="hex"><span>HEX</span><span id="colorHex">#88b0ff</span></div>
+                <div class="color-item" data-copy="rgb"><span>RGB</span><span id="colorRgb">rgb(136, 176, 255)</span></div>
+                <div class="color-item" data-copy="hsl"><span>HSL</span><span id="colorHsl">hsl(219, 100%, 77%)</span></div>
+            </div>
+
+            <!-- Base64 -->
+            <div class="tp-pane" data-pane="base64">
+                <div class="tp-label">输入</div>
+                <textarea class="tp-textarea" id="b64Input" placeholder="输入文本或 Base64 字符串…"></textarea>
+                <div class="tp-row" style="margin-top:8px;">
+                    <button class="tp-btn tp-btn-primary" id="b64Encode" style="flex:1;">编码 ↓</button>
+                    <button class="tp-btn" id="b64Decode" style="flex:1;">解码 ↓</button>
+                </div>
+                <div class="tp-label">输出</div>
+                <textarea class="tp-textarea" id="b64Output" readonly placeholder="结果显示在这里"></textarea>
+                <button class="tp-btn" id="b64Copy" style="width:100%;margin-top:8px;">复制结果</button>
+            </div>
+
+        </div>
     </div>
 
     <!-- 设置面板 -->
@@ -1146,6 +1779,17 @@
             <button class="sp-close" id="settingsClose" aria-label="关闭设置">×</button>
         </div>
         <div class="sp-body">
+
+            <div class="sp-section">
+                <div class="sp-label">性能模式 <span class="sp-val" id="perfModeVal">标准</span></div>
+                <div class="sp-grid sp-grid-2" id="perfGrid">
+                    <button class="chip" data-perf="0">标准</button>
+                    <button class="chip" data-perf="1">低性能</button>
+                </div>
+                <div class="sp-hint">低配设备建议开启：粒子数上限 200，关闭背景动画与毛玻璃模糊，降低显卡占用。</div>
+            </div>
+
+            <div class="sp-divider"></div>
 
             <div class="sp-section">
                 <div class="sp-label">背景风格</div>
@@ -1216,6 +1860,20 @@
                 <div class="sp-hint">悬停任意模块，拖动上方 ✥ 手柄即可自由调整位置；偏移量会自动保存。</div>
             </div>
 
+            <div class="sp-divider"></div>
+
+            <div class="sp-section">
+                <div class="sp-label">键盘快捷键</div>
+                <div class="sp-hint" style="line-height:2;">
+                    <div><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>K</kbd>　聚焦搜索框</div>
+                    <div><kbd>/</kbd>　聚焦搜索框</div>
+                    <div><kbd>1</kbd>–<kbd>9</kbd>　打开对应快捷方式</div>
+                    <div><kbd>↑</kbd> <kbd>↓</kbd>　选择搜索建议</div>
+                    <div><kbd>Enter</kbd>　执行搜索 / 打开网址</div>
+                    <div><kbd>Esc</kbd>　关闭面板 / 返回首页</div>
+                </div>
+            </div>
+
         </div>
     </aside>
 
@@ -1236,8 +1894,11 @@
             meteorInterval: 180,
             bgStyle: 'deepspace',
             layout: 'center',
+            perfMode: false,
             offsets: {}
         };
+
+        const PERF_STAR_CAP = 200;
 
         function loadSettings() {
             try {
@@ -1329,15 +1990,19 @@
             }
         }
 
+        function effectiveStarCount() {
+            const raw = Math.max(10, Math.round(settings.starCount));
+            return settings.perfMode ? Math.min(raw, PERF_STAR_CAP) : raw;
+        }
+
         function syncStarCount() {
-            const target = Math.max(10, Math.round(settings.starCount));
+            const target = effectiveStarCount();
             while (stars.length < target) stars.push(new Star());
             while (stars.length > target) stars.pop();
         }
         syncStarCount();
 
         function animate() {
-            // destination-out 淡出：保持 Canvas 透明，让底层背景风格可见
             const fade = currentState === 'warp' ? 0.09 : 0.26;
             ctx.globalCompositeOperation = 'destination-out';
             ctx.fillStyle = `rgba(0, 0, 0, ${fade})`;
@@ -1667,6 +2332,8 @@
         const meteorVal = document.getElementById('meteorVal');
         const presetSelect = document.getElementById('presetSelect');
         const toastEl = document.getElementById('spToast');
+        const perfGrid = document.getElementById('perfGrid');
+        const perfModeVal = document.getElementById('perfModeVal');
 
         let toastTimer = null;
         function toast(msg) {
@@ -1688,6 +2355,14 @@
             document.body.dataset.bg = settings.bgStyle;
             document.body.dataset.layout = settings.layout;
 
+            // 性能模式
+            document.body.classList.toggle('perf-mode', !!settings.perfMode);
+            perfModeVal.textContent = settings.perfMode ? '低性能' : '标准';
+            perfGrid.querySelectorAll('.chip').forEach(btn => {
+                const on = btn.dataset.perf === '1';
+                btn.classList.toggle('active', on === !!settings.perfMode);
+            });
+
             bgGrid.querySelectorAll('.chip').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.bg === settings.bgStyle);
             });
@@ -1697,7 +2372,9 @@
             });
 
             starCountRange.value = settings.starCount;
-            starCountVal.textContent = settings.starCount;
+            starCountVal.textContent = settings.perfMode
+                ? `${settings.starCount}（实际 ${effectiveStarCount()}）`
+                : settings.starCount;
 
             colorRow.querySelectorAll('.color-dot').forEach(dot => {
                 dot.classList.toggle('active', dot.dataset.color.toLowerCase() === String(settings.starColor).toLowerCase());
@@ -1725,6 +2402,18 @@
             syncSettingsUI();
         }
 
+        // 性能模式
+        perfGrid.addEventListener('click', e => {
+            const btn = e.target.closest('.chip[data-perf]');
+            if (!btn) return;
+            const on = btn.dataset.perf === '1';
+            if (on === !!settings.perfMode) return;
+            settings.perfMode = on;
+            saveSettings();
+            applyAllSettings();
+            toast(on ? '已开启低性能模式' : '已恢复标准模式');
+        });
+
         // 背景风格
         bgGrid.addEventListener('click', e => {
             const btn = e.target.closest('.chip[data-bg]');
@@ -1746,8 +2435,8 @@
         // 星星数量
         starCountRange.addEventListener('input', () => {
             settings.starCount = parseInt(starCountRange.value, 10);
-            starCountVal.textContent = settings.starCount;
             syncStarCount();
+            syncSettingsUI();
         });
         starCountRange.addEventListener('change', saveSettings);
 
@@ -1792,7 +2481,7 @@
                 names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
         }
 
-        const PRESET_FIELDS = ['starCount', 'starColor', 'warpSpeed', 'meteorInterval', 'bgStyle', 'layout'];
+        const PRESET_FIELDS = ['starCount', 'starColor', 'warpSpeed', 'meteorInterval', 'bgStyle', 'layout', 'perfMode'];
 
         document.getElementById('presetSave').addEventListener('click', () => {
             const name = prompt('为这套预设命名：', '我的星空 ' + (Object.keys(loadPresets()).length + 1));
@@ -1923,13 +2612,11 @@
             }
         });
 
-        // 初始专注状态
         try {
             if (localStorage.getItem(FOCUS_KEY) === '1') setFocusMode(true, false);
         } catch (e) {}
         updateFocusBtn();
 
-        // 专注模式下按 Esc 退出
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape' && body.classList.contains('focus-mode')) {
                 setFocusMode(false, true);
@@ -1960,13 +2647,169 @@
         document.getElementById('settingsClose').addEventListener('click', closeSettings);
 
         /* ==========================================
-           11. 搜索与动画
+           11. 搜索联想 / 历史 / 网址直达
            ========================================== */
+        const HISTORY_KEY = 'st_nav_search_history_v1';
+        const MAX_HISTORY = 10;
+        const suggestEl = document.getElementById('searchSuggest');
+
+        const COMMON_SUGGESTIONS = [
+            '天气预报', '今日新闻', '知乎热榜', 'B站热门', 'GitHub Trending',
+            '豆瓣电影', '在线翻译', '计算器', '快递查询', '汇率转换',
+            '股票行情', '百度地图', '微博热搜', 'CSDN', '掘金',
+            'LeetCode', 'MDN', '菜鸟教程', '12306', '支付宝'
+        ];
+
+        let suggestList = [];
+        let activeIdx = -1;
+
+        function loadHistory() {
+            try {
+                const raw = localStorage.getItem(HISTORY_KEY);
+                if (!raw) return [];
+                const arr = JSON.parse(raw);
+                return Array.isArray(arr) ? arr.filter(x => x && x.type && x.value) : [];
+            } catch (e) { return []; }
+        }
+        function saveHistory(arr) {
+            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr.slice(0, MAX_HISTORY))); } catch (e) {}
+        }
+        function addToHistory(type, value) {
+            const v = String(value || '').trim();
+            if (!v) return;
+            const list = loadHistory().filter(x => !(x.type === type && x.value === v));
+            list.unshift({ type, value: v });
+            saveHistory(list);
+        }
+
+        function detectUrl(query) {
+            const q = String(query || '').trim();
+            if (!q || /\s/.test(q)) return null;
+            if (/^https?:\/\/[^\s]+$/i.test(q)) return q;
+            if (/^localhost(:\d+)?(\/[^\s]*)?$/i.test(q)) return 'http://' + q;
+            if (/^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}(:\d+)?(\/[^\s]*)?$/i.test(q)) return 'https://' + q;
+            return null;
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function highlight(text, query) {
+            const safe = escapeHtml(text);
+            if (!query) return safe;
+            const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            try {
+                return safe.replace(new RegExp('(' + esc + ')', 'ig'), '<mark>$1</mark>');
+            } catch (e) { return safe; }
+        }
+
+        function buildSuggestions(query) {
+            const q = String(query || '').trim();
+            const list = [];
+            const url = detectUrl(q);
+            const history = loadHistory();
+
+            if (url) {
+                list.push({ type: 'url', value: url, label: q, icon: '🌐', tag: '网址直达', historyType: 'url' });
+            }
+
+            const lower = q.toLowerCase();
+            const histMatched = q
+                ? history.filter(h => h.value.toLowerCase().includes(lower)).slice(0, 4)
+                : history.slice(0, 6);
+            histMatched.forEach(h => {
+                list.push({
+                    type: 'history',
+                    value: h.value,
+                    label: h.value,
+                    icon: h.type === 'url' ? '🌐' : '🕘',
+                    tag: h.type === 'url' ? '历史网址' : '历史',
+                    historyType: h.type
+                });
+            });
+
+            if (q) {
+                COMMON_SUGGESTIONS
+                    .filter(s => s.toLowerCase().includes(lower) && s.toLowerCase() !== lower)
+                    .slice(0, 5)
+                    .forEach(s => list.push({ type: 'suggest', value: s, label: s, icon: '🔍', tag: '联想' }));
+
+                if (!url) {
+                    list.push({ type: 'search', value: q, label: q, icon: '🔍', tag: '搜索' });
+                }
+            }
+
+            return list;
+        }
+
+        function renderSuggest(query) {
+            const q = String(query || '').trim();
+            const list = buildSuggestions(q);
+            suggestList = list;
+            activeIdx = -1;
+
+            if (!list.length) {
+                suggestEl.innerHTML = '';
+                closeSuggest();
+                return;
+            }
+
+            let html = '';
+            if (!q) {
+                html += `<div class="ss-header"><span>最近搜索</span><button class="ss-clear" data-act="clear">清空</button></div>`;
+            }
+
+            list.forEach((item, i) => {
+                const delBtn = item.type === 'history'
+                    ? `<button class="ss-del" data-del="${i}" title="删除此条">×</button>`
+                    : '';
+                html += `<div class="ss-item" data-index="${i}" role="option">
+                    <span class="ss-icon">${item.icon}</span>
+                    <span class="ss-label">${highlight(item.label, q)}<span class="ss-type"> · ${item.tag}</span></span>
+                    ${delBtn}
+                </div>`;
+            });
+
+            suggestEl.innerHTML = html;
+            suggestEl.classList.add('open');
+            body.classList.add('is-input-focus');
+        }
+
+        function closeSuggest() {
+            suggestEl.classList.remove('open');
+            activeIdx = -1;
+            body.classList.remove('is-input-focus');
+        }
+
+        function updateActiveItem() {
+            const items = suggestEl.querySelectorAll('.ss-item');
+            items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
+            if (activeIdx >= 0 && items[activeIdx]) {
+                items[activeIdx].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function executeSuggestion(idx) {
+            const item = suggestList[idx];
+            if (!item) return;
+            searchInput.value = item.value;
+            closeSuggest();
+            triggerSearch();
+        }
+
+        /* 输入事件 */
+        searchInput.addEventListener('input', () => {
+            renderSuggest(searchInput.value);
+        });
+
         searchInput.addEventListener('focus', () => {
             if (currentState === 'idle') {
                 currentState = 'prepare';
                 searchBox.classList.add('active');
             }
+            if (body.classList.contains('is-searching')) return;
+            renderSuggest(searchInput.value);
         });
 
         searchInput.addEventListener('blur', () => {
@@ -1974,11 +2817,102 @@
                 currentState = 'idle';
                 searchBox.classList.remove('active');
             }
+            setTimeout(() => {
+                if (document.activeElement !== searchInput) closeSuggest();
+            }, 140);
         });
 
+        /* 键盘导航 */
+        searchInput.addEventListener('keydown', e => {
+            const open = suggestEl.classList.contains('open');
+
+            if (e.key === 'ArrowDown') {
+                if (!open) { renderSuggest(searchInput.value); return; }
+                if (!suggestList.length) return;
+                e.preventDefault();
+                activeIdx = (activeIdx + 1) % suggestList.length;
+                updateActiveItem();
+            } else if (e.key === 'ArrowUp') {
+                if (!open || !suggestList.length) return;
+                e.preventDefault();
+                activeIdx = activeIdx <= 0 ? suggestList.length - 1 : activeIdx - 1;
+                updateActiveItem();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (open && activeIdx >= 0 && suggestList[activeIdx]) {
+                    executeSuggestion(activeIdx);
+                } else {
+                    triggerSearch();
+                }
+            } else if (e.key === 'Escape') {
+                e.stopPropagation();
+                if (open) {
+                    e.preventDefault();
+                    closeSuggest();
+                }
+                searchInput.blur();
+            }
+        });
+
+        /* 面板交互 */
+        suggestEl.addEventListener('mousedown', e => {
+            e.preventDefault();
+        });
+
+        suggestEl.addEventListener('click', e => {
+            const delBtn = e.target.closest('.ss-del');
+            if (delBtn) {
+                e.stopPropagation();
+                const idx = parseInt(delBtn.dataset.del, 10);
+                const item = suggestList[idx];
+                if (item && item.type === 'history') {
+                    const list = loadHistory().filter(x => !(x.type === item.historyType && x.value === item.value));
+                    saveHistory(list);
+                    renderSuggest(searchInput.value);
+                }
+                return;
+            }
+
+            const clearBtn = e.target.closest('.ss-clear');
+            if (clearBtn) {
+                saveHistory([]);
+                renderSuggest(searchInput.value);
+                return;
+            }
+
+            const itemEl = e.target.closest('.ss-item');
+            if (itemEl) {
+                const idx = parseInt(itemEl.dataset.index, 10);
+                executeSuggestion(idx);
+            }
+        });
+
+        /* 点击外部关闭 */
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.search-box-wrapper')) {
+                closeSuggest();
+            }
+        });
+
+        /* ==========================================
+           12. 搜索与动画
+           ========================================== */
         function triggerSearch() {
             const query = searchInput.value.trim();
             if (!query) return;
+
+            closeSuggest();
+
+            const url = detectUrl(query);
+            if (url) {
+                addToHistory('url', query);
+                window.open(url, '_blank', 'noopener');
+                searchInput.value = '';
+                searchInput.blur();
+                return;
+            }
+
+            addToHistory('search', query);
 
             const currentToken = ++searchToken;
 
@@ -2068,25 +3002,578 @@
         }
 
         searchBtn.addEventListener('click', triggerSearch);
-        searchInput.addEventListener('keypress', e => {
-            if (e.key === 'Enter') triggerSearch();
-        });
 
         backBtn.addEventListener('click', () => {
             searchToken++;
             body.classList.remove('is-searching');
             searchInput.value = '';
             currentState = 'idle';
+            closeSuggest();
             document.querySelectorAll('.flying-star').forEach(el => el.remove());
             setTimeout(() => { resultsContainer.innerHTML = ''; }, 400);
         });
 
         /* ==========================================
-           12. 启动
+           12.5 全局键盘快捷键
+           ========================================== */
+        function isTextInputFocused() {
+            const el = document.activeElement;
+            if (!el) return false;
+            const tag = el.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+            if (el.isContentEditable) return true;
+            return false;
+        }
+
+        document.addEventListener('keydown', e => {
+            // Ctrl/Cmd + K：聚焦搜索框
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+                return;
+            }
+
+            // Esc 返回首页（输入框之外的场景；输入框内已被 stopPropagation）
+            if (e.key === 'Escape') {
+                if (e.defaultPrevented) return;
+                if (body.classList.contains('is-searching')) {
+                    backBtn.click();
+                    e.preventDefault();
+                    return;
+                }
+                return;
+            }
+
+            // 剩余快捷键：不在输入框、不带修饰键
+            if (isTextInputFocused()) return;
+            if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+
+            // / 聚焦搜索框
+            if (e.key === '/') {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+                return;
+            }
+
+            // 数字 1-9 打开对应快捷方式
+            if (e.key >= '1' && e.key <= '9') {
+                if (body.classList.contains('focus-mode')) return;
+                if (body.classList.contains('is-searching')) return;
+                if (document.getElementById('toolsPanel').classList.contains('open')) return;
+                if (settingsPanel.classList.contains('open')) return;
+
+                const idx = parseInt(e.key, 10) - 1;
+                const shortcuts = document.querySelectorAll('.shortcuts .shortcut-item');
+                if (shortcuts[idx]) {
+                    e.preventDefault();
+                    shortcuts[idx].click();
+                }
+                return;
+            }
+        });
+
+        /* ==========================================
+           13. 启动
            ========================================== */
         setupDragHandles();
         applyAllSettings();
         colorPicker.value = settings.starColor;
+
+        /* ==========================================
+           14. 小工具箱
+           ========================================== */
+        (function initToolbox() {
+            const panel = document.getElementById('toolsPanel');
+            const fab = document.getElementById('toolsFab');
+            const closeBtn = document.getElementById('toolsClose');
+            const tabsWrap = document.getElementById('toolsTabs');
+            let currentTool = 'calc';
+
+            function copyText(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(text);
+                }
+                return new Promise((resolve, reject) => {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try { document.execCommand('copy'); resolve(); }
+                    catch (err) { reject(err); }
+                    document.body.removeChild(ta);
+                });
+            }
+
+            function beep(times) {
+                try {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    if (!AC) return;
+                    const ac = new AC();
+                    const now = ac.currentTime;
+                    for (let i = 0; i < times; i++) {
+                        const o = ac.createOscillator();
+                        const g = ac.createGain();
+                        o.connect(g); g.connect(ac.destination);
+                        o.type = 'sine';
+                        o.frequency.value = 880;
+                        const t0 = now + i * 0.28;
+                        g.gain.setValueAtTime(0.0001, t0);
+                        g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02);
+                        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
+                        o.start(t0);
+                        o.stop(t0 + 0.24);
+                    }
+                    setTimeout(() => { try { ac.close(); } catch (e) {} }, times * 300 + 400);
+                } catch (e) {}
+            }
+
+            function openTools() {
+                panel.classList.add('open');
+                fab.classList.add('is-active');
+                document.getElementById('settingsPanel').classList.remove('open');
+                if (currentTool === 'unit') initUnit();
+                if (currentTool === 'color') renderColor();
+            }
+            function closeTools() {
+                panel.classList.remove('open');
+                fab.classList.remove('is-active');
+            }
+
+            fab.addEventListener('click', () => {
+                if (panel.classList.contains('open')) closeTools();
+                else openTools();
+            });
+            closeBtn.addEventListener('click', closeTools);
+
+            document.getElementById('settingsFab').addEventListener('click', closeTools);
+            document.getElementById('focusBtn').addEventListener('click', () => {
+                if (document.body.classList.contains('focus-mode')) closeTools();
+            });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && panel.classList.contains('open')) {
+                    closeTools();
+                    e.preventDefault();
+                }
+            });
+
+            tabsWrap.addEventListener('click', e => {
+                const btn = e.target.closest('.tp-tab');
+                if (!btn) return;
+                currentTool = btn.dataset.tool;
+                tabsWrap.querySelectorAll('.tp-tab').forEach(b => b.classList.toggle('active', b === btn));
+                panel.querySelectorAll('.tp-pane').forEach(p => {
+                    p.classList.toggle('active', p.dataset.pane === currentTool);
+                });
+                if (currentTool === 'unit') initUnit();
+                if (currentTool === 'color') renderColor();
+            });
+
+            /* ---------- 计算器 ---------- */
+            const calcDisplay = document.getElementById('calcDisplay');
+            const calcHistory = document.getElementById('calcHistory');
+            let calcExpr = '';
+
+            function safeEval(expr) {
+                if (!/^[0-9+\-*/().%\s]+$/.test(expr)) throw new Error('invalid');
+                const sanitized = expr.replace(/(\d+(?:\.\d+)?)%(?=[+\-*/().]|$)/g, '($1/100)');
+                const fn = new Function('"use strict"; return (' + sanitized + ');');
+                const r = fn();
+                if (typeof r !== 'number' || !isFinite(r)) throw new Error('invalid result');
+                return Math.round(r * 1e10) / 1e10;
+            }
+
+            function renderCalc() { calcDisplay.textContent = calcExpr || '0'; }
+
+            function appendCalc(k) {
+                if (k === 'C') { calcExpr = ''; calcHistory.textContent = ''; }
+                else if (k === 'DEL') { calcExpr = calcExpr.slice(0, -1); }
+                else if (k === '=') { evaluateCalc(); return; }
+                else { calcExpr += k; }
+                renderCalc();
+            }
+
+            function evaluateCalc() {
+                if (!calcExpr.trim()) return;
+                try {
+                    const val = safeEval(calcExpr);
+                    calcHistory.textContent = calcExpr + ' =';
+                    calcExpr = String(val);
+                    renderCalc();
+                } catch (err) {
+                    calcHistory.textContent = '表达式有误';
+                }
+            }
+
+            document.getElementById('calcKeys').addEventListener('click', e => {
+                const btn = e.target.closest('.calc-key');
+                if (!btn) return;
+                appendCalc(btn.dataset.k);
+            });
+
+            document.addEventListener('keydown', e => {
+                if (!panel.classList.contains('open') || currentTool !== 'calc') return;
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+                const k = e.key;
+                if (/^[0-9.+\-*/()%]$/.test(k)) { appendCalc(k); e.preventDefault(); }
+                else if (k === 'Enter' || k === '=') { evaluateCalc(); e.preventDefault(); }
+                else if (k === 'Backspace') { appendCalc('DEL'); e.preventDefault(); }
+            });
+
+            /* ---------- 单位换算 ---------- */
+            const UNITS = {
+                length: { name: '长度', units: { '米 m': 1, '千米 km': 1000, '厘米 cm': 0.01, '毫米 mm': 0.001, '英里 mi': 1609.344, '英尺 ft': 0.3048, '英寸 in': 0.0254, '海里 nmi': 1852 } },
+                weight: { name: '重量', units: { '千克 kg': 1, '克 g': 0.001, '吨 t': 1000, '磅 lb': 0.45359237, '盎司 oz': 0.028349523125, '斤': 0.5 } },
+                area:   { name: '面积', units: { '平方米 m²': 1, '平方千米 km²': 1e6, '平方厘米 cm²': 1e-4, '公顷 ha': 1e4, '亩': 666.6667, '英亩 ac': 4046.8564 } },
+                volume: { name: '体积', units: { '升 L': 1, '毫升 mL': 0.001, '立方米 m³': 1000, '加仑 gal': 3.785411784 } },
+                speed:  { name: '速度', units: { '米/秒 m/s': 1, '千米/时 km/h': 0.2777778, '英里/时 mph': 0.44704, '节 kn': 0.514444 } },
+                data:   { name: '数据量', units: { '字节 B': 1, 'KB': 1024, 'MB': 1048576, 'GB': 1073741824, 'TB': 1099511627776, 'bit': 0.125 } },
+                time:   { name: '时间', units: { '秒 s': 1, '分钟 min': 60, '小时 h': 3600, '天 d': 86400, '周 wk': 604800 } },
+                temp:   { name: '温度', special: true, units: { '摄氏度 °C': 'c', '华氏度 °F': 'f', '开尔文 K': 'k' } }
+            };
+
+            let unitInited = false;
+
+            function formatNum(n) {
+                if (!isFinite(n)) return '—';
+                const abs = Math.abs(n);
+                if (abs !== 0 && (abs < 1e-6 || abs >= 1e12)) return n.toExponential(4);
+                return parseFloat(n.toPrecision(10)).toString();
+            }
+
+            function convertTemp(v, from, to) {
+                let c;
+                if (from === 'c') c = v;
+                else if (from === 'f') c = (v - 32) * 5 / 9;
+                else c = v - 273.15;
+                if (to === 'c') return c;
+                if (to === 'f') return c * 9 / 5 + 32;
+                return c + 273.15;
+            }
+
+            function convertUnit() {
+                const cat = document.getElementById('unitCategory').value;
+                const u = UNITS[cat];
+                if (!u) return;
+                const from = document.getElementById('unitFrom').value;
+                const to = document.getElementById('unitTo').value;
+                const raw = parseFloat(document.getElementById('unitInput').value);
+                const out = document.getElementById('unitResult');
+                if (!isFinite(raw)) { out.textContent = '—'; return; }
+                let res;
+                if (u.special) res = convertTemp(raw, u.units[from], u.units[to]);
+                else res = (raw * u.units[from]) / u.units[to];
+                out.textContent = formatNum(res);
+            }
+
+            function fillUnitSelects() {
+                const cat = document.getElementById('unitCategory').value;
+                const u = UNITS[cat];
+                const keys = Object.keys(u.units);
+                const fromSel = document.getElementById('unitFrom');
+                const toSel = document.getElementById('unitTo');
+                fromSel.innerHTML = keys.map(k => `<option value="${k}">${k}</option>`).join('');
+                toSel.innerHTML = keys.map(k => `<option value="${k}">${k}</option>`).join('');
+                if (keys.length > 1) toSel.value = keys[1];
+                convertUnit();
+            }
+
+            function initUnit() {
+                if (unitInited) return;
+                unitInited = true;
+                const catSel = document.getElementById('unitCategory');
+                catSel.innerHTML = Object.keys(UNITS).map(k => `<option value="${k}">${UNITS[k].name}</option>`).join('');
+                catSel.addEventListener('change', fillUnitSelects);
+                document.getElementById('unitFrom').addEventListener('change', convertUnit);
+                document.getElementById('unitTo').addEventListener('change', convertUnit);
+                document.getElementById('unitInput').addEventListener('input', convertUnit);
+                fillUnitSelects();
+            }
+
+            /* ---------- 二维码 ---------- */
+            const qrBox = document.getElementById('qrBox');
+
+            document.getElementById('qrGenBtn').addEventListener('click', () => {
+                const text = document.getElementById('qrText').value.trim();
+                if (!text) { toast('请输入内容'); return; }
+                if (typeof QRCode === 'undefined') { toast('二维码库加载失败，请检查网络'); return; }
+                qrBox.innerHTML = '';
+                new QRCode(qrBox, {
+                    text,
+                    width: 170,
+                    height: 170,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            });
+
+            document.getElementById('qrDownloadBtn').addEventListener('click', () => {
+                const canvasEl = qrBox.querySelector('canvas');
+                const imgEl = qrBox.querySelector('img');
+                let url = '';
+                if (canvasEl) url = canvasEl.toDataURL('image/png');
+                else if (imgEl) url = imgEl.src;
+                if (!url) { toast('请先生成二维码'); return; }
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'qrcode.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
+            document.getElementById('qrFile').addEventListener('change', e => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                const out = document.getElementById('qrResult');
+                if (typeof jsQR === 'undefined') { out.textContent = '识别库加载失败，请检查网络'; return; }
+                out.textContent = '识别中…';
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const c = document.createElement('canvas');
+                        let w = img.naturalWidth, h = img.naturalHeight;
+                        const max = 1200;
+                        if (Math.max(w, h) > max) {
+                            const s = max / Math.max(w, h);
+                            w = Math.round(w * s);
+                            h = Math.round(h * s);
+                        }
+                        c.width = w; c.height = h;
+                        const cx = c.getContext('2d');
+                        cx.drawImage(img, 0, 0, w, h);
+                        const data = cx.getImageData(0, 0, w, h);
+                        const code = jsQR(data.data, w, h);
+                        if (code && code.data) {
+                            out.textContent = code.data;
+                            toast('识别成功');
+                        } else {
+                            out.textContent = '未识别到二维码，试试更清晰的图片';
+                        }
+                    } catch (err) {
+                        out.textContent = '图片处理失败';
+                    }
+                    URL.revokeObjectURL(img.src);
+                };
+                img.onerror = () => { out.textContent = '图片加载失败'; };
+                img.src = URL.createObjectURL(file);
+            });
+
+            /* ---------- 翻译 ---------- */
+            document.getElementById('trBtn').addEventListener('click', async () => {
+                const text = document.getElementById('trInput').value.trim();
+                const out = document.getElementById('trOutput');
+                const btn = document.getElementById('trBtn');
+                if (!text) { toast('请输入要翻译的内容'); return; }
+                const dir = document.getElementById('trDir').value;
+                btn.disabled = true;
+                btn.textContent = '翻译中…';
+                out.value = '';
+                try {
+                    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${dir}`;
+                    const r = await fetch(url);
+                    if (!r.ok) throw new Error('http ' + r.status);
+                    const j = await r.json();
+                    const t = j && j.responseData && j.responseData.translatedText;
+                    if (!t) throw new Error('empty');
+                    out.value = t;
+                } catch (err) {
+                    out.value = '翻译失败，请检查网络后重试';
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = '翻译';
+                }
+            });
+
+            /* ---------- 番茄钟 / 倒计时 ---------- */
+            const timerDisplay = document.getElementById('timerDisplay');
+            const timerStatus = document.getElementById('timerStatus');
+            const timerStartBtn = document.getElementById('timerStart');
+
+            const timerState = {
+                total: 25 * 60,
+                remaining: 25 * 60,
+                running: false,
+                endAt: 0,
+                tid: null
+            };
+
+            function fmtTime(sec) {
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            function renderTimer() { timerDisplay.textContent = fmtTime(timerState.remaining); }
+
+            function stopTicking() {
+                timerState.running = false;
+                if (timerState.tid) { clearTimeout(timerState.tid); timerState.tid = null; }
+            }
+
+            function setTimerSeconds(sec, label) {
+                stopTicking();
+                timerState.total = sec;
+                timerState.remaining = sec;
+                timerStartBtn.textContent = '开始';
+                timerStatus.textContent = label || '自定义倒计时';
+                renderTimer();
+            }
+
+            function tickTimer() {
+                if (!timerState.running) return;
+                const left = Math.max(0, Math.ceil((timerState.endAt - Date.now()) / 1000));
+                timerState.remaining = left;
+                renderTimer();
+                if (left <= 0) {
+                    stopTicking();
+                    timerStartBtn.textContent = '开始';
+                    timerStatus.textContent = '时间到！';
+                    beep(3);
+                    toast('⏰ 计时结束');
+                    return;
+                }
+                timerState.tid = setTimeout(tickTimer, 200);
+            }
+
+            timerStartBtn.addEventListener('click', () => {
+                if (timerState.running) {
+                    timerState.remaining = Math.max(0, Math.ceil((timerState.endAt - Date.now()) / 1000));
+                    stopTicking();
+                    timerStartBtn.textContent = '继续';
+                    timerStatus.textContent = '已暂停';
+                    renderTimer();
+                    return;
+                }
+                if (timerState.remaining <= 0) timerState.remaining = timerState.total;
+                timerState.running = true;
+                timerState.endAt = Date.now() + timerState.remaining * 1000;
+                timerStartBtn.textContent = '暂停';
+                timerStatus.textContent = '计时中…';
+                tickTimer();
+            });
+
+            document.getElementById('timerReset').addEventListener('click', () => {
+                stopTicking();
+                timerState.remaining = timerState.total;
+                timerStartBtn.textContent = '开始';
+                timerStatus.textContent = '已重置';
+                renderTimer();
+            });
+
+            panel.querySelectorAll('[data-timer]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const min = parseInt(btn.dataset.timer, 10);
+                    setTimerSeconds(min * 60, `${min} 分钟倒计时`);
+                });
+            });
+
+            document.getElementById('timerSetCustom').addEventListener('click', () => {
+                const v = parseInt(document.getElementById('timerCustom').value, 10);
+                if (!isFinite(v) || v <= 0 || v > 180) { toast('请输入 1–180 分钟'); return; }
+                setTimerSeconds(v * 60, `${v} 分钟倒计时`);
+            });
+
+            /* ---------- 取色器 ---------- */
+            function rgbToHsl(r, g, b) {
+                r /= 255; g /= 255; b /= 255;
+                const max = Math.max(r, g, b), min = Math.min(r, g, b);
+                let h = 0, s = 0;
+                const l = (max + min) / 2;
+                if (max !== min) {
+                    const d = max - min;
+                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                    switch (max) {
+                        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                        case g: h = (b - r) / d + 2; break;
+                        case b: h = (r - g) / d + 4; break;
+                    }
+                    h /= 6;
+                }
+                return {
+                    h: Math.round(h * 360),
+                    s: Math.round(s * 100),
+                    l: Math.round(l * 100)
+                };
+            }
+
+            function renderColor() {
+                const hex = document.getElementById('colorInput').value;
+                document.getElementById('colorPreview').style.background = hex;
+                document.getElementById('colorHex').textContent = hex;
+                const { r, g, b } = hexToRgb(hex);
+                document.getElementById('colorRgb').textContent = `rgb(${r}, ${g}, ${b})`;
+                const hsl = rgbToHsl(r, g, b);
+                document.getElementById('colorHsl').textContent = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+            }
+
+            document.getElementById('colorInput').addEventListener('input', renderColor);
+            document.getElementById('colorRandom').addEventListener('click', () => {
+                const hex = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+                document.getElementById('colorInput').value = hex;
+                renderColor();
+            });
+
+            document.querySelectorAll('.color-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const key = item.dataset.copy;
+                    const map = { hex: 'colorHex', rgb: 'colorRgb', hsl: 'colorHsl' };
+                    const text = document.getElementById(map[key]).textContent;
+                    copyText(text)
+                        .then(() => toast('已复制 ' + text))
+                        .catch(() => toast('复制失败'));
+                });
+            });
+
+            /* ---------- Base64 ---------- */
+            function b64Encode(str) {
+                const bytes = new TextEncoder().encode(str);
+                let bin = '';
+                const chunk = 0x8000;
+                for (let i = 0; i < bytes.length; i += chunk) {
+                    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+                }
+                return btoa(bin);
+            }
+
+            function b64Decode(b64) {
+                const bin = atob(b64.trim());
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                return new TextDecoder().decode(bytes);
+            }
+
+            document.getElementById('b64Encode').addEventListener('click', () => {
+                const v = document.getElementById('b64Input').value;
+                try {
+                    document.getElementById('b64Output').value = b64Encode(v);
+                    toast('已编码');
+                } catch (err) {
+                    toast('编码失败');
+                }
+            });
+
+            document.getElementById('b64Decode').addEventListener('click', () => {
+                const v = document.getElementById('b64Input').value.trim();
+                try {
+                    document.getElementById('b64Output').value = b64Decode(v);
+                    toast('已解码');
+                } catch (err) {
+                    document.getElementById('b64Output').value = '解码失败：不是有效的 Base64 字符串';
+                }
+            });
+
+            document.getElementById('b64Copy').addEventListener('click', () => {
+                const v = document.getElementById('b64Output').value;
+                if (!v) { toast('没有可复制的内容'); return; }
+                copyText(v).then(() => toast('已复制')).catch(() => toast('复制失败'));
+            });
+
+        })();
     </script>
 </body>
 </html>
