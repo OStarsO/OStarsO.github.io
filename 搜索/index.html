@@ -231,6 +231,26 @@
         kbd { display: inline-block; padding: 1px 6px; margin: 0 2px; border-radius: 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); font-family: inherit; font-size: 11px; color: rgba(255,255,255,0.78); line-height: 1.6; }
         .sp-toast { position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%) translateY(20px); padding: 9px 20px; border-radius: 999px; background: rgba(20, 26, 48, 0.92); border: 1px solid rgba(136, 176, 255, 0.4); color: #dfe9ff; font-size: 12.5px; letter-spacing: 1px; opacity: 0; pointer-events: none; transition: all 0.32s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 9800; backdrop-filter: blur(12px); }
         .sp-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ============= FPS 检测徽标 ============= */
+        .fps-badge {
+            position: fixed; top: 24px; right: 24px; z-index: 9900;
+            padding: 8px 16px; border-radius: 999px;
+            background: rgba(20, 26, 48, 0.92);
+            border: 1px solid rgba(136, 176, 255, 0.4);
+            color: #dfe9ff; font-size: 13px; font-weight: 600;
+            font-variant-numeric: tabular-nums; letter-spacing: 1.5px;
+            opacity: 0; transform: translateY(-10px);
+            transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            pointer-events: none;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+        .fps-badge.show { opacity: 1; transform: none; }
+        .fps-badge.good { border-color: rgba(76, 216, 255, 0.65); color: #a8ecff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 16px rgba(76, 216, 255, 0.25); }
+        .fps-badge.bad  { border-color: rgba(255, 138, 138, 0.65); color: #ffb8b8; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 16px rgba(255, 120, 120, 0.28); }
+        @media (max-width: 600px) { .fps-badge { top: 16px; right: 16px; padding: 6px 12px; font-size: 12px; } }
+
         .tools-panel { position: fixed; right: 20px; bottom: 76px; z-index: 9550; width: 380px; max-width: calc(100vw - 24px); height: 560px; max-height: calc(100vh - 110px); max-height: calc(100dvh - 110px); display: flex; flex-direction: column; border-radius: 18px; background: rgba(12, 14, 28, 0.88); border: 1px solid rgba(255, 255, 255, 0.12); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); box-shadow: 0 16px 56px rgba(0, 0, 0, 0.5); opacity: 0; transform: translateY(14px) scale(0.97); transform-origin: bottom right; pointer-events: none; visibility: hidden; transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0s linear 0.3s; }
         .tools-panel.open { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0s; }
         .tp-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 11px; font-size: 14px; font-weight: 600; letter-spacing: 1px; color: rgba(255, 255, 255, 0.92); flex-shrink: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
@@ -303,7 +323,7 @@
             <div class="mod-wrap" data-mod="quote">
                 <div class="daily-quote-panel" id="dailyQuotePanel">
                     <button class="daily-quote-close" id="dailyQuoteClose" aria-label="关闭每日一句" title="关闭每日一句">×</button>
-                    <div class="daily-quote-mark"></div>
+                    <div class="daily-quote-mark">❝</div>
                     <div class="daily-quote-text" id="dailyQuoteText">——</div>
                     <div class="daily-quote-author" id="dailyQuoteAuthor"></div>
                 </div>
@@ -544,6 +564,9 @@
 
     <div class="sp-toast" id="spToast"></div>
 
+    <!-- FPS 检测徽标 -->
+    <div class="fps-badge" id="fpsBadge">FPS --</div>
+
     <script>
         /* ==========================================
            0. 工具函数
@@ -561,9 +584,8 @@
         }
 
         /* ==========================================
-           1. 聚合搜索引擎配置（核心）
+           1. 聚合搜索引擎配置
            ========================================== */
-        // id、名称、图标、bang 别名、搜索 URL（%s 占位）、默认启用
         const SEARCH_ENGINES = [
             { id: 'baidu',    name: '百度',   icon: '🔍', bangs: ['bd', 'baidu'],     url: 'https://www.baidu.com/s?wd=%s',                   defaultEnabled: true },
             { id: 'bing',     name: '必应',   icon: '🔎', bangs: ['bing', 'bi2'],     url: 'https://www.bing.com/search?q=%s',                defaultEnabled: true },
@@ -591,6 +613,9 @@
         const SETTINGS_KEY = 'st_nav_settings_v2';
         const PRESETS_KEY = 'st_nav_presets_v2';
         const FOCUS_KEY = 'st_nav_focus_mode';
+        const PERF_CHECK_KEY = 'st_nav_perf_checked_v1';      // 首次性能检测标记
+        const PERF_FPS_THRESHOLD = 30;                         // 低于此 FPS 提示开启低性能
+        const PERF_FPS_WINDOW_MS = 1000;                       // 检测窗口 1 秒
 
         const DEFAULT_SETTINGS = {
             starCount: 800,
@@ -601,7 +626,7 @@
             layout: 'center',
             perfMode: false,
             offsets: {},
-            enabledEngines: DEFAULT_ENGINES   // 新增：聚合搜索引擎
+            enabledEngines: DEFAULT_ENGINES
         };
         const PERF_STAR_CAP = 200;
 
@@ -611,7 +636,6 @@
                 if (!raw) return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
                 const parsed = JSON.parse(raw);
                 const merged = Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), parsed, { offsets: parsed.offsets || {} });
-                // 校验 enabledEngines 合法性
                 if (!Array.isArray(merged.enabledEngines) || !merged.enabledEngines.length) {
                     merged.enabledEngines = DEFAULT_ENGINES.slice();
                 } else {
@@ -728,7 +752,7 @@
         }
 
         /* ==========================================
-           5. 快捷方式交互：点击 / 右键 / 长按 / 拖拽
+           5. 快捷方式交互
            ========================================== */
         let drag = null;
         let longPressTimer = null;
@@ -1460,7 +1484,86 @@
             });
         }
 
-        // 渲染聚合搜索引擎网格
+        /* ==========================================
+           15.1 FPS 检测（首次打开自动运行）
+           ========================================== */
+        function runPerfCheck() {
+            // 已经检测过 → 跳过
+            let checked = false;
+            try { checked = localStorage.getItem(PERF_CHECK_KEY) === '1'; } catch (e) {}
+            if (checked) return;
+            // 用户已在低性能模式 → 直接标记完成
+            if (settings.perfMode) {
+                try { localStorage.setItem(PERF_CHECK_KEY, '1'); } catch (e) {}
+                return;
+            }
+            // 等首屏渲染稳定后开始（避开初始化高峰）
+            setTimeout(startFpsCounting, 600);
+        }
+
+        function startFpsCounting() {
+            let frames = 0;
+            let startTs = 0;
+            let rafId = null;
+
+            function tick(ts) {
+                // 页面不可见时暂停计数，可见后重新开始
+                if (document.visibilityState !== 'visible') {
+                    startTs = 0;
+                    frames = 0;
+                    rafId = requestAnimationFrame(tick);
+                    return;
+                }
+                if (!startTs) startTs = ts;
+                frames++;
+                const elapsed = ts - startTs;
+                if (elapsed < PERF_FPS_WINDOW_MS) {
+                    rafId = requestAnimationFrame(tick);
+                } else {
+                    const fps = Math.max(1, Math.round(frames * 1000 / elapsed));
+                    handlePerfResult(fps);
+                }
+            }
+            rafId = requestAnimationFrame(tick);
+        }
+
+        function handlePerfResult(fps) {
+            // 显示 FPS 徽标
+            showFpsBadge(fps);
+            // 标记已检测（无论 FPS 高低只提醒一次）
+            try { localStorage.setItem(PERF_CHECK_KEY, '1'); } catch (e) {}
+
+            if (fps >= PERF_FPS_THRESHOLD) return;
+
+            // 延迟到 FPS 徽标可见再弹窗
+            setTimeout(() => {
+                if (settings.perfMode) return; // 用户在等待期间手动开启了
+                const ok = confirm(
+                    '检测到设备性能一般（当前 FPS: ' + fps + '）\n\n' +
+                    '是否开启低性能模式？\n' +
+                    '开启后将：粒子数上限 200、关闭背景动画、关闭毛玻璃模糊效果，\n' +
+                    '显著降低显卡与 GPU 占用。'
+                );
+                if (ok) {
+                    settings.perfMode = true;
+                    saveSettings();
+                    applyAllSettings();
+                    toast('已开启低性能模式');
+                }
+            }, 1200);
+        }
+
+        function showFpsBadge(fps) {
+            const badge = document.getElementById('fpsBadge');
+            if (!badge) return;
+            badge.textContent = 'FPS ' + fps;
+            badge.classList.remove('good', 'bad');
+            if (fps >= 50) badge.classList.add('good');
+            else if (fps < PERF_FPS_THRESHOLD) badge.classList.add('bad');
+            badge.classList.add('show');
+            setTimeout(() => badge.classList.remove('show'), 2400);
+        }
+
         function renderEngineGrid() {
             const enabled = settings.enabledEngines && settings.enabledEngines.length ? settings.enabledEngines : DEFAULT_ENGINES;
             engineGrid.innerHTML = SEARCH_ENGINES.map(e =>
@@ -1528,7 +1631,10 @@
             if (!btn) return;
             const on = btn.dataset.perf === '1';
             if (on === !!settings.perfMode) return;
-            settings.perfMode = on; saveSettings(); applyAllSettings();
+            settings.perfMode = on;
+            // 用户手动开启过性能模式后就不再自动检测/提示
+            if (on) { try { localStorage.setItem(PERF_CHECK_KEY, '1'); } catch (err) {} }
+            saveSettings(); applyAllSettings();
             toast(on ? '已开启低性能模式' : '已恢复标准模式');
         });
         bgGrid.addEventListener('click', e => {
@@ -1601,7 +1707,6 @@
             const p = presets[key];
             if (!p) return;
             PRESET_FIELDS.forEach(k => { if (p[k] !== undefined) settings[k] = p[k]; });
-            // enabledEngines 需校验
             if (!Array.isArray(settings.enabledEngines) || !settings.enabledEngines.length) settings.enabledEngines = DEFAULT_ENGINES.slice();
             else settings.enabledEngines = settings.enabledEngines.filter(id => ENGINE_MAP[id]);
             if (!settings.enabledEngines.length) settings.enabledEngines = DEFAULT_ENGINES.slice();
@@ -1762,13 +1867,10 @@
             catch (err) { return safe; }
         }
 
-        // 核心：构建联想列表（包含 Bang 支持）
         function buildSuggestions(query) {
             const q = String(query || '').trim();
             const list = [];
 
-            // ===== 1. Bang 前缀或完整 bang =====
-            // 1a. 完整 "!xx query"
             const bangWithQuery = q.match(/^!([a-zA-Z][a-zA-Z0-9]*)\s+(.+)$/);
             if (bangWithQuery) {
                 const bang = bangWithQuery[1].toLowerCase();
@@ -1788,7 +1890,6 @@
                 }
             }
 
-            // 1b. 只输入了 "!xx" 前缀（含 ! 但无空格或没有匹配到引擎）
             if (/^![a-zA-Z0-9]*$/.test(q)) {
                 const prefix = q.slice(1).toLowerCase();
                 const matched = SEARCH_ENGINES.filter(e =>
@@ -1810,7 +1911,6 @@
                 }
             }
 
-            // ===== 2. 原有逻辑 =====
             const url = detectUrl(q);
             const history = loadHistory();
             if (url) list.push({ type: 'url', value: url, label: q, icon: '🌐', tag: '网址直达', historyType: 'url' });
@@ -1843,7 +1943,6 @@
             activeIdx = -1;
             if (!list.length) { suggestEl.innerHTML = ''; closeSuggest(); return; }
             let html = '';
-            // 只在显示历史搜索时展示"清空"
             if (!q) {
                 html += `<div class="ss-header"><span>最近搜索</span><button class="ss-clear" data-act="clear">清空</button></div>`;
             } else if (q.startsWith('!') && list[0] && list[0].type === 'bang-prefix') {
@@ -1851,7 +1950,6 @@
             }
             list.forEach((item, i) => {
                 const delBtn = item.type === 'history' ? `<button class="ss-del" data-del="${i}" title="删除此条">×</button>` : '';
-                // bang 高亮用不同样式
                 let labelHtml;
                 if (item.type === 'bang-prefix') {
                     labelHtml = `<span class="ss-bang-mark">${esc(item.label)}</span><span class="ss-type"> · ${esc(item.tag)}</span>`;
@@ -1885,18 +1983,15 @@
         function executeSuggestion(idx) {
             const item = suggestList[idx];
             if (!item) return;
-            // Bang 前缀：填入搜索框但不立即触发
             if (item.type === 'bang-prefix') {
                 searchInput.value = item.value;
                 searchInput.focus();
-                // 光标移到末尾
                 requestAnimationFrame(() => {
                     try { searchInput.setSelectionRange(item.value.length, item.value.length); } catch (e) {}
                 });
                 renderSuggest(item.value);
                 return;
             }
-            // Bang 完整：直接跳转
             if (item.type === 'bang-search') {
                 closeSuggest();
                 openBangSearch(item.engine, item.query);
@@ -1961,9 +2056,8 @@
         document.addEventListener('click', e => { if (!e.target.closest('.search-box-wrapper')) closeSuggest(); });
 
         /* ==========================================
-           21. 搜索与动画（含 Bang 语法和聚合引擎）
+           21. 搜索与动画
            ========================================== */
-        // Bang 直达：直接打开目标站点
         function openBangSearch(engine, query) {
             const url = engine.url.replace('%s', encodeURIComponent(query));
             addToHistory('search', `!${engine.bangs[0]} ${query}`);
@@ -1978,7 +2072,6 @@
             if (!query) return;
             closeSuggest();
 
-            // 1. URL 直达
             const url = detectUrl(query);
             if (url) {
                 addToHistory('url', query);
@@ -1988,7 +2081,6 @@
                 return;
             }
 
-            // 2. Bang 语法：!bang query
             const bangMatch = query.match(/^!([a-zA-Z][a-zA-Z0-9]*)\s+(.+)$/);
             if (bangMatch) {
                 const bang = bangMatch[1].toLowerCase();
@@ -2002,7 +2094,6 @@
                 }
             }
 
-            // 3. 聚合搜索（使用用户勾选的引擎）
             addToHistory('search', query);
             const currentToken = ++searchToken;
             currentState = 'warp';
@@ -2133,8 +2224,11 @@
         colorPicker.value = settings.starColor;
         renderShortcuts();
 
+        // 首次打开：自动检测帧率，低于 30 时提示开启低性能模式
+        runPerfCheck();
+
         /* ==========================================
-           24. 小工具箱（不变）
+           24. 小工具箱
            ========================================== */
         (function initToolbox() {
             const panel = document.getElementById('toolsPanel');
