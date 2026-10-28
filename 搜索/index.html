@@ -13,8 +13,15 @@
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
         }
 
+        :root { --bg-rgb: 5, 5, 16; }
+        body[data-bg="deepspace"] { --bg-rgb: 5, 5, 16; }
+        body[data-bg="aurora"]    { --bg-rgb: 4, 18, 26; }
+        body[data-bg="nebula"]    { --bg-rgb: 12, 6, 24; }
+        body[data-bg="deepsea"]   { --bg-rgb: 3, 12, 28; }
+        body[data-bg="solid"]     { --bg-rgb: 0, 0, 0; }
+
         body {
-            background-color: #050510;
+            background-color: rgb(var(--bg-rgb));
             color: #fff;
             height: 100vh;
             overflow: hidden;
@@ -22,6 +29,65 @@
             flex-direction: column;
             align-items: center;
             position: relative;
+            transition: background-color 0.6s ease;
+        }
+
+        /* ================= 背景层 ================= */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        body[data-bg="deepspace"] .bg-layer::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 42%, rgba(40, 55, 120, 0.28), transparent 70%);
+        }
+
+        body[data-bg="aurora"] .bg-layer::before {
+            content: "";
+            position: absolute;
+            inset: -25%;
+            background:
+                radial-gradient(38% 28% at 28% 22%, rgba(0, 255, 190, 0.20), transparent 70%),
+                radial-gradient(42% 32% at 72% 28%, rgba(0, 150, 255, 0.18), transparent 70%),
+                radial-gradient(48% 38% at 50% 72%, rgba(150, 80, 255, 0.14), transparent 70%);
+            filter: blur(50px);
+            animation: auroraShift 22s ease-in-out infinite alternate;
+        }
+        @keyframes auroraShift {
+            0%   { transform: translate(-4%, -2%) scale(1); }
+            50%  { transform: translate(3%, 2%) scale(1.08); }
+            100% { transform: translate(-2%, 4%) scale(1.03); }
+        }
+
+        body[data-bg="nebula"] .bg-layer::before {
+            content: "";
+            position: absolute;
+            inset: -20%;
+            background:
+                radial-gradient(45% 35% at 30% 30%, rgba(180, 80, 255, 0.20), transparent 70%),
+                radial-gradient(40% 30% at 70% 60%, rgba(255, 80, 150, 0.15), transparent 70%),
+                radial-gradient(50% 40% at 55% 20%, rgba(80, 140, 255, 0.15), transparent 70%);
+            filter: blur(60px);
+            animation: nebulaShift 28s ease-in-out infinite alternate;
+        }
+        @keyframes nebulaShift {
+            0%   { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(8deg) scale(1.1); }
+        }
+
+        body[data-bg="deepsea"] .bg-layer::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(0, 90, 150, 0.35) 0%, transparent 45%, rgba(0, 20, 60, 0.55) 100%),
+                radial-gradient(60% 40% at 50% 0%, rgba(0, 180, 255, 0.18), transparent 70%);
         }
 
         /* ================= 左上角毛玻璃返回按钮 ================= */
@@ -29,7 +95,6 @@
             position: fixed;
             top: 24px;
             left: 24px;
-            right: auto;
             z-index: 9999;
             display: inline-flex;
             align-items: center;
@@ -45,10 +110,7 @@
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
-            box-shadow:
-                0 4px 24px rgba(0, 0, 0, 0.25),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
             transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
             overflow: hidden;
             cursor: pointer;
@@ -77,39 +139,21 @@
             transition: left 0.6s ease;
             pointer-events: none;
         }
-
         .back-home-btn:hover::after { left: 100%; }
 
         .back-home-btn:hover {
             color: #fff;
             background: rgba(255, 255, 255, 0.14);
             border-color: rgba(136, 176, 255, 0.6);
-            box-shadow:
-                0 8px 32px rgba(0, 0, 0, 0.35),
-                0 0 20px rgba(136, 176, 255, 0.35),
-                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 20px rgba(136, 176, 255, 0.35);
             transform: translateY(-2px);
         }
-
-        .back-home-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-
-        .back-home-btn svg {
-            transition: transform 0.35s ease;
-            flex-shrink: 0;
-        }
-
+        .back-home-btn:active { transform: translateY(0); }
+        .back-home-btn svg { transition: transform 0.35s ease; flex-shrink: 0; }
         .back-home-btn:hover svg { transform: translateX(-4px); }
 
         @media (max-width: 600px) {
-            .back-home-btn {
-                top: 16px;
-                left: 16px;
-                padding: 8px 14px;
-                font-size: 13px;
-            }
+            .back-home-btn { top: 16px; left: 16px; padding: 8px 14px; font-size: 13px; }
         }
 
         #starCanvas {
@@ -127,7 +171,7 @@
             z-index: 10;
             width: 100%;
             height: 100%;
-            max-width: 800px;
+            max-width: 900px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -148,6 +192,50 @@
             flex-direction: column;
             align-items: center;
             transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* ================= 模块包装（拖拽偏移载体） ================= */
+        .mod-wrap {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.35s ease;
+        }
+
+        .mod-wrap.dragging { transition: none; }
+
+        .mod-drag-handle {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            line-height: 1;
+            cursor: grab;
+            opacity: 0;
+            z-index: 30;
+            transition: opacity 0.2s, background 0.2s;
+            touch-action: none;
+        }
+        .mod-wrap:hover .mod-drag-handle { opacity: 1; }
+        .mod-drag-handle:hover { background: rgba(136, 176, 255, 0.28); color: #fff; }
+        .mod-drag-handle:active { cursor: grabbing; }
+
+        @media (hover: none) {
+            .mod-drag-handle { opacity: 0.5; }
         }
 
         /* ================= 时间与天气面板 ================= */
@@ -241,7 +329,7 @@
             .tw-line-1, .tw-line-2 { font-size: 12.5px; }
         }
 
-        /* ================= 每日一句（logo 下方 / 搜索框上方） ================= */
+        /* ================= 每日一句 ================= */
         .daily-quote-panel {
             position: relative;
             display: flex;
@@ -264,7 +352,6 @@
             transition: opacity 0.4s ease, transform 0.4s ease, max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease, border 0.4s ease;
         }
 
-        /* 搜索模式 / 用户关闭时：折叠淡出 */
         body.is-searching .daily-quote-panel,
         body.is-quote-hidden .daily-quote-panel {
             opacity: 0;
@@ -321,13 +408,8 @@
             padding: 0;
             transition: all 0.2s;
         }
+        .daily-quote-close:hover { color: #fff; background: rgba(255, 255, 255, 0.12); }
 
-        .daily-quote-close:hover {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        /* 关闭后的小恢复按钮 */
         .daily-quote-restore {
             display: none;
             align-items: center;
@@ -345,9 +427,7 @@
             transition: all 0.25s;
         }
 
-        body.is-quote-hidden:not(.is-searching) .daily-quote-restore {
-            display: inline-flex;
-        }
+        body.is-quote-hidden:not(.is-searching) .daily-quote-restore { display: inline-flex; }
 
         .daily-quote-restore:hover {
             color: #fff;
@@ -356,11 +436,7 @@
         }
 
         @media (max-width: 600px) {
-            .daily-quote-panel {
-                padding: 12px 32px;
-                margin-bottom: 16px;
-                max-width: 92%;
-            }
+            .daily-quote-panel { padding: 12px 32px; margin-bottom: 16px; max-width: 92%; }
             .daily-quote-text { font-size: 13.5px; }
             .daily-quote-author { font-size: 11.5px; }
             .daily-quote-mark { font-size: 18px; }
@@ -418,9 +494,7 @@
             padding: 8px 10px;
         }
 
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
+        .search-input::placeholder { color: rgba(255, 255, 255, 0.4); }
 
         .search-btn {
             background: linear-gradient(135deg, #00d2ff, #3a7bd5);
@@ -433,11 +507,7 @@
             transition: all 0.3s;
             opacity: 0.8;
         }
-
-        .search-btn:hover {
-            opacity: 1;
-            transform: scale(1.05);
-        }
+        .search-btn:hover { opacity: 1; transform: scale(1.05); }
 
         /* 快捷方式 */
         .shortcuts {
@@ -497,9 +567,7 @@
             box-shadow: 0 0 15px rgba(100, 200, 255, 0.4);
         }
 
-        .shortcut-text {
-            font-size: 13px;
-        }
+        .shortcut-text { font-size: 13px; }
 
         /* ================= 搜索结果区域 ================= */
         .results-area {
@@ -513,9 +581,7 @@
             padding-right: 10px;
         }
 
-        body.is-searching .results-area {
-            pointer-events: auto;
-        }
+        body.is-searching .results-area { pointer-events: auto; }
 
         .results-area::-webkit-scrollbar { width: 6px; }
         .results-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
@@ -540,9 +606,7 @@
             visibility: visible;
         }
 
-        .result-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
+        .result-item:hover { background: rgba(255, 255, 255, 0.08); }
 
         .result-title {
             color: #64b5f6;
@@ -551,20 +615,11 @@
             text-decoration: none;
             display: block;
         }
-
         .result-title:hover { text-decoration: underline; }
 
-        .result-url {
-            color: #4caf50;
-            font-size: 13px;
-            margin-bottom: 5px;
-        }
+        .result-url { color: #4caf50; font-size: 13px; margin-bottom: 5px; }
 
-        .result-desc {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
-            line-height: 1.5;
-        }
+        .result-desc { color: rgba(255, 255, 255, 0.6); font-size: 14px; line-height: 1.5; }
 
         .back-btn {
             margin-top: 20px;
@@ -580,15 +635,8 @@
             font-size: 14px;
         }
 
-        body.is-searching .back-btn {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .back-btn:hover {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-        }
+        body.is-searching .back-btn { opacity: 1; pointer-events: auto; }
+        .back-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
         .warp-mask {
             position: absolute;
@@ -596,7 +644,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, transparent 20%, rgba(5,5,16,0.6) 100%);
+            background: radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.55) 100%);
             z-index: 5;
             pointer-events: none;
             opacity: 0;
@@ -617,10 +665,386 @@
             pointer-events: none;
             opacity: 0;
         }
+
+        /* ================= 布局模板 ================= */
+        body[data-layout="top"]:not(.is-searching) .main-container {
+            justify-content: flex-start;
+            padding-top: 64px;
+        }
+        body[data-layout="top"] .logo {
+            font-size: 34px;
+            margin-bottom: 18px;
+        }
+        body[data-layout="top"] .time-weather-panel { margin-top: 12px; }
+        body[data-layout="top"] .shortcuts { margin-top: 26px; }
+
+        body[data-layout="split"] .header-area {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+            grid-template-areas:
+                "logo      shortcuts"
+                "quote     shortcuts"
+                "search    weather";
+            align-items: center;
+            justify-items: center;
+            gap: 16px 28px;
+            width: 100%;
+        }
+
+        body[data-layout="split"] .mod-wrap[data-mod="logo"]      { grid-area: logo; }
+        body[data-layout="split"] .mod-wrap[data-mod="quote"]     { grid-area: quote; }
+        body[data-layout="split"] .mod-wrap[data-mod="search"]    { grid-area: search; }
+        body[data-layout="split"] .mod-wrap[data-mod="shortcuts"] { grid-area: shortcuts; }
+        body[data-layout="split"] .mod-wrap[data-mod="weather"]   { grid-area: weather; }
+
+        body[data-layout="split"] .logo { font-size: 38px; margin-bottom: 10px; }
+        body[data-layout="split"] .daily-quote-panel { margin-bottom: 8px; padding: 10px 26px; }
+        body[data-layout="split"] .daily-quote-restore { margin-bottom: 8px; }
+        body[data-layout="split"] .shortcuts { margin-top: 0; gap: 14px; }
+        body[data-layout="split"] .time-weather-panel { margin-top: 0; padding: 12px 16px; }
+
+        @media (max-width: 900px) {
+            body[data-layout="split"] .header-area {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        /* ================= 专注模式 ================= */
+        body.focus-mode .mod-wrap[data-mod="logo"],
+        body.focus-mode .mod-wrap[data-mod="quote"],
+        body.focus-mode .mod-wrap[data-mod="shortcuts"],
+        body.focus-mode .mod-wrap[data-mod="weather"] {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            position: absolute !important;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        body.focus-mode .main-container { justify-content: center; padding-top: 20px; }
+
+        /* ================= 角落按钮 ================= */
+        .corner-actions {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 9500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .corner-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 13px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+        }
+
+        .corner-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(136, 176, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32), 0 0 16px rgba(136, 176, 255, 0.28);
+        }
+
+        .corner-btn.is-active {
+            color: #0a1a2a;
+            background: linear-gradient(135deg, #88b0ff, #4cd8ff);
+            border-color: transparent;
+            font-weight: 600;
+        }
+
+        #settingsFab { font-size: 17px; }
+
+        body.focus-mode #settingsFab { display: none; }
+
+        @media (max-width: 600px) {
+            .corner-actions { right: 12px; bottom: 12px; }
+            .corner-btn { height: 36px; min-width: 36px; padding: 0 12px; font-size: 12px; }
+        }
+
+        /* ================= 设置面板 ================= */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 340px;
+            max-width: 92vw;
+            z-index: 9600;
+            display: flex;
+            flex-direction: column;
+            background: rgba(12, 14, 28, 0.82);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            box-shadow: -12px 0 48px rgba(0, 0, 0, 0.45);
+            transform: translateX(105%);
+            transition: transform 0.42s cubic-bezier(0.25, 0.8, 0.25, 1);
+            visibility: hidden;
+        }
+
+        .settings-panel.open {
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        .sp-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.92);
+            flex-shrink: 0;
+        }
+
+        .sp-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sp-close:hover { color: #fff; background: rgba(255, 255, 255, 0.12); }
+
+        .sp-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 20px 32px;
+        }
+        .sp-body::-webkit-scrollbar { width: 5px; }
+        .sp-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.16); border-radius: 3px; }
+
+        .sp-section { margin-bottom: 22px; }
+
+        .sp-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12.5px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 10px;
+        }
+
+        .sp-val {
+            color: #88b0ff;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            accent-color: #88b0ff;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #88b0ff, #4cd8ff);
+            box-shadow: 0 0 10px rgba(136, 176, 255, 0.6);
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #88b0ff, #4cd8ff);
+            cursor: pointer;
+        }
+
+        .sp-grid { display: grid; gap: 8px; }
+        .sp-grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .sp-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+        .chip {
+            padding: 9px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12.5px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.22s;
+            text-align: center;
+        }
+        .chip:hover { background: rgba(255, 255, 255, 0.11); color: #fff; }
+        .chip.active {
+            background: linear-gradient(135deg, rgba(136,176,255,0.32), rgba(76,216,255,0.22));
+            border-color: rgba(136, 176, 255, 0.65);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 0 14px rgba(136, 176, 255, 0.28);
+        }
+
+        .sp-color-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            align-items: center;
+        }
+
+        .color-dot {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            background: var(--c, #fff);
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.2s;
+        }
+        .color-dot:hover { transform: scale(1.12); }
+        .color-dot.active {
+            border-color: #fff;
+            box-shadow: 0 0 0 3px rgba(136, 176, 255, 0.4);
+        }
+
+        .color-custom {
+            position: relative;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            background: conic-gradient(#ff6b6b, #ffd93d, #6bcB77, #4d96ff, #c780fa, #ff6b6b);
+        }
+        .color-custom input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 0;
+        }
+
+        .sp-preset-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 8px;
+        }
+
+        .sp-select {
+            padding: 8px 10px;
+            border-radius: 9px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 12.5px;
+            outline: none;
+            cursor: pointer;
+            min-width: 0;
+        }
+        .sp-select option { background: #14172a; color: #fff; }
+
+        .sp-btn {
+            padding: 8px 12px;
+            border-radius: 9px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 12.5px;
+            cursor: pointer;
+            transition: all 0.22s;
+            white-space: nowrap;
+        }
+        .sp-btn:hover { background: rgba(255, 255, 255, 0.13); color: #fff; }
+
+        .sp-btn-primary {
+            background: linear-gradient(135deg, rgba(136,176,255,0.4), rgba(76,216,255,0.3));
+            border-color: rgba(136, 176, 255, 0.55);
+            color: #fff;
+        }
+        .sp-btn-primary:hover { background: linear-gradient(135deg, rgba(136,176,255,0.6), rgba(76,216,255,0.45)); }
+
+        .sp-btn-block { width: 100%; margin-top: 8px; }
+
+        .sp-hint {
+            font-size: 11.5px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.38);
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+        }
+
+        .sp-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 20px 0;
+        }
+
+        .sp-toast {
+            position: fixed;
+            left: 50%;
+            bottom: 46px;
+            transform: translateX(-50%) translateY(20px);
+            padding: 9px 20px;
+            border-radius: 999px;
+            background: rgba(20, 26, 48, 0.92);
+            border: 1px solid rgba(136, 176, 255, 0.4);
+            color: #dfe9ff;
+            font-size: 12.5px;
+            letter-spacing: 1px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.32s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 9800;
+            backdrop-filter: blur(12px);
+        }
+        .sp-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
 </head>
-<body>
+<body data-bg="deepspace" data-layout="center">
+
+    <div class="bg-layer"></div>
 
     <a href="../Introduction.html" class="back-home-btn" id="backHomeBtn">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -634,61 +1058,72 @@
 
     <div class="main-container">
         <div class="header-area">
-            <div class="logo">ST 导航</div>
-
-            <!-- 每日一句：logo 下方 / 搜索框上方 -->
-            <div class="daily-quote-panel" id="dailyQuotePanel">
-                <button class="daily-quote-close" id="dailyQuoteClose" aria-label="关闭每日一句" title="关闭每日一句">×</button>
-                <div class="daily-quote-mark">❝</div>
-                <div class="daily-quote-text" id="dailyQuoteText">——</div>
-                <div class="daily-quote-author" id="dailyQuoteAuthor"></div>
+            <!-- Logo -->
+            <div class="mod-wrap" data-mod="logo">
+                <div class="logo">ST 导航</div>
             </div>
-            <!-- 关闭后的小恢复按钮 -->
-            <button class="daily-quote-restore" id="dailyQuoteRestore" title="显示每日一句">✨ 每日一句</button>
 
-            <div class="search-box-wrapper">
-                <div class="search-box" id="searchBox">
-                    <input type="text" class="search-input" id="searchInput" placeholder="搜索或输入网址..." autocomplete="off" />
-                    <button class="search-btn" id="searchBtn">搜索</button>
+            <!-- 每日一句 -->
+            <div class="mod-wrap" data-mod="quote">
+                <div class="daily-quote-panel" id="dailyQuotePanel">
+                    <button class="daily-quote-close" id="dailyQuoteClose" aria-label="关闭每日一句" title="关闭每日一句">×</button>
+                    <div class="daily-quote-mark">❝</div>
+                    <div class="daily-quote-text" id="dailyQuoteText">——</div>
+                    <div class="daily-quote-author" id="dailyQuoteAuthor"></div>
+                </div>
+                <button class="daily-quote-restore" id="dailyQuoteRestore" title="显示每日一句">✨ 每日一句</button>
+            </div>
+
+            <!-- 搜索框 -->
+            <div class="mod-wrap" data-mod="search">
+                <div class="search-box-wrapper">
+                    <div class="search-box" id="searchBox">
+                        <input type="text" class="search-input" id="searchInput" placeholder="搜索或输入网址..." autocomplete="off" />
+                        <button class="search-btn" id="searchBtn">搜索</button>
+                    </div>
                 </div>
             </div>
 
             <!-- 快捷导航 -->
-            <div class="shortcuts">
-                <a href="https://www.bilibili.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
-                    <div class="shortcut-icon" style="color: #fb7299;">📺</div>
-                    <div class="shortcut-text">哔哩哔哩</div>
-                </a>
-                <a href="https://www.zhihu.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
-                    <div class="shortcut-icon" style="color: #0084ff;">💡</div>
-                    <div class="shortcut-text">知乎</div>
-                </a>
-                <a href="https://weibo.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
-                    <div class="shortcut-icon" style="color: #ff8200;">🔥</div>
-                    <div class="shortcut-text">微博</div>
-                </a>
-                <a href="https://github.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
-                    <div class="shortcut-icon" style="color: #fff;">🐙</div>
-                    <div class="shortcut-text">GitHub</div>
-                </a>
-                <a href="https://www.douban.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
-                    <div class="shortcut-icon" style="color: #00b96b;">📚</div>
-                    <div class="shortcut-text">豆瓣</div>
-                </a>
+            <div class="mod-wrap" data-mod="shortcuts">
+                <div class="shortcuts">
+                    <a href="https://www.bilibili.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
+                        <div class="shortcut-icon" style="color: #fb7299;">📺</div>
+                        <div class="shortcut-text">哔哩哔哩</div>
+                    </a>
+                    <a href="https://www.zhihu.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
+                        <div class="shortcut-icon" style="color: #0084ff;">💡</div>
+                        <div class="shortcut-text">知乎</div>
+                    </a>
+                    <a href="https://weibo.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
+                        <div class="shortcut-icon" style="color: #ff8200;">🔥</div>
+                        <div class="shortcut-text">微博</div>
+                    </a>
+                    <a href="https://github.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
+                        <div class="shortcut-icon" style="color: #fff;">🐙</div>
+                        <div class="shortcut-text">GitHub</div>
+                    </a>
+                    <a href="https://www.douban.com/" class="shortcut-item" target="_blank" rel="noopener noreferrer">
+                        <div class="shortcut-icon" style="color: #00b96b;">📚</div>
+                        <div class="shortcut-text">豆瓣</div>
+                    </a>
+                </div>
             </div>
 
-            <!-- 时间与天气面板 -->
-            <div class="time-weather-panel" id="timeWeatherPanel">
-                <div class="tw-line-1">
-                    <span id="timeClock">--:--:--</span>
-                    <span id="dateGregorian">----年--月--日</span>
-                    <span id="dateWeekday">星期-</span>
-                    <span id="dateLunar">农历 --</span>
-                </div>
-                <div class="tw-line-2" id="weatherRow">
-                    <span id="weatherLocation">📍 定位中…</span>
-                    <span id="weatherCurrent"><span class="weather-loading"><span class="weather-pulse"></span>天气加载中</span></span>
-                    <span id="weatherForecast"></span>
+            <!-- 时间与天气 -->
+            <div class="mod-wrap" data-mod="weather">
+                <div class="time-weather-panel" id="timeWeatherPanel">
+                    <div class="tw-line-1">
+                        <span id="timeClock">--:--:--</span>
+                        <span id="dateGregorian">----年--月--日</span>
+                        <span id="dateWeekday">星期-</span>
+                        <span id="dateLunar">农历 --</span>
+                    </div>
+                    <div class="tw-line-2" id="weatherRow">
+                        <span id="weatherLocation">📍 定位中…</span>
+                        <span id="weatherCurrent"><span class="weather-loading"><span class="weather-pulse"></span>天气加载中</span></span>
+                        <span id="weatherForecast"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -698,7 +1133,152 @@
         <button class="back-btn" id="backBtn">返回首页</button>
     </div>
 
+    <!-- 角落按钮 -->
+    <div class="corner-actions">
+        <button class="corner-btn" id="focusBtn" title="专注模式">专注</button>
+        <button class="corner-btn" id="settingsFab" title="外观与布局设置">⚙</button>
+    </div>
+
+    <!-- 设置面板 -->
+    <aside class="settings-panel" id="settingsPanel">
+        <div class="sp-header">
+            <span>星空与布局</span>
+            <button class="sp-close" id="settingsClose" aria-label="关闭设置">×</button>
+        </div>
+        <div class="sp-body">
+
+            <div class="sp-section">
+                <div class="sp-label">背景风格</div>
+                <div class="sp-grid sp-grid-3" id="bgGrid">
+                    <button class="chip" data-bg="deepspace">深空</button>
+                    <button class="chip" data-bg="aurora">极光</button>
+                    <button class="chip" data-bg="nebula">星云</button>
+                    <button class="chip" data-bg="deepsea">深海</button>
+                    <button class="chip" data-bg="solid">纯色</button>
+                </div>
+            </div>
+
+            <div class="sp-section">
+                <div class="sp-label">星星数量 <span class="sp-val" id="starCountVal">800</span></div>
+                <input type="range" id="starCountRange" min="100" max="3000" step="50" />
+            </div>
+
+            <div class="sp-section">
+                <div class="sp-label">粒子颜色</div>
+                <div class="sp-color-row" id="colorRow">
+                    <button class="color-dot" data-color="#ffffff" style="--c:#ffffff" title="纯白"></button>
+                    <button class="color-dot" data-color="#88b0ff" style="--c:#88b0ff" title="星蓝"></button>
+                    <button class="color-dot" data-color="#a0ffd8" style="--c:#a0ffd8" title="薄荷"></button>
+                    <button class="color-dot" data-color="#ffd88a" style="--c:#ffd88a" title="暖金"></button>
+                    <button class="color-dot" data-color="#ff9ecb" style="--c:#ff9ecb" title="樱粉"></button>
+                    <button class="color-dot" data-color="#c9a0ff" style="--c:#c9a0ff" title="紫罗兰"></button>
+                    <label class="color-custom" title="自定义颜色">
+                        <input type="color" id="colorPicker" value="#ffffff" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="sp-section">
+                <div class="sp-label">跃迁速度 <span class="sp-val" id="warpSpeedVal">1.0×</span></div>
+                <input type="range" id="warpSpeedRange" min="0.5" max="3" step="0.1" />
+            </div>
+
+            <div class="sp-section">
+                <div class="sp-label">流星频率 <span class="sp-val" id="meteorVal">正常</span></div>
+                <input type="range" id="meteorRange" min="60" max="400" step="20" />
+                <div class="sp-hint">数值越小，搜索时星星砸中卡片越密集。</div>
+            </div>
+
+            <div class="sp-divider"></div>
+
+            <div class="sp-section">
+                <div class="sp-label">预设方案</div>
+                <div class="sp-preset-row">
+                    <select class="sp-select" id="presetSelect">
+                        <option value="">— 选择预设 —</option>
+                    </select>
+                    <button class="sp-btn sp-btn-primary" id="presetSave">保存</button>
+                    <button class="sp-btn" id="presetDelete">删除</button>
+                </div>
+                <div class="sp-hint">保存当前星空与背景设置为一套预设，随时一键切换。</div>
+            </div>
+
+            <div class="sp-divider"></div>
+
+            <div class="sp-section">
+                <div class="sp-label">布局模板</div>
+                <div class="sp-grid sp-grid-3" id="layoutGrid">
+                    <button class="chip" data-layout="center">居中经典</button>
+                    <button class="chip" data-layout="top">顶部简约</button>
+                    <button class="chip" data-layout="split">左右分栏</button>
+                </div>
+                <button class="sp-btn sp-btn-block" id="resetOffsets">重置模块位置</button>
+                <div class="sp-hint">悬停任意模块，拖动上方 ✥ 手柄即可自由调整位置；偏移量会自动保存。</div>
+            </div>
+
+        </div>
+    </aside>
+
+    <div class="sp-toast" id="spToast"></div>
+
     <script>
+        /* ==========================================
+           0. 设置存储与常量
+           ========================================== */
+        const SETTINGS_KEY = 'st_nav_settings_v2';
+        const PRESETS_KEY = 'st_nav_presets_v2';
+        const FOCUS_KEY = 'st_nav_focus_mode';
+
+        const DEFAULT_SETTINGS = {
+            starCount: 800,
+            starColor: '#ffffff',
+            warpSpeed: 1,
+            meteorInterval: 180,
+            bgStyle: 'deepspace',
+            layout: 'center',
+            offsets: {}
+        };
+
+        function loadSettings() {
+            try {
+                const raw = localStorage.getItem(SETTINGS_KEY);
+                if (!raw) return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+                const parsed = JSON.parse(raw);
+                return Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), parsed, {
+                    offsets: parsed.offsets || {}
+                });
+            } catch (e) {
+                return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+            }
+        }
+
+        function saveSettings() {
+            try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+        }
+
+        let settings = loadSettings();
+
+        function loadPresets() {
+            try {
+                return JSON.parse(localStorage.getItem(PRESETS_KEY) || '{}');
+            } catch (e) { return {}; }
+        }
+        function savePresets(p) {
+            try { localStorage.setItem(PRESETS_KEY, JSON.stringify(p)); } catch (e) {}
+        }
+
+        function hexToRgb(hex) {
+            const h = String(hex || '#ffffff').replace('#', '');
+            const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h.padEnd(6, '0').slice(0, 6);
+            return {
+                r: parseInt(full.slice(0, 2), 16) || 0,
+                g: parseInt(full.slice(2, 4), 16) || 0,
+                b: parseInt(full.slice(4, 6), 16) || 0
+            };
+        }
+
+        let starBaseRgb = hexToRgb(settings.starColor);
+
         /* ==========================================
            1. 星空粒子引擎
            ========================================== */
@@ -707,10 +1287,9 @@
 
         let width, height;
         let stars = [];
-        const numStars = 800;
-        const speed = { idle: 0.5, prepare: 4, warp: 60 };
+        const SPEEDS = { idle: 0.5, prepare: 4, warp: 60 };
         let currentState = 'idle';
-        let currentSpeed = speed.idle;
+        let currentSpeed = SPEEDS.idle;
 
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -725,7 +1304,7 @@
                 this.x = (Math.random() - 0.5) * width * 3;
                 this.y = (Math.random() - 0.5) * height * 3;
                 this.z = Math.random() * width;
-                this.color = `rgba(255, 255, 255, ${Math.random() * 0.8 + 0.2})`;
+                this.alpha = Math.random() * 0.8 + 0.2;
                 this.size = Math.random() * 1.5 + 0.5;
             }
             update() {
@@ -740,28 +1319,46 @@
                     ctx.beginPath();
                     ctx.arc(screenX, screenY, scale, 0, Math.PI * 2);
                     if (currentState === 'warp') {
-                        ctx.fillStyle = `rgba(150, 200, 255, ${Math.max(0, 1 - this.z / width)})`;
+                        const t = Math.max(0, 1 - this.z / width);
+                        ctx.fillStyle = `rgba(150, 200, 255, ${t})`;
                     } else {
-                        ctx.fillStyle = this.color;
+                        ctx.fillStyle = `rgba(${starBaseRgb.r}, ${starBaseRgb.g}, ${starBaseRgb.b}, ${this.alpha})`;
                     }
                     ctx.fill();
                 }
             }
         }
 
-        for (let i = 0; i < numStars; i++) stars.push(new Star());
+        function syncStarCount() {
+            const target = Math.max(10, Math.round(settings.starCount));
+            while (stars.length < target) stars.push(new Star());
+            while (stars.length > target) stars.pop();
+        }
+        syncStarCount();
 
         function animate() {
-            ctx.fillStyle = currentState === 'warp' ? 'rgba(5, 5, 16, 0.1)' : 'rgba(5, 5, 16, 0.3)';
+            // destination-out 淡出：保持 Canvas 透明，让底层背景风格可见
+            const fade = currentState === 'warp' ? 0.09 : 0.26;
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = `rgba(0, 0, 0, ${fade})`;
             ctx.fillRect(0, 0, width, height);
-            stars.forEach(star => { star.update(); star.draw(); });
+            ctx.globalCompositeOperation = 'source-over';
+
+            currentSpeed = currentState === 'warp'
+                ? SPEEDS.warp * settings.warpSpeed
+                : currentState === 'prepare' ? SPEEDS.prepare : SPEEDS.idle;
+
+            for (let i = 0; i < stars.length; i++) {
+                stars[i].update();
+                stars[i].draw();
+            }
             requestAnimationFrame(animate);
         }
         animate();
 
 
         /* ==========================================
-           2. UI 交互与卡片化流星
+           2. UI 基础引用
            ========================================== */
         const body = document.body;
         const searchBox = document.getElementById('searchBox');
@@ -777,7 +1374,6 @@
         const DAILY_QUOTE_STORAGE_KEY = 'st_nav_daily_quote_enabled';
 
         const QUOTES = [
-            // ---- 诗词 ----
             { text: '人生若只如初见，何事秋风悲画扇。', author: '纳兰性德《木兰花令》' },
             { text: '山有木兮木有枝，心悦君兮君不知。', author: '《越人歌》' },
             { text: '落霞与孤鹜齐飞，秋水共长天一色。', author: '王勃《滕王阁序》' },
@@ -798,8 +1394,6 @@
             { text: '千里之行，始于足下。', author: '老子《道德经》' },
             { text: '不积跬步，无以至千里；不积小流，无以成江海。', author: '荀子《劝学》' },
             { text: '知之为知之，不知为不知，是知也。', author: '孔子《论语》' },
-
-            // ---- 名言 ----
             { text: '我思故我在。', author: '笛卡尔' },
             { text: '人是一根会思想的芦苇。', author: '帕斯卡' },
             { text: '世上只有一种真正的英雄主义，那就是认清生活的真相后依然热爱生活。', author: '罗曼·罗兰' },
@@ -810,8 +1404,6 @@
             { text: '万物皆有裂痕，那是光照进来的地方。', author: '莱昂纳德·科恩' },
             { text: '把日子过成诗，把生活绘成画。', author: '佚名' },
             { text: '生活不止眼前的苟且，还有诗和远方。', author: '高晓松' },
-
-            // ---- 治愈短句 ----
             { text: '你走的每一步，都在向着更好的自己靠近。', author: '每日一句' },
             { text: '慢慢来，比较快。', author: '每日一句' },
             { text: '星光不问赶路人，时光不负有心人。', author: '每日一句' },
@@ -829,12 +1421,9 @@
         const dailyQuoteClose = document.getElementById('dailyQuoteClose');
         const dailyQuoteRestore = document.getElementById('dailyQuoteRestore');
 
-        // 基于日期的字符串哈希：保证同一天固定同一句，不同天分布均匀
         function hashDateStr(str) {
             let h = 0;
-            for (let i = 0; i < str.length; i++) {
-                h = (h * 31 + str.charCodeAt(i)) >>> 0;
-            }
+            for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
             return h;
         }
 
@@ -856,15 +1445,11 @@
             try {
                 const v = localStorage.getItem(DAILY_QUOTE_STORAGE_KEY);
                 return v === null ? true : v === '1';
-            } catch (e) {
-                return true;
-            }
+            } catch (e) { return true; }
         }
 
         function setQuoteEnabled(enabled) {
-            try {
-                localStorage.setItem(DAILY_QUOTE_STORAGE_KEY, enabled ? '1' : '0');
-            } catch (e) {}
+            try { localStorage.setItem(DAILY_QUOTE_STORAGE_KEY, enabled ? '1' : '0'); } catch (e) {}
             body.classList.toggle('is-quote-hidden', !enabled);
         }
 
@@ -873,8 +1458,6 @@
 
         dailyQuoteClose.addEventListener('click', () => setQuoteEnabled(false));
         dailyQuoteRestore.addEventListener('click', () => setQuoteEnabled(true));
-
-        // 跨日自动换句（每分钟检查一次，几乎零成本）
         setInterval(renderDailyQuoteIfNeeded, 60 * 1000);
 
         /* ==========================================
@@ -915,7 +1498,7 @@
         setInterval(updateClockAndLunar, 1000);
 
         /* ==========================================
-           5. 天气模块（Open-Meteo 为主，wttr.in 降级）
+           5. 天气模块
            ========================================== */
         const weatherLocation = document.getElementById('weatherLocation');
         const weatherCurrent = document.getElementById('weatherCurrent');
@@ -1070,12 +1653,318 @@
         loadWeather();
 
         /* ==========================================
-           6. 搜索与动画
+           6. 设置应用与 UI 同步
+           ========================================== */
+        const bgGrid = document.getElementById('bgGrid');
+        const layoutGrid = document.getElementById('layoutGrid');
+        const starCountRange = document.getElementById('starCountRange');
+        const starCountVal = document.getElementById('starCountVal');
+        const colorRow = document.getElementById('colorRow');
+        const colorPicker = document.getElementById('colorPicker');
+        const warpSpeedRange = document.getElementById('warpSpeedRange');
+        const warpSpeedVal = document.getElementById('warpSpeedVal');
+        const meteorRange = document.getElementById('meteorRange');
+        const meteorVal = document.getElementById('meteorVal');
+        const presetSelect = document.getElementById('presetSelect');
+        const toastEl = document.getElementById('spToast');
+
+        let toastTimer = null;
+        function toast(msg) {
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+        }
+
+        function applyOffsets() {
+            document.querySelectorAll('.mod-wrap').forEach(wrap => {
+                const key = wrap.dataset.mod;
+                const off = (settings.offsets && settings.offsets[key]) || { x: 0, y: 0 };
+                wrap.style.transform = `translate(${off.x}px, ${off.y}px)`;
+            });
+        }
+
+        function syncSettingsUI() {
+            document.body.dataset.bg = settings.bgStyle;
+            document.body.dataset.layout = settings.layout;
+
+            bgGrid.querySelectorAll('.chip').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.bg === settings.bgStyle);
+            });
+
+            layoutGrid.querySelectorAll('.chip').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.layout === settings.layout);
+            });
+
+            starCountRange.value = settings.starCount;
+            starCountVal.textContent = settings.starCount;
+
+            colorRow.querySelectorAll('.color-dot').forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.color.toLowerCase() === String(settings.starColor).toLowerCase());
+            });
+
+            warpSpeedRange.value = settings.warpSpeed;
+            warpSpeedVal.textContent = Number(settings.warpSpeed).toFixed(1) + '×';
+
+            meteorRange.value = settings.meteorInterval;
+            meteorVal.textContent = meteorLabel(settings.meteorInterval);
+        }
+
+        function meteorLabel(ms) {
+            if (ms <= 100) return '极密';
+            if (ms <= 160) return '较密';
+            if (ms <= 240) return '正常';
+            if (ms <= 320) return '舒缓';
+            return '稀疏';
+        }
+
+        function applyAllSettings() {
+            starBaseRgb = hexToRgb(settings.starColor);
+            syncStarCount();
+            applyOffsets();
+            syncSettingsUI();
+        }
+
+        // 背景风格
+        bgGrid.addEventListener('click', e => {
+            const btn = e.target.closest('.chip[data-bg]');
+            if (!btn) return;
+            settings.bgStyle = btn.dataset.bg;
+            saveSettings();
+            syncSettingsUI();
+        });
+
+        // 布局模板
+        layoutGrid.addEventListener('click', e => {
+            const btn = e.target.closest('.chip[data-layout]');
+            if (!btn) return;
+            settings.layout = btn.dataset.layout;
+            saveSettings();
+            syncSettingsUI();
+        });
+
+        // 星星数量
+        starCountRange.addEventListener('input', () => {
+            settings.starCount = parseInt(starCountRange.value, 10);
+            starCountVal.textContent = settings.starCount;
+            syncStarCount();
+        });
+        starCountRange.addEventListener('change', saveSettings);
+
+        // 粒子颜色
+        colorRow.addEventListener('click', e => {
+            const dot = e.target.closest('.color-dot');
+            if (!dot) return;
+            settings.starColor = dot.dataset.color;
+            starBaseRgb = hexToRgb(settings.starColor);
+            colorPicker.value = settings.starColor;
+            saveSettings();
+            syncSettingsUI();
+        });
+        colorPicker.addEventListener('input', () => {
+            settings.starColor = colorPicker.value;
+            starBaseRgb = hexToRgb(settings.starColor);
+            syncSettingsUI();
+        });
+        colorPicker.addEventListener('change', saveSettings);
+
+        // 跃迁速度
+        warpSpeedRange.addEventListener('input', () => {
+            settings.warpSpeed = parseFloat(warpSpeedRange.value);
+            warpSpeedVal.textContent = settings.warpSpeed.toFixed(1) + '×';
+        });
+        warpSpeedRange.addEventListener('change', saveSettings);
+
+        // 流星频率
+        meteorRange.addEventListener('input', () => {
+            settings.meteorInterval = parseInt(meteorRange.value, 10);
+            meteorVal.textContent = meteorLabel(settings.meteorInterval);
+        });
+        meteorRange.addEventListener('change', saveSettings);
+
+        /* ==========================================
+           7. 预设管理
+           ========================================== */
+        function refreshPresetSelect() {
+            const presets = loadPresets();
+            const names = Object.keys(presets);
+            presetSelect.innerHTML = '<option value="">— 选择预设 —</option>' +
+                names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+        }
+
+        const PRESET_FIELDS = ['starCount', 'starColor', 'warpSpeed', 'meteorInterval', 'bgStyle', 'layout'];
+
+        document.getElementById('presetSave').addEventListener('click', () => {
+            const name = prompt('为这套预设命名：', '我的星空 ' + (Object.keys(loadPresets()).length + 1));
+            if (!name || !name.trim()) return;
+            const key = name.trim().slice(0, 24);
+            const presets = loadPresets();
+            const snapshot = {};
+            PRESET_FIELDS.forEach(k => snapshot[k] = settings[k]);
+            presets[key] = snapshot;
+            savePresets(presets);
+            refreshPresetSelect();
+            presetSelect.value = key;
+            toast('预设已保存：' + key);
+        });
+
+        presetSelect.addEventListener('change', () => {
+            const key = presetSelect.value;
+            if (!key) return;
+            const presets = loadPresets();
+            const p = presets[key];
+            if (!p) return;
+            PRESET_FIELDS.forEach(k => { if (p[k] !== undefined) settings[k] = p[k]; });
+            saveSettings();
+            applyAllSettings();
+            colorPicker.value = settings.starColor;
+            toast('已应用预设：' + key);
+        });
+
+        document.getElementById('presetDelete').addEventListener('click', () => {
+            const key = presetSelect.value;
+            if (!key) { toast('请先选择要删除的预设'); return; }
+            const presets = loadPresets();
+            delete presets[key];
+            savePresets(presets);
+            refreshPresetSelect();
+            toast('已删除预设：' + key);
+        });
+
+        refreshPresetSelect();
+
+        /* ==========================================
+           8. 模块拖拽
+           ========================================== */
+        function setupDragHandles() {
+            document.querySelectorAll('.mod-wrap').forEach(wrap => {
+                const key = wrap.dataset.mod;
+                const handle = document.createElement('button');
+                handle.type = 'button';
+                handle.className = 'mod-drag-handle';
+                handle.title = '拖动调整位置';
+                handle.setAttribute('aria-label', '拖动调整位置');
+                handle.textContent = '✥';
+                wrap.appendChild(handle);
+
+                let drag = null;
+
+                handle.addEventListener('pointerdown', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const off = (settings.offsets[key]) || { x: 0, y: 0 };
+                    drag = {
+                        startX: e.clientX,
+                        startY: e.clientY,
+                        baseX: off.x || 0,
+                        baseY: off.y || 0
+                    };
+                    wrap.classList.add('dragging');
+                    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+                });
+
+                handle.addEventListener('pointermove', e => {
+                    if (!drag) return;
+                    const nx = drag.baseX + (e.clientX - drag.startX);
+                    const ny = drag.baseY + (e.clientY - drag.startY);
+                    settings.offsets[key] = { x: nx, y: ny };
+                    wrap.style.transform = `translate(${nx}px, ${ny}px)`;
+                });
+
+                const end = e => {
+                    if (!drag) return;
+                    drag = null;
+                    wrap.classList.remove('dragging');
+                    try { handle.releasePointerCapture(e.pointerId); } catch (err) {}
+                    saveSettings();
+                };
+
+                handle.addEventListener('pointerup', end);
+                handle.addEventListener('pointercancel', end);
+            });
+        }
+
+        document.getElementById('resetOffsets').addEventListener('click', () => {
+            settings.offsets = {};
+            saveSettings();
+            document.querySelectorAll('.mod-wrap').forEach(w => {
+                w.style.transition = 'transform 0.42s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                w.style.transform = 'translate(0, 0)';
+                setTimeout(() => { w.style.transition = ''; }, 460);
+            });
+            toast('模块位置已重置');
+        });
+
+        /* ==========================================
+           9. 专注模式
+           ========================================== */
+        const focusBtn = document.getElementById('focusBtn');
+
+        function updateFocusBtn() {
+            const on = body.classList.contains('focus-mode');
+            focusBtn.textContent = on ? '退出专注' : '专注';
+            focusBtn.classList.toggle('is-active', on);
+        }
+
+        function setFocusMode(on, persist) {
+            body.classList.toggle('focus-mode', on);
+            if (persist) {
+                try { localStorage.setItem(FOCUS_KEY, on ? '1' : '0'); } catch (e) {}
+            }
+            updateFocusBtn();
+        }
+
+        focusBtn.addEventListener('click', () => {
+            const on = !body.classList.contains('focus-mode');
+            setFocusMode(on, true);
+            if (on) {
+                closeSettings();
+                setTimeout(() => searchInput.focus(), 260);
+            }
+        });
+
+        // 初始专注状态
+        try {
+            if (localStorage.getItem(FOCUS_KEY) === '1') setFocusMode(true, false);
+        } catch (e) {}
+        updateFocusBtn();
+
+        // 专注模式下按 Esc 退出
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && body.classList.contains('focus-mode')) {
+                setFocusMode(false, true);
+            }
+            if (e.key === 'Escape' && document.getElementById('settingsPanel').classList.contains('open')) {
+                closeSettings();
+            }
+        });
+
+        /* ==========================================
+           10. 设置面板开关
+           ========================================== */
+        const settingsPanel = document.getElementById('settingsPanel');
+        const settingsFab = document.getElementById('settingsFab');
+
+        function openSettings() {
+            settingsPanel.classList.add('open');
+            if (document.body.classList.contains('focus-mode')) setFocusMode(false, true);
+        }
+        function closeSettings() {
+            settingsPanel.classList.remove('open');
+        }
+
+        settingsFab.addEventListener('click', () => {
+            if (settingsPanel.classList.contains('open')) closeSettings();
+            else openSettings();
+        });
+        document.getElementById('settingsClose').addEventListener('click', closeSettings);
+
+        /* ==========================================
+           11. 搜索与动画
            ========================================== */
         searchInput.addEventListener('focus', () => {
             if (currentState === 'idle') {
                 currentState = 'prepare';
-                currentSpeed = speed.prepare;
                 searchBox.classList.add('active');
             }
         });
@@ -1083,7 +1972,6 @@
         searchInput.addEventListener('blur', () => {
             if (currentState === 'prepare') {
                 currentState = 'idle';
-                currentSpeed = speed.idle;
                 searchBox.classList.remove('active');
             }
         });
@@ -1095,7 +1983,6 @@
             const currentToken = ++searchToken;
 
             currentState = 'warp';
-            currentSpeed = speed.warp;
             searchInput.blur();
             body.classList.add('is-warping');
             body.classList.add('is-searching');
@@ -1124,6 +2011,7 @@
 
         function launchStarsToCards(token) {
             const cards = document.querySelectorAll('.result-item');
+            const gap = Math.max(40, settings.meteorInterval);
 
             cards.forEach((card, index) => {
                 const rect = card.getBoundingClientRect();
@@ -1132,21 +2020,19 @@
 
                 setTimeout(() => {
                     if (token !== searchToken) return;
-
                     createFlyingStar(targetX, targetY, () => {
                         if (token !== searchToken) return;
                         card.style.visibility = 'visible';
                         void card.offsetWidth;
                         card.classList.add('visible');
                     });
-                }, index * 180);
+                }, index * gap);
             });
 
-            const totalTime = cards.length * 180 + 600;
+            const totalTime = cards.length * gap + 600;
             setTimeout(() => {
                 if (token !== searchToken) return;
                 currentState = 'idle';
-                currentSpeed = speed.idle;
                 body.classList.remove('is-warping');
             }, totalTime);
         }
@@ -1182,7 +2068,7 @@
         }
 
         searchBtn.addEventListener('click', triggerSearch);
-        searchInput.addEventListener('keypress', (e) => {
+        searchInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') triggerSearch();
         });
 
@@ -1191,14 +2077,16 @@
             body.classList.remove('is-searching');
             searchInput.value = '';
             currentState = 'idle';
-            currentSpeed = speed.idle;
-
             document.querySelectorAll('.flying-star').forEach(el => el.remove());
-
-            setTimeout(() => {
-                resultsContainer.innerHTML = '';
-            }, 400);
+            setTimeout(() => { resultsContainer.innerHTML = ''; }, 400);
         });
+
+        /* ==========================================
+           12. 启动
+           ========================================== */
+        setupDragHandles();
+        applyAllSettings();
+        colorPicker.value = settings.starColor;
     </script>
 </body>
 </html>
