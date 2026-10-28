@@ -232,7 +232,7 @@
         .sp-toast { position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%) translateY(20px); padding: 9px 20px; border-radius: 999px; background: rgba(20, 26, 48, 0.92); border: 1px solid rgba(136, 176, 255, 0.4); color: #dfe9ff; font-size: 12.5px; letter-spacing: 1px; opacity: 0; pointer-events: none; transition: all 0.32s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 9800; backdrop-filter: blur(12px); }
         .sp-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* ============= FPS 检测徽标 ============= */
+        /* ============= FPS 检测徽标（首次启动） ============= */
         .fps-badge {
             position: fixed; top: 24px; right: 24px; z-index: 9900;
             padding: 8px 16px; border-radius: 999px;
@@ -250,6 +250,9 @@
         .fps-badge.good { border-color: rgba(76, 216, 255, 0.65); color: #a8ecff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 16px rgba(76, 216, 255, 0.25); }
         .fps-badge.bad  { border-color: rgba(255, 138, 138, 0.65); color: #ffb8b8; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 16px rgba(255, 120, 120, 0.28); }
         @media (max-width: 600px) { .fps-badge { top: 16px; right: 16px; padding: 6px 12px; font-size: 12px; } }
+
+        /* 实时帧率值 */
+        .live-fps-val { font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: 1px; transition: color 0.2s; }
 
         .tools-panel { position: fixed; right: 20px; bottom: 76px; z-index: 9550; width: 380px; max-width: calc(100vw - 24px); height: 560px; max-height: calc(100vh - 110px); max-height: calc(100dvh - 110px); display: flex; flex-direction: column; border-radius: 18px; background: rgba(12, 14, 28, 0.88); border: 1px solid rgba(255, 255, 255, 0.12); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); box-shadow: 0 16px 56px rgba(0, 0, 0, 0.5); opacity: 0; transform: translateY(14px) scale(0.97); transform-origin: bottom right; pointer-events: none; visibility: hidden; transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0s linear 0.3s; }
         .tools-panel.open { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0s; }
@@ -483,6 +486,27 @@
                 <div class="sp-grid sp-grid-2" id="perfGrid"><button class="chip" data-perf="0">标准</button><button class="chip" data-perf="1">低性能</button></div>
                 <div class="sp-hint">低配设备建议开启：粒子数上限 200，关闭背景动画与毛玻璃模糊，降低显卡占用。</div>
             </div>
+
+            <!-- 实时帧率 -->
+            <div class="sp-section">
+                <div class="sp-label">实时帧率 <span class="sp-val live-fps-val" id="liveFpsVal">--</span></div>
+                <div class="sp-hint">仅在当前设置面板打开时统计，关闭后停止监控以免额外开销。</div>
+            </div>
+
+            <!-- 帧率限制 -->
+            <div class="sp-section">
+                <div class="sp-label">帧率限制 <span class="sp-val" id="fpsLimitVal">不限制</span></div>
+                <div class="sp-grid sp-grid-3" id="fpsLimitGrid">
+                    <button class="chip" data-fps="0">不限制</button>
+                    <button class="chip" data-fps="120">120</button>
+                    <button class="chip" data-fps="60">60</button>
+                    <button class="chip" data-fps="30">30</button>
+                    <button class="chip" data-fps="20">20</button>
+                    <button class="chip" data-fps="15">15</button>
+                </div>
+                <div class="sp-hint">限制渲染帧率可降低 GPU 与电量消耗。低配设备建议 30 fps；高刷屏设备若想省电也可选择 60 / 90。动画速度不受影响。</div>
+            </div>
+
             <div class="sp-divider"></div>
             <div class="sp-section">
                 <div class="sp-label">背景风格</div>
@@ -564,7 +588,7 @@
 
     <div class="sp-toast" id="spToast"></div>
 
-    <!-- FPS 检测徽标 -->
+    <!-- FPS 检测徽标（首次启动） -->
     <div class="fps-badge" id="fpsBadge">FPS --</div>
 
     <script>
@@ -600,7 +624,6 @@
         ];
         const ENGINE_MAP = Object.fromEntries(SEARCH_ENGINES.map(e => [e.id, e]));
         const DEFAULT_ENGINES = SEARCH_ENGINES.filter(e => e.defaultEnabled).map(e => e.id);
-
         function findEngineByBang(bang) {
             const b = String(bang || '').toLowerCase();
             if (!b) return null;
@@ -613,9 +636,9 @@
         const SETTINGS_KEY = 'st_nav_settings_v2';
         const PRESETS_KEY = 'st_nav_presets_v2';
         const FOCUS_KEY = 'st_nav_focus_mode';
-        const PERF_CHECK_KEY = 'st_nav_perf_checked_v1';      // 首次性能检测标记
-        const PERF_FPS_THRESHOLD = 30;                         // 低于此 FPS 提示开启低性能
-        const PERF_FPS_WINDOW_MS = 1000;                       // 检测窗口 1 秒
+        const PERF_CHECK_KEY = 'st_nav_perf_checked_v1';
+        const PERF_FPS_THRESHOLD = 30;
+        const PERF_FPS_WINDOW_MS = 1000;
 
         const DEFAULT_SETTINGS = {
             starCount: 800,
@@ -626,7 +649,8 @@
             layout: 'center',
             perfMode: false,
             offsets: {},
-            enabledEngines: DEFAULT_ENGINES
+            enabledEngines: DEFAULT_ENGINES,
+            fpsLimit: 0          // 0 = 不限制；其他值 = 限制到指定 fps
         };
         const PERF_STAR_CAP = 200;
 
@@ -641,6 +665,10 @@
                 } else {
                     merged.enabledEngines = merged.enabledEngines.filter(id => ENGINE_MAP[id]);
                     if (!merged.enabledEngines.length) merged.enabledEngines = DEFAULT_ENGINES.slice();
+                }
+                // fpsLimit 校验
+                if (typeof merged.fpsLimit !== 'number' || !isFinite(merged.fpsLimit) || merged.fpsLimit < 0) {
+                    merged.fpsLimit = 0;
                 }
                 return merged;
             } catch (e) {
@@ -1204,7 +1232,7 @@
         });
 
         /* ==========================================
-           10. 星空粒子引擎
+           10. 星空粒子引擎（含帧率限制 + 实时监控）
            ========================================== */
         const canvas = document.getElementById('starCanvas');
         const ctx = canvas.getContext('2d');
@@ -1213,6 +1241,14 @@
         const SPEEDS = { idle: 0.5, prepare: 4, warp: 60 };
         let currentState = 'idle';
         let currentSpeed = SPEEDS.idle;
+
+        // 帧率限制 & 实时监控
+        let fpsLimit = settings.fpsLimit || 0;   // 0 = 不限制
+        let lastDrawTs = 0;
+        let isFpsMonitorOn = false;
+        let fpsFrameCount = 0;
+        let fpsSampleStart = 0;
+        let liveFps = 0;
 
         function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize);
@@ -1255,17 +1291,60 @@
             while (stars.length > target) stars.pop();
         }
         syncStarCount();
-        function animate() {
-            const fade = currentState === 'warp' ? 0.09 : 0.26;
+
+        function updateLiveFpsDisplay() {
+            const el = document.getElementById('liveFpsVal');
+            if (!el) return;
+            el.textContent = liveFps + ' fps';
+            if (liveFps >= 50) el.style.color = '#a8ecff';
+            else if (liveFps >= 30) el.style.color = '#88b0ff';
+            else el.style.color = '#ffb8b8';
+        }
+
+        function animate(ts) {
+            requestAnimationFrame(animate);
+
+            // —— 帧率限制：跳过本帧绘制 ——
+            if (fpsLimit > 0 && lastDrawTs) {
+                const minInterval = 1000 / fpsLimit;
+                if (ts - lastDrawTs < minInterval - 1.5) return;
+            }
+
+            // —— 基于时间计算 dt（相对 60fps），让限制帧率时动画速度不变 ——
+            let dt = 1;
+            if (lastDrawTs) {
+                dt = Math.min((ts - lastDrawTs) / (1000 / 60), 4); // 单帧最多补偿 4 倍
+            }
+            lastDrawTs = ts;
+
+            // —— 实时 FPS 监控（只在设置面板打开时执行） ——
+            if (isFpsMonitorOn) {
+                fpsFrameCount++;
+                if (!fpsSampleStart) fpsSampleStart = ts;
+                if (ts - fpsSampleStart >= 500) {
+                    liveFps = Math.round(fpsFrameCount * 1000 / (ts - fpsSampleStart));
+                    updateLiveFpsDisplay();
+                    fpsSampleStart = ts;
+                    fpsFrameCount = 0;
+                }
+            }
+
+            // —— 绘制 ——
+            const baseFade = currentState === 'warp' ? 0.09 : 0.26;
+            const fade = Math.min(baseFade * dt, 1);
             ctx.globalCompositeOperation = 'destination-out';
             ctx.fillStyle = `rgba(0, 0, 0, ${fade})`;
             ctx.fillRect(0, 0, width, height);
             ctx.globalCompositeOperation = 'source-over';
-            currentSpeed = currentState === 'warp' ? SPEEDS.warp * settings.warpSpeed : currentState === 'prepare' ? SPEEDS.prepare : SPEEDS.idle;
+
+            const baseSpeed = currentState === 'warp'
+                ? SPEEDS.warp * settings.warpSpeed
+                : currentState === 'prepare' ? SPEEDS.prepare : SPEEDS.idle;
+            currentSpeed = baseSpeed * dt;
+
             for (let i = 0; i < stars.length; i++) { stars[i].update(); stars[i].draw(); }
-            requestAnimationFrame(animate);
         }
-        animate();
+        requestAnimationFrame(animate);
 
         /* ==========================================
            11. UI 基础引用
@@ -1467,6 +1546,8 @@
         const perfModeVal = document.getElementById('perfModeVal');
         const engineGrid = document.getElementById('engineGrid');
         const engineCountEl = document.getElementById('engineCount');
+        const fpsLimitGrid = document.getElementById('fpsLimitGrid');
+        const fpsLimitVal = document.getElementById('fpsLimitVal');
 
         let toastTimer = null;
         function toast(msg) {
@@ -1485,59 +1566,45 @@
         }
 
         /* ==========================================
-           15.1 FPS 检测（首次打开自动运行）
+           15.1 首次 FPS 检测（保留，与实时监控独立）
            ========================================== */
         function runPerfCheck() {
-            // 已经检测过 → 跳过
             let checked = false;
             try { checked = localStorage.getItem(PERF_CHECK_KEY) === '1'; } catch (e) {}
             if (checked) return;
-            // 用户已在低性能模式 → 直接标记完成
             if (settings.perfMode) {
                 try { localStorage.setItem(PERF_CHECK_KEY, '1'); } catch (e) {}
                 return;
             }
-            // 等首屏渲染稳定后开始（避开初始化高峰）
             setTimeout(startFpsCounting, 600);
         }
-
         function startFpsCounting() {
             let frames = 0;
             let startTs = 0;
-            let rafId = null;
-
             function tick(ts) {
-                // 页面不可见时暂停计数，可见后重新开始
                 if (document.visibilityState !== 'visible') {
-                    startTs = 0;
-                    frames = 0;
-                    rafId = requestAnimationFrame(tick);
+                    startTs = 0; frames = 0;
+                    requestAnimationFrame(tick);
                     return;
                 }
                 if (!startTs) startTs = ts;
                 frames++;
                 const elapsed = ts - startTs;
                 if (elapsed < PERF_FPS_WINDOW_MS) {
-                    rafId = requestAnimationFrame(tick);
+                    requestAnimationFrame(tick);
                 } else {
                     const fps = Math.max(1, Math.round(frames * 1000 / elapsed));
                     handlePerfResult(fps);
                 }
             }
-            rafId = requestAnimationFrame(tick);
+            requestAnimationFrame(tick);
         }
-
         function handlePerfResult(fps) {
-            // 显示 FPS 徽标
             showFpsBadge(fps);
-            // 标记已检测（无论 FPS 高低只提醒一次）
             try { localStorage.setItem(PERF_CHECK_KEY, '1'); } catch (e) {}
-
             if (fps >= PERF_FPS_THRESHOLD) return;
-
-            // 延迟到 FPS 徽标可见再弹窗
             setTimeout(() => {
-                if (settings.perfMode) return; // 用户在等待期间手动开启了
+                if (settings.perfMode) return;
                 const ok = confirm(
                     '检测到设备性能一般（当前 FPS: ' + fps + '）\n\n' +
                     '是否开启低性能模式？\n' +
@@ -1552,7 +1619,6 @@
                 }
             }, 1200);
         }
-
         function showFpsBadge(fps) {
             const badge = document.getElementById('fpsBadge');
             if (!badge) return;
@@ -1564,6 +1630,9 @@
             setTimeout(() => badge.classList.remove('show'), 2400);
         }
 
+        /* ==========================================
+           15.2 渲染与同步
+           ========================================== */
         function renderEngineGrid() {
             const enabled = settings.enabledEngines && settings.enabledEngines.length ? settings.enabledEngines : DEFAULT_ENGINES;
             engineGrid.innerHTML = SEARCH_ENGINES.map(e =>
@@ -1574,7 +1643,6 @@
             });
             engineCountEl.textContent = enabled.length;
         }
-
         engineGrid.addEventListener('click', e => {
             const btn = e.target.closest('.chip[data-engine]');
             if (!btn) return;
@@ -1588,6 +1656,26 @@
             saveSettings();
             btn.classList.toggle('active', enabled.includes(id));
             engineCountEl.textContent = enabled.length;
+        });
+
+        function syncFpsLimitUI() {
+            const val = settings.fpsLimit || 0;
+            fpsLimitVal.textContent = val === 0 ? '不限制' : val + ' fps';
+            fpsLimitGrid.querySelectorAll('.chip').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.fps, 10) === val);
+            });
+        }
+        fpsLimitGrid.addEventListener('click', e => {
+            const btn = e.target.closest('.chip[data-fps]');
+            if (!btn) return;
+            const v = parseInt(btn.dataset.fps, 10);
+            if (v === settings.fpsLimit) return;
+            settings.fpsLimit = v;
+            fpsLimit = v;
+            lastDrawTs = 0;     // 重置，避免旧的时间戳导致下一帧被误判跳过
+            saveSettings();
+            syncFpsLimitUI();
+            toast(v === 0 ? '已取消帧率限制' : `已限制帧率至 ${v} fps`);
         });
 
         function syncSettingsUI() {
@@ -1610,6 +1698,7 @@
             warpSpeedVal.textContent = Number(settings.warpSpeed).toFixed(1) + '×';
             meteorRange.value = settings.meteorInterval;
             meteorVal.textContent = meteorLabel(settings.meteorInterval);
+            syncFpsLimitUI();
         }
         function meteorLabel(ms) {
             if (ms <= 100) return '极密';
@@ -1624,6 +1713,8 @@
             applyOffsets();
             syncSettingsUI();
             renderEngineGrid();
+            // 同步 fpsLimit 到渲染循环
+            fpsLimit = settings.fpsLimit || 0;
         }
 
         perfGrid.addEventListener('click', e => {
@@ -1632,7 +1723,6 @@
             const on = btn.dataset.perf === '1';
             if (on === !!settings.perfMode) return;
             settings.perfMode = on;
-            // 用户手动开启过性能模式后就不再自动检测/提示
             if (on) { try { localStorage.setItem(PERF_CHECK_KEY, '1'); } catch (err) {} }
             saveSettings(); applyAllSettings();
             toast(on ? '已开启低性能模式' : '已恢复标准模式');
@@ -1685,7 +1775,7 @@
             const names = Object.keys(presets);
             presetSelect.innerHTML = '<option value="">— 选择预设 —</option>' + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
         }
-        const PRESET_FIELDS = ['starCount', 'starColor', 'warpSpeed', 'meteorInterval', 'bgStyle', 'layout', 'perfMode', 'enabledEngines'];
+        const PRESET_FIELDS = ['starCount', 'starColor', 'warpSpeed', 'meteorInterval', 'bgStyle', 'layout', 'perfMode', 'enabledEngines', 'fpsLimit'];
 
         document.getElementById('presetSave').addEventListener('click', () => {
             const name = prompt('为这套预设命名：', '我的星空 ' + (Object.keys(loadPresets()).length + 1));
@@ -1710,6 +1800,7 @@
             if (!Array.isArray(settings.enabledEngines) || !settings.enabledEngines.length) settings.enabledEngines = DEFAULT_ENGINES.slice();
             else settings.enabledEngines = settings.enabledEngines.filter(id => ENGINE_MAP[id]);
             if (!settings.enabledEngines.length) settings.enabledEngines = DEFAULT_ENGINES.slice();
+            if (typeof settings.fpsLimit !== 'number' || !isFinite(settings.fpsLimit) || settings.fpsLimit < 0) settings.fpsLimit = 0;
             saveSettings(); applyAllSettings();
             colorPicker.value = settings.starColor;
             toast('已应用预设：' + key);
@@ -1806,15 +1897,31 @@
         });
 
         /* ==========================================
-           19. 设置面板开关
+           19. 设置面板开关（控制实时 FPS 监控）
            ========================================== */
         const settingsPanel = document.getElementById('settingsPanel');
         const settingsFab = document.getElementById('settingsFab');
+
         function openSettings() {
             settingsPanel.classList.add('open');
             if (body.classList.contains('focus-mode')) setFocusMode(false, true);
+            // 启动实时 FPS 监控
+            isFpsMonitorOn = true;
+            fpsFrameCount = 0;
+            fpsSampleStart = 0;
+            liveFps = 0;
+            const el = document.getElementById('liveFpsVal');
+            if (el) { el.textContent = '--'; el.style.color = ''; }
         }
-        function closeSettings() { settingsPanel.classList.remove('open'); }
+        function closeSettings() {
+            settingsPanel.classList.remove('open');
+            // 停止实时 FPS 监控
+            isFpsMonitorOn = false;
+            fpsFrameCount = 0;
+            fpsSampleStart = 0;
+            const el = document.getElementById('liveFpsVal');
+            if (el) { el.textContent = '--'; el.style.color = ''; }
+        }
         settingsFab.addEventListener('click', () => { if (settingsPanel.classList.contains('open')) closeSettings(); else openSettings(); });
         document.getElementById('settingsClose').addEventListener('click', closeSettings);
 
@@ -1824,17 +1931,14 @@
         const HISTORY_KEY = 'st_nav_search_history_v1';
         const MAX_HISTORY = 10;
         const suggestEl = document.getElementById('searchSuggest');
-
         const COMMON_SUGGESTIONS = [
             '天气预报', '今日新闻', '知乎热榜', 'B站热门', 'GitHub Trending',
             '豆瓣电影', '在线翻译', '计算器', '快递查询', '汇率转换',
             '股票行情', '百度地图', '微博热搜', 'CSDN', '掘金',
             'LeetCode', 'MDN', '菜鸟教程', '12306', '支付宝'
         ];
-
         let suggestList = [];
         let activeIdx = -1;
-
         function loadHistory() {
             try {
                 const raw = localStorage.getItem(HISTORY_KEY);
@@ -1866,30 +1970,19 @@
             try { return safe.replace(new RegExp('(' + e + ')', 'ig'), '<mark>$1</mark>'); }
             catch (err) { return safe; }
         }
-
         function buildSuggestions(query) {
             const q = String(query || '').trim();
             const list = [];
-
             const bangWithQuery = q.match(/^!([a-zA-Z][a-zA-Z0-9]*)\s+(.+)$/);
             if (bangWithQuery) {
                 const bang = bangWithQuery[1].toLowerCase();
                 const rest = bangWithQuery[2].trim();
                 const engine = findEngineByBang(bang);
                 if (engine) {
-                    list.push({
-                        type: 'bang-search',
-                        value: q,
-                        label: `在 ${engine.name} 搜索：${rest}`,
-                        icon: engine.icon,
-                        tag: `Bang · !${bang}`,
-                        engine,
-                        query: rest
-                    });
+                    list.push({ type: 'bang-search', value: q, label: `在 ${engine.name} 搜索：${rest}`, icon: engine.icon, tag: `Bang · !${bang}`, engine, query: rest });
                     return list;
                 }
             }
-
             if (/^![a-zA-Z0-9]*$/.test(q)) {
                 const prefix = q.slice(1).toLowerCase();
                 const matched = SEARCH_ENGINES.filter(e =>
@@ -1898,34 +1991,19 @@
                 if (matched.length) {
                     matched.slice(0, 12).forEach(e => {
                         const primaryBang = e.bangs[0];
-                        list.push({
-                            type: 'bang-prefix',
-                            value: '!' + primaryBang + ' ',
-                            label: `!${primaryBang}`,
-                            icon: e.icon,
-                            tag: e.name + (e.bangs.length > 1 ? ' · ' + e.bangs.slice(1).map(b => '!' + b).join(' ') : ''),
-                            engine: e
-                        });
+                        list.push({ type: 'bang-prefix', value: '!' + primaryBang + ' ', label: `!${primaryBang}`, icon: e.icon, tag: e.name + (e.bangs.length > 1 ? ' · ' + e.bangs.slice(1).map(b => '!' + b).join(' ') : ''), engine: e });
                     });
                     return list;
                 }
             }
-
             const url = detectUrl(q);
             const history = loadHistory();
             if (url) list.push({ type: 'url', value: url, label: q, icon: '🌐', tag: '网址直达', historyType: 'url' });
-
             const lower = q.toLowerCase();
             const histMatched = q ? history.filter(h => h.value.toLowerCase().includes(lower)).slice(0, 4) : history.slice(0, 6);
             histMatched.forEach(h => {
-                list.push({
-                    type: 'history', value: h.value, label: h.value,
-                    icon: h.type === 'url' ? '🌐' : '🕘',
-                    tag: h.type === 'url' ? '历史网址' : '历史',
-                    historyType: h.type
-                });
+                list.push({ type: 'history', value: h.value, label: h.value, icon: h.type === 'url' ? '🌐' : '🕘', tag: h.type === 'url' ? '历史网址' : '历史', historyType: h.type });
             });
-
             if (q) {
                 COMMON_SUGGESTIONS
                     .filter(s => s.toLowerCase().includes(lower) && s.toLowerCase() !== lower)
@@ -1935,7 +2013,6 @@
             }
             return list;
         }
-
         function renderSuggest(query) {
             const q = String(query || '').trim();
             const list = buildSuggestions(q);
@@ -1943,21 +2020,14 @@
             activeIdx = -1;
             if (!list.length) { suggestEl.innerHTML = ''; closeSuggest(); return; }
             let html = '';
-            if (!q) {
-                html += `<div class="ss-header"><span>最近搜索</span><button class="ss-clear" data-act="clear">清空</button></div>`;
-            } else if (q.startsWith('!') && list[0] && list[0].type === 'bang-prefix') {
-                html += `<div class="ss-header"><span>Bang 快捷搜索（输入空格 + 关键词直接跳转）</span></div>`;
-            }
+            if (!q) html += `<div class="ss-header"><span>最近搜索</span><button class="ss-clear" data-act="clear">清空</button></div>`;
+            else if (q.startsWith('!') && list[0] && list[0].type === 'bang-prefix') html += `<div class="ss-header"><span>Bang 快捷搜索（输入空格 + 关键词直接跳转）</span></div>`;
             list.forEach((item, i) => {
                 const delBtn = item.type === 'history' ? `<button class="ss-del" data-del="${i}" title="删除此条">×</button>` : '';
                 let labelHtml;
-                if (item.type === 'bang-prefix') {
-                    labelHtml = `<span class="ss-bang-mark">${esc(item.label)}</span><span class="ss-type"> · ${esc(item.tag)}</span>`;
-                } else if (item.type === 'bang-search') {
-                    labelHtml = `${highlight(item.label, q.replace(/^![a-zA-Z0-9]+\s+/, ''))}<span class="ss-type"> · ${esc(item.tag)}</span>`;
-                } else {
-                    labelHtml = `${highlight(item.label, q)}<span class="ss-type"> · ${esc(item.tag)}</span>`;
-                }
+                if (item.type === 'bang-prefix') labelHtml = `<span class="ss-bang-mark">${esc(item.label)}</span><span class="ss-type"> · ${esc(item.tag)}</span>`;
+                else if (item.type === 'bang-search') labelHtml = `${highlight(item.label, q.replace(/^![a-zA-Z0-9]+\s+/, ''))}<span class="ss-type"> · ${esc(item.tag)}</span>`;
+                else labelHtml = `${highlight(item.label, q)}<span class="ss-type"> · ${esc(item.tag)}</span>`;
                 html += `<div class="ss-item" data-index="${i}" role="option">
                     <span class="ss-icon">${item.icon}</span>
                     <span class="ss-label">${labelHtml}</span>
@@ -1968,7 +2038,6 @@
             suggestEl.classList.add('open');
             body.classList.add('is-input-focus');
         }
-
         function closeSuggest() {
             suggestEl.classList.remove('open');
             activeIdx = -1;
@@ -1979,29 +2048,21 @@
             items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
             if (activeIdx >= 0 && items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
         }
-
         function executeSuggestion(idx) {
             const item = suggestList[idx];
             if (!item) return;
             if (item.type === 'bang-prefix') {
                 searchInput.value = item.value;
                 searchInput.focus();
-                requestAnimationFrame(() => {
-                    try { searchInput.setSelectionRange(item.value.length, item.value.length); } catch (e) {}
-                });
+                requestAnimationFrame(() => { try { searchInput.setSelectionRange(item.value.length, item.value.length); } catch (e) {} });
                 renderSuggest(item.value);
                 return;
             }
-            if (item.type === 'bang-search') {
-                closeSuggest();
-                openBangSearch(item.engine, item.query);
-                return;
-            }
+            if (item.type === 'bang-search') { closeSuggest(); openBangSearch(item.engine, item.query); return; }
             searchInput.value = item.value;
             closeSuggest();
             triggerSearch();
         }
-
         searchInput.addEventListener('input', () => renderSuggest(searchInput.value));
         searchInput.addEventListener('focus', () => {
             if (currentState === 'idle') { currentState = 'prepare'; searchBox.classList.add('active'); }
@@ -2066,12 +2127,10 @@
             searchInput.blur();
             toast(`已通过 ${engine.icon} ${engine.name} 搜索：${query}`);
         }
-
         function triggerSearch() {
             const query = searchInput.value.trim();
             if (!query) return;
             closeSuggest();
-
             const url = detectUrl(query);
             if (url) {
                 addToHistory('url', query);
@@ -2080,31 +2139,23 @@
                 searchInput.blur();
                 return;
             }
-
             const bangMatch = query.match(/^!([a-zA-Z][a-zA-Z0-9]*)\s+(.+)$/);
             if (bangMatch) {
                 const bang = bangMatch[1].toLowerCase();
                 const rest = bangMatch[2].trim();
                 const engine = findEngineByBang(bang);
-                if (engine) {
-                    openBangSearch(engine, rest);
-                    return;
-                } else {
-                    toast(`未识别的 !${bang} 指令，将作为普通搜索处理`);
-                }
+                if (engine) { openBangSearch(engine, rest); return; }
+                else toast(`未识别的 !${bang} 指令，将作为普通搜索处理`);
             }
-
             addToHistory('search', query);
             const currentToken = ++searchToken;
             currentState = 'warp';
             searchInput.blur();
             body.classList.add('is-warping');
             body.classList.add('is-searching');
-
             const enabledIds = (settings.enabledEngines && settings.enabledEngines.length) ? settings.enabledEngines : DEFAULT_ENGINES;
             const engines = SEARCH_ENGINES.filter(e => enabledIds.includes(e.id));
             const activeEngines = engines.length ? engines : [ENGINE_MAP.baidu];
-
             const results = activeEngines.map(e => ({
                 title: `${e.icon} ${e.name}：${query}`,
                 url: e.url.replace('%s', encodeURIComponent(query)),
@@ -2112,7 +2163,6 @@
                 bang: e.bangs[0],
                 engineName: e.name
             }));
-
             resultsContainer.innerHTML = results.map((item, index) => `
                 <div class="result-item" id="res-card-${index}">
                     <a href="${esc(item.url)}" class="result-title" target="_blank">
@@ -2123,13 +2173,11 @@
                     <div class="result-desc">${esc(item.desc)}</div>
                 </div>
             `).join('');
-
             setTimeout(() => {
                 if (currentToken !== searchToken) return;
                 launchStarsToCards(currentToken);
             }, 400);
         }
-
         function launchStarsToCards(token) {
             const cards = document.querySelectorAll('.result-item');
             const gap = Math.max(40, settings.meteorInterval);
@@ -2169,7 +2217,6 @@
             ], { duration: 500, easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)', fill: 'forwards' });
             animation.onfinish = () => { star.remove(); if (onComplete) onComplete(); };
         }
-
         searchBtn.addEventListener('click', triggerSearch);
         backBtn.addEventListener('click', () => {
             searchToken++;
@@ -2223,8 +2270,6 @@
         applyAllSettings();
         colorPicker.value = settings.starColor;
         renderShortcuts();
-
-        // 首次打开：自动检测帧率，低于 30 时提示开启低性能模式
         runPerfCheck();
 
         /* ==========================================
@@ -2468,7 +2513,6 @@
             const notifBtn = document.getElementById('timerNotifBtn');
             const notifStatus = document.getElementById('timerNotifStatus');
             const NOTIF_SUPPORTED = ('Notification' in window) && window.isSecureContext !== false;
-
             function updateNotifUI() {
                 if (!NOTIF_SUPPORTED) {
                     notifBtn.textContent = '不支持通知'; notifBtn.disabled = true; notifBtn.classList.remove('granted');
