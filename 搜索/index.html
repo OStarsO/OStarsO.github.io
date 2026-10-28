@@ -1477,6 +1477,48 @@
             letter-spacing: 1px;
         }
 
+        /* 计时器通知 */
+        .timer-notif-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .timer-notif-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 12.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .timer-notif-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.13);
+            color: #fff;
+        }
+        .timer-notif-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .timer-notif-btn.granted {
+            background: linear-gradient(135deg, rgba(76, 216, 255, 0.28), rgba(136, 176, 255, 0.22));
+            border-color: rgba(136, 176, 255, 0.5);
+            color: #fff;
+        }
+        .timer-notif-status {
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 6px;
+            padding: 0 4px;
+            letter-spacing: 0.3px;
+            min-height: 16px;
+        }
+
         /* 二维码 */
         .qr-box {
             display: flex;
@@ -1522,6 +1564,7 @@
                 max-height: none;
             }
             .timer-display { font-size: 36px; }
+            .timer-notif-btn { padding: 9px 16px; font-size: 12.5px; }
             .calc-display { font-size: 19px; }
             .search-suggest { max-height: 300px; }
         }
@@ -1736,6 +1779,12 @@
                     <button class="tp-btn tp-btn-primary" id="timerStart" style="min-width:92px;">开始</button>
                     <button class="tp-btn" id="timerReset">重置</button>
                 </div>
+
+                <div class="timer-notif-row">
+                    <button class="timer-notif-btn" id="timerNotifBtn" type="button">开启通知</button>
+                </div>
+                <div class="timer-notif-status" id="timerNotifStatus">开启后，计时结束可发送系统通知</div>
+
                 <div class="tp-label" style="margin-top:16px;">自定义（分钟）</div>
                 <div class="tp-row">
                     <input class="tp-input" id="timerCustom" type="number" min="1" max="180" value="10" style="flex:1;" />
@@ -3170,6 +3219,7 @@
                 });
                 if (currentTool === 'unit') initUnit();
                 if (currentTool === 'color') renderColor();
+                if (currentTool === 'timer' && typeof updateNotifUI === 'function') updateNotifUI();
             });
 
             /* ---------- 计算器 ---------- */
@@ -3402,6 +3452,117 @@
                 tid: null
             };
 
+            /* ---------- 计时器通知 ---------- */
+            const notifBtn = document.getElementById('timerNotifBtn');
+            const notifStatus = document.getElementById('timerNotifStatus');
+            const NOTIF_SUPPORTED = ('Notification' in window) && window.isSecureContext !== false;
+
+            function updateNotifUI() {
+                if (!NOTIF_SUPPORTED) {
+                    notifBtn.textContent = '不支持通知';
+                    notifBtn.disabled = true;
+                    notifBtn.classList.remove('granted');
+                    notifStatus.textContent = '当前浏览器不支持系统通知，将仅使用声音与页面提示';
+                    return;
+                }
+                const perm = Notification.permission;
+                if (perm === 'granted') {
+                    notifBtn.textContent = '✓ 通知已开启';
+                    notifBtn.disabled = true;
+                    notifBtn.classList.add('granted');
+                    notifStatus.textContent = '计时结束时会发送系统通知';
+                } else if (perm === 'denied') {
+                    notifBtn.textContent = '通知被拒绝';
+                    notifBtn.disabled = true;
+                    notifBtn.classList.remove('granted');
+                    notifStatus.textContent = '浏览器已拒绝通知权限，请前往站点设置中手动开启';
+                } else {
+                    notifBtn.textContent = '开启通知';
+                    notifBtn.disabled = false;
+                    notifBtn.classList.remove('granted');
+                    notifStatus.textContent = '开启后，计时结束可发送系统通知';
+                }
+            }
+
+            async function requestNotifPermission() {
+                if (!NOTIF_SUPPORTED) return false;
+                if (Notification.permission === 'granted') { updateNotifUI(); return true; }
+                if (Notification.permission === 'denied') { updateNotifUI(); return false; }
+                try {
+                    const p = await Notification.requestPermission();
+                    updateNotifUI();
+                    return p === 'granted';
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            notifBtn.addEventListener('click', () => {
+                requestNotifPermission().then(ok => {
+                    if (ok) toast('通知已开启');
+                    else if (NOTIF_SUPPORTED && Notification.permission === 'denied') toast('通知权限被拒绝，可在站点设置中开启');
+                });
+            });
+
+            function sendTimerNotification(minutes) {
+                if (!NOTIF_SUPPORTED) return;
+                if (Notification.permission !== 'granted') return;
+
+                const title = '⏰ 番茄钟结束';
+                const opts = {
+                    body: `${minutes} 分钟的专注时间已结束，休息一下吧 ☕`,
+                    tag: 'st-nav-timer',
+                    renotify: true,
+                    requireInteraction: false,
+                    silent: false
+                };
+
+                const closeLater = () => {
+                    setTimeout(() => {
+                        try {
+                            if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+                                navigator.serviceWorker.getRegistration().then(reg => {
+                                    if (!reg || !reg.getNotifications) return;
+                                    reg.getNotifications({ tag: opts.tag }).then(list => {
+                                        list.forEach(n => { try { n.close(); } catch (e) {} });
+                                    }).catch(() => {});
+                                }).catch(() => {});
+                            }
+                        } catch (e) {}
+                    }, 15000);
+                };
+
+                // 优先走 Service Worker（Android Chrome 只支持这种方式）
+                if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+                    navigator.serviceWorker.getRegistration().then(reg => {
+                        if (reg && reg.showNotification) {
+                            reg.showNotification(title, opts).catch(() => {
+                                try { new Notification(title, opts); } catch (e) {}
+                            });
+                            closeLater();
+                            return;
+                        }
+                        try { new Notification(title, opts); } catch (e) {}
+                    }).catch(() => {
+                        try { new Notification(title, opts); } catch (e) {}
+                    });
+                    return;
+                }
+
+                try {
+                    const n = new Notification(title, opts);
+                    n.onclick = () => {
+                        try { window.focus(); } catch (e) {}
+                        try { n.close(); } catch (e) {}
+                    };
+                    setTimeout(() => {
+                        try { n.close(); } catch (e) {}
+                    }, 15000);
+                } catch (e) {}
+            }
+
+            updateNotifUI();
+
             function fmtTime(sec) {
                 const m = Math.floor(sec / 60);
                 const s = sec % 60;
@@ -3434,6 +3595,16 @@
                     timerStartBtn.textContent = '开始';
                     timerStatus.textContent = '时间到！';
                     beep(3);
+
+                    // 移动端震动
+                    if (navigator.vibrate) {
+                        try { navigator.vibrate([200, 100, 200, 100, 200]); } catch (e) {}
+                    }
+
+                    // 系统通知
+                    sendTimerNotification(Math.max(1, Math.round(timerState.total / 60)));
+
+                    // 页面内提示
                     toast('⏰ 计时结束');
                     return;
                 }
@@ -3441,6 +3612,11 @@
             }
 
             timerStartBtn.addEventListener('click', () => {
+                // 用户首次点「开始」时，如果还没决定通知权限，自动请求一次
+                if (NOTIF_SUPPORTED && Notification.permission === 'default') {
+                    requestNotifPermission();
+                }
+
                 if (timerState.running) {
                     timerState.remaining = Math.max(0, Math.ceil((timerState.endAt - Date.now()) / 1000));
                     stopTicking();
