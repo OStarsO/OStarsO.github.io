@@ -989,6 +989,235 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 }
 
 
+/* ==================================================================
+   v4：抽取范围 / 名单增强 / 跳过 / 权重 / 快捷键重绑 / 移动端 / PK / 打印
+   ================================================================== */
+
+/* ---------- 抽取范围（替代旧「仅当前分组」开关） ---------- */
+.scope-bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+  width:100%;max-width:520px;padding:8px 12px;border-radius:16px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+}
+body.light .scope-bar{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18)}
+.scope-lab{font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.scope-seg{padding:3px}
+.scope-seg button{font-size:11.5px;padding:5px 12px;letter-spacing:.04em}
+.scope-seg button:disabled{opacity:.38;cursor:not-allowed}
+.scope-name{
+  font-size:11.5px;font-weight:800;letter-spacing:.04em;color:#06121a;
+  padding:4px 11px;border-radius:9px;
+  background:linear-gradient(120deg,#6ee7ff,#b98cff);box-shadow:0 4px 14px rgba(110,231,255,.32);
+}
+.scope-name.off{color:var(--muted);background:rgba(255,255,255,.08);box-shadow:none;font-weight:600}
+
+/* ---------- 名单行：抽中次数 / 临时排除 ---------- */
+.p-count{
+  font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.04em;
+  padding:2px 8px;border-radius:8px;color:#9fe9ff;
+  background:rgba(110,231,255,.14);border:1px solid rgba(110,231,255,.34);flex:0 0 auto;
+}
+.p-count.zero{color:var(--muted);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.p-row.is-excluded{opacity:.46;border-style:dashed}
+.p-row.is-excluded .p-avatar{filter:grayscale(1)}
+.p-row.is-excluded .p-info b{text-decoration:line-through;text-decoration-color:rgba(255,120,150,.7)}
+.mini-btn.excl.on{background:rgba(255,170,80,.22);border-color:rgba(255,170,80,.5);color:#ffd9a8}
+.mini-btn.return:hover{background:rgba(110,231,255,.26);border-color:rgba(110,231,255,.5);color:#c9f4ff}
+
+/* ---------- 跳过动画 ---------- */
+.skip-btn{
+  position:absolute;top:16px;right:16px;z-index:9;
+  font-size:12px;font-weight:700;letter-spacing:.08em;padding:8px 14px;border-radius:12px;
+  color:#eaf3ff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.26);
+  cursor:pointer;backdrop-filter:blur(8px);transition:.2s;
+}
+.skip-btn:hover{background:rgba(255,255,255,.24);color:#fff;transform:translateY(-1px)}
+.draw-overlay .skip-btn,.ten-overlay .skip-btn{display:none}
+.draw-overlay.active .skip-btn,.ten-overlay.active .skip-btn{display:block}
+
+/* ---------- 成就解锁提示 ---------- */
+.toast.achv{
+  background:linear-gradient(115deg,rgba(255,215,0,.26),rgba(199,125,255,.24));
+  border-color:rgba(255,215,0,.55);color:#fff8dc;font-weight:700;
+  box-shadow:0 14px 40px rgba(255,190,80,.28);
+  animation:achvIn .55s cubic-bezier(.2,1.5,.4,1);
+}
+@keyframes achvIn{
+  0%{transform:translateY(18px) scale(.72);opacity:0}
+  55%{transform:translateY(-4px) scale(1.07);opacity:1}
+  100%{transform:none;opacity:1}
+}
+.achv.on.pop{animation:achvPop .7s cubic-bezier(.2,1.5,.4,1)}
+@keyframes achvPop{0%{transform:scale(.8);box-shadow:0 0 0 rgba(255,215,0,0)}55%{transform:scale(1.09);box-shadow:0 0 26px rgba(255,215,0,.6)}100%{transform:none}}
+.achv{position:relative}
+.achv .achv-time{display:block;font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.04em}
+.achv:not(.on){opacity:.42;filter:grayscale(.6)}
+.achv.on{opacity:1;filter:none}
+.achv-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}
+
+/* ---------- 权重模式 ---------- */
+.weight-grid{display:flex;flex-direction:column;gap:7px;margin:8px 0 4px}
+.weight-row{display:grid;grid-template-columns:52px minmax(0,1fr) 88px;align-items:center;gap:10px}
+.weight-row .w-lab{font-size:12px;font-weight:800;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.weight-row input[type="number"]{
+  width:100%;padding:5px 8px;border-radius:9px;font-size:12px;text-align:center;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#eaf3ff;
+}
+.weight-row .w-pct{font-size:11px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.weight-grid.disabled{opacity:.42;pointer-events:none}
+
+/* ---------- 快捷键重绑 ---------- */
+.kbd-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 2px}
+.kbd-item .kb-val{display:flex;align-items:center;gap:6px}
+.kbd-item button.kb-edit{
+  font-size:10.5px;padding:3px 8px;border-radius:8px;cursor:pointer;color:var(--muted);
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+}
+.kbd-item button.kb-edit:hover{background:rgba(255,255,255,.18);color:#fff}
+.kbd-item button.kb-edit.rec{
+  color:#06121a;background:linear-gradient(120deg,#6ee7ff,#b98cff);border-color:transparent;
+  animation:kbRec 1s ease-in-out infinite;
+}
+@keyframes kbRec{0%,100%{box-shadow:0 0 0 rgba(110,231,255,0)}50%{box-shadow:0 0 16px rgba(110,231,255,.7)}}
+#kbWarn.bad{color:#ffb3c4}
+#kbWarn.good{color:#8affc1}
+
+/* ---------- 搜索高亮 ---------- */
+mark.search-hl{background:rgba(255,215,0,.32);color:#fff;border-radius:4px;padding:0 1px;font-weight:800}
+
+/* ---------- 虚拟滚动占位 ---------- */
+.roster-list{position:relative}
+.vs-spacer{width:100%;flex:0 0 auto;pointer-events:none}
+.vs-hint{font-size:10.5px;color:var(--muted);text-align:center;padding:4px 0 0}
+
+/* ---------- PK 面板 ---------- */
+.pk-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.pk-side{
+  display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);
+}
+.pk-side select{
+  padding:8px 10px;border-radius:10px;font-size:12.5px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#eaf3ff;
+}
+.pk-side .pk-score{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.02em;color:#9fe9ff}
+.pk-side .pk-sub{font-size:11px;color:var(--muted);letter-spacing:.05em}
+.pk-vs{display:grid;place-items:center;font-size:13px;font-weight:900;letter-spacing:.14em;color:var(--muted)}
+.pk-result{
+  margin-top:12px;padding:14px;border-radius:16px;font-size:13px;line-height:1.9;
+  background:rgba(110,231,255,.09);border:1px solid rgba(110,231,255,.28);
+}
+.pk-result b{color:#9fe9ff}
+.pk-hist{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ---------- 皮肤联动：背景与光晕 ---------- */
+body.skin-nebula #cursor-glow{background:radial-gradient(circle,rgba(199,125,255,.2) 0%,rgba(199,125,255,0) 70%)}
+body.skin-nebula .nebula-1{background:rgba(167,139,250,.22)}
+body.skin-nebula .nebula-2{background:rgba(255,110,200,.16)}
+body.skin-nebula .nebula-3{background:rgba(110,180,255,.14)}
+body.skin-aurora #cursor-glow{background:radial-gradient(circle,rgba(138,255,193,.2) 0%,rgba(138,255,193,0) 70%)}
+body.skin-aurora .nebula-1{background:rgba(80,255,215,.18)}
+body.skin-aurora .nebula-2{background:rgba(120,140,255,.18)}
+body.skin-aurora .nebula-3{background:rgba(160,255,200,.12)}
+body.skin-gold #cursor-glow{background:radial-gradient(circle,rgba(255,205,110,.22) 0%,rgba(255,205,110,0) 70%)}
+body.skin-gold .nebula-1{background:rgba(255,205,110,.16)}
+body.skin-gold .nebula-2{background:rgba(255,150,90,.13)}
+body.skin-gold .nebula-3{background:rgba(255,230,150,.1)}
+body.skin-gold{background-color:#0a0703}
+body.light.skin-gold{background-color:#6b4a12}
+body.light.skin-nebula{background-color:#3d1f7a}
+body.light.skin-aurora{background-color:#0b4a52}
+
+/* 星级标识（详情强调） */
+.set-desc.strong{color:#dbeafe;opacity:.95}
+
+/* ---------- 移动端 ---------- */
+@media(max-width:820px){
+  .pk-grid{grid-template-columns:1fr}
+  .pk-vs{padding:4px 0}
+  .scope-bar{gap:8px;padding:7px 10px}
+}
+@media(max-width:720px){
+  .dock{
+    flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;justify-content:flex-start;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    padding:8px 10px;max-width:calc(100vw - 16px);
+  }
+  .dock::-webkit-scrollbar{display:none}
+  .dock button{flex:0 0 auto}
+  .scope-bar{max-width:100%}
+  .scope-name{font-size:11px;padding:3px 9px}
+  .ten-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .ten-card{padding:10px 6px 8px;gap:5px}
+  .ten-name{font-size:12.5px}
+  .ten-stars{font-size:10.5px}
+  .skip-btn{top:10px;right:10px;padding:7px 11px;font-size:11px}
+  .weight-row{grid-template-columns:44px minmax(0,1fr) 72px}
+  .achv-list{grid-template-columns:1fr 1fr}
+  .p-count{font-size:10px;padding:2px 6px}
+  .p-actions .mini-btn{padding:4px 7px}
+}
+/* 键盘弹出时隐藏 Dock（由 JS 在 body 上加 .kb-open） */
+body.kb-open .dock{
+  transform:translateX(-50%) translateY(180%);
+  opacity:0;pointer-events:none;transition:transform .28s ease,opacity .28s ease;
+}
+body.kb-open .app{padding-bottom:24px}
+
+/* ---------- 打印样式 ---------- */
+@media print{
+  @page{margin:14mm}
+  #starfield,#sunlight-bg,#cursor-glow,.nebula,.dock,.top-actions,.add-form,.toolbar,.batch-bar,
+  .scope-bar,.draw-actions,.stage-foot,.modal,.draw-overlay,.ten-overlay,.toast-box,.skip-btn,
+  .p-actions,.p-check,#settingsBtn,#themeToggle,#soundBtn{display:none!important}
+  html,body{background:#fff!important;color:#111!important}
+  .app{padding:0!important}
+  .layout{display:block!important}
+  .panel,.last-card{
+    background:#fff!important;border:1px solid #d5d5d5!important;box-shadow:none!important;
+    color:#111!important;break-inside:avoid;
+  }
+  .panel-head h2,.brand-text h1,.last-name,.last-id,.p-info b,.p-info span{color:#111!important}
+  .roster-list{max-height:none!important;overflow:visible!important;display:flex!important}
+  .p-row{background:#fff!important;border-color:#e2e2e2!important;color:#111!important;opacity:1!important}
+  .p-avatar{background:#eee!important;color:#333!important;border-color:#ddd!important}
+  .p-row.is-excluded{opacity:.6!important}
+  .p-count{color:#333!important;background:#f2f2f2!important;border-color:#ddd!important}
+  .badge,.stat b{color:#111!important}
+  .roster-panel{break-after:page}
+}
+
+/* ---- 右键菜单 ---- */
+.ctx-menu {
+  position: fixed;
+  z-index: 420;
+  min-width: 158px;
+  padding: 6px;
+  border-radius: 12px;
+  background: rgba(16, 24, 44, .97);
+  border: 1px solid rgba(140, 200, 255, .22);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+  display: none;
+}
+.ctx-menu.open { display: block; }
+.ctx-menu button {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text, #eaf0ff);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.ctx-menu button:hover { background: rgba(120, 190, 255, .16); }
+.ctx-menu button.danger { color: #ff9db1; }
+body.light .ctx-menu { background: rgba(255, 255, 255, .98); border-color: rgba(60, 90, 140, .18); }
+body.light .ctx-menu button { color: #1b2436; }
+body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
+
 </style>
 </head>
 <body class="light">
@@ -1062,6 +1291,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
           <option value="name" data-zh="姓名" data-en="Name">姓名</option>
           <option value="id" data-zh="学号" data-en="Student ID">学号</option>
           <option value="drawn" data-zh="抽中状态" data-en="Draw state">抽中状态</option>
+          <option value="count" data-zh="抽中次数" data-en="Draw count">抽中次数</option>
         </select>
       </div>
 
@@ -1073,6 +1303,8 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       <div class="batch-bar" id="batchBar" hidden>
         <span id="batchCount">已选 0 人</span>
         <button type="button" data-batch="return" data-zh="放回候选池" data-en="Return">放回候选池</button>
+        <button type="button" data-batch="exclude" data-zh="临时排除" data-en="Exclude">临时排除</button>
+        <button type="button" data-batch="include" data-zh="恢复参加" data-en="Restore">恢复参加</button>
         <button type="button" data-batch="delete" data-zh="删除" data-en="Delete">删除</button>
         <button type="button" data-batch="clear" data-zh="取消选择" data-en="Clear">取消选择</button>
       </div>
@@ -1090,7 +1322,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
             <button type="button" data-mode="unique" data-zh="不重复" data-en="No repeat">不重复</button>
             <button type="button" data-mode="repeat" data-zh="可重复" data-en="Repeatable">可重复</button>
           </div>
-          <button type="button" class="chip" id="groupOnlyChip">🎯 仅当前分组：关</button>
+          <button type="button" class="chip" id="speedChip">⏩ 1x</button>
           <div class="anim-switcher" id="animSwitcher">
             <button class="anim-trigger" id="animTrigger">
               <span id="animLabel">🌊 经典</span>
@@ -1119,6 +1351,15 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
         </div>
       </div>
 
+      <div class="scope-bar" id="scopeBar">
+        <span class="scope-lab" data-zh="抽取范围" data-en="Scope">抽取范围</span>
+        <div class="seg scope-seg" id="scopeSeg">
+          <button type="button" data-scope="all" data-zh="全部名单" data-en="All">全部名单</button>
+          <button type="button" data-scope="group" data-zh="当前分组" data-en="Group">当前分组</button>
+        </div>
+        <span class="scope-name" id="scopeName">全部分组</span>
+      </div>
+
       <div class="draw-actions">
         <button class="draw-btn" id="drawBtn" data-zh="单 抽" data-en="SINGLE">单 抽</button>
         <button class="draw-btn ten" id="drawTenBtn" data-zh="十 连" data-en="TEN PULL">十 连</button>
@@ -1132,6 +1373,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
   <button type="button" data-action="import"><span class="ico">📥</span><span data-zh="导入" data-en="Import">导入</span></button>
   <button type="button" data-action="history"><span class="ico">📜</span><span data-zh="历史" data-en="History">历史</span></button>
   <button type="button" data-action="stats"><span class="ico">📊</span><span data-zh="统计" data-en="Stats">统计</span></button>
+  <button type="button" data-action="pk"><span class="ico">⚔️</span><span data-zh="PK" data-en="PK">PK</span></button>
   <button type="button" data-action="export"><span class="ico">📤</span><span data-zh="导出" data-en="Export">导出</span></button>
   <button type="button" data-action="settings"><span class="ico">⚙</span><span data-zh="设置" data-en="Settings">设置</span></button>
   <button type="button" data-action="undo" id="undoBtn"><span class="ico">↶</span><span data-zh="撤销" data-en="Undo">撤销</span></button>
@@ -1142,6 +1384,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 <!-- 单抽遮罩 -->
 <div class="draw-overlay anim-classic" id="drawOverlay">
   <div class="fx-layer"></div>
+  <button type="button" class="skip-btn" id="skipDrawBtn" data-zh="跳过 ▸" data-en="Skip ▸">跳过 ▸</button>
   <div class="draw-stage">
     <div class="roll-card" id="rollCard">
       <div class="roll-star" id="rollStar"></div>
@@ -1155,6 +1398,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 <!-- 十连遮罩 -->
 <div class="ten-overlay anim-classic" id="tenOverlay">
   <div class="ten-fx"></div>
+  <button type="button" class="skip-btn" id="skipTenBtn" data-zh="跳过 ▸" data-en="Skip ▸">跳过 ▸</button>
   <div class="ten-wrap">
     <div class="ten-title" data-zh="十 连 抽 卡" data-en="TEN PULL">十 连 抽 卡</div>
     <div class="ten-grid" id="tenGrid"></div>
@@ -1169,13 +1413,13 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       <h3 data-zh="导入 / 编辑名单" data-en="Import / Edit roster">导入 / 编辑名单</h3>
       <button class="close" data-close>✕</button>
     </div>
-    <div class="hint-box" data-zh="每行一条，支持：&quot;张三&quot;, / &quot;张三&quot; / 张三 / 张三,2021001 / 张三,2021001,一班。兼容中英文引号、多余逗号、空行与多余空白；学号可省略，填写时不可重复。第三列为分组（可选）。" data-en="One entry per line: &quot;Name&quot;, / &quot;Name&quot; / Name / Name,2021001 / Name,2021001,Class 1. Quotes, extra commas, blank lines and whitespace are tolerated. Student ID is optional but must be unique. The third column is the group (optional).">每行一条，支持多种格式：<br><code>"张三",</code> · <code>"张三"</code> · <code>张三</code> · <code>张三,2021001,一班</code></div>
+    <div class="hint-box" data-zh="每行一条，支持：姓名 / 姓名,学号 / 姓名,学号,分组。可直接从 Excel、WPS 或聊天记录粘贴：制表符、多个空格、中英文逗号、分号都会被识别，空行自动跳过。也可选择 .txt / .csv / .json / .xlsx / .xls 文件。" data-en="One entry per line: Name / Name,StudentID / Name,StudentID,Group. Paste straight from Excel, WPS or chat: tabs, runs of spaces, Chinese/English commas and semicolons are all recognised, blank lines skipped. Files: .txt / .csv / .json / .xlsx / .xls.">每行一条，支持：<code>姓名</code> · <code>姓名,学号</code> · <code>姓名,学号,分组</code><br>可直接从 Excel / WPS / 聊天记录粘贴（制表符、多空格、中英文逗号、分号均可识别），也支持 .txt / .csv / .json / .xlsx / .xls。</div>
     <div class="modal-body">
       <textarea id="importText" spellcheck="false" placeholder='"张三",&#10;"李四",&#10;王五&#10;赵六,2021006,一班'></textarea>
       <div class="preview-box" id="importPreview">输入内容后实时预览有效人数、重复学号与空行。</div>
     </div>
     <div class="modal-foot">
-      <input type="file" id="fileInput" accept=".txt,.csv,.json" hidden>
+      <input type="file" id="fileInput" accept=".txt,.csv,.json,.xlsx,.xls" hidden>
       <button type="button" id="pickFileBtn" data-zh="选择文件…" data-en="Choose file…">选择文件…</button>
       <button type="button" id="appendBtn" data-zh="追加到名单" data-en="Append">追加到名单</button>
       <button type="button" id="replaceBtn" class="primary" data-zh="替换全部名单" data-en="Replace all">替换全部名单</button>
@@ -1218,10 +1462,28 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 
       <section class="set-sec">
         <h4 data-zh="星级概率（1–5★）" data-en="Star odds (1–5★)">星级概率（1–5★）</h4>
+        <p class="set-desc strong" data-zh="星级只是抽中之后的评级展示，不会影响谁会抽中；下面这组数值只决定结果亮几颗星。" data-en="Stars are a rating shown after a draw — they never influence who is picked. These numbers only choose the star rating of the result.">星级只是抽中之后的评级展示，不会影响谁会抽中；下面这组数值只决定结果亮几颗星。</p>
         <div class="star-config" id="starConfig"></div>
         <div class="sum-line">合计 <b id="starSum">100</b>% <span id="starSumWarn"></span></div>
         <div class="preset-row" id="presetRow"></div>
         <p class="set-desc" data-zh="四舍五入到 1%，合计必须恰好为 100% 才能抽取。" data-en="Whole percentages; the total must be exactly 100% before drawing.">四舍五入到 1%，合计必须恰好为 100% 才能抽取。</p>
+      </section>
+
+      <section class="set-sec">
+        <h4 data-zh="星级权重模式（可选 1–5 倍）" data-en="STAR WEIGHT MODE (1–5×)">星级权重模式（可选 1–5 倍）</h4>
+        <label class="switch-row"><span data-zh="启用权重模式：按 1–5 倍权重换算概率" data-en="Weight mode: derive odds from 1–5× weights">启用权重模式：按 1–5 倍权重换算概率</span><span class="switch"><input type="checkbox" id="weightEnable"><span></span></span></label>
+        <div class="weight-grid" id="weightGrid"></div>
+        <p class="set-desc" id="weightPct"></p>
+      </section>
+
+      <section class="set-sec">
+        <h4 data-zh="动画节奏" data-en="ANIMATION SPEED">动画节奏</h4>
+        <div class="seg" id="speedSeg">
+          <button type="button" data-speed="0.5">0.5x</button>
+          <button type="button" data-speed="1">1x</button>
+          <button type="button" data-speed="1.5">1.5x</button>
+        </div>
+        <p class="set-desc" data-zh="抽卡动画的播放速度；抽取途中也可以点遮罩右上角的「跳过 ▸」直接看结果。" data-en="Playback speed of the draw animation. During a draw you can also hit “Skip ▸” in the overlay to jump straight to the result.">抽卡动画的播放速度；抽取途中也可以点遮罩右上角的「跳过 ▸」直接看结果。</p>
       </section>
 
       <section class="set-sec">
@@ -1230,6 +1492,9 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
         <label class="switch-row"><span data-zh="十连至少 1 个 4★" data-en="Ten-pull: at least one 4★">十连至少 1 个 4★</span><span class="switch"><input type="checkbox" id="pityTen"><span></span></span></label>
         <label class="switch-row"><span data-zh="50 抽保底 5★" data-en="50-draw 5★ guarantee">50 抽保底 5★</span><span class="switch"><input type="checkbox" id="pityFifty"><span></span></span></label>
         <p class="set-desc" id="pityStatus"></p>
+        <label class="switch-row"><span data-zh="幸运值：连续未出 5★ 时逐步提升 5★ 概率" data-en="Luck: drift 5★ odds up during dry streaks">幸运值：连续未出 5★ 时逐步提升 5★ 概率</span><span class="switch"><input type="checkbox" id="luckyEnable"><span></span></span></label>
+        <label class="range-row"><span data-zh="每抽提升" data-en="Per-pull bonus">每抽提升</span><input type="range" id="luckyStep" min="0" max="5" step="0.5"><output id="luckyStepOut">1</output></label>
+        <p class="set-desc" id="luckyStatus"></p>
       </section>
 
       <section class="set-sec">
@@ -1246,15 +1511,13 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 
       <section class="set-sec">
         <h4 data-zh="全局快捷键" data-en="KEYBOARD SHORTCUTS">全局快捷键</h4>
-        <div class="kbd-list">
-          <div class="kbd-item"><span data-zh="单抽" data-en="Single draw">单抽</span><span><kbd>Space</kbd> / <kbd>Enter</kbd></span></div>
-          <div class="kbd-item"><span data-zh="十连" data-en="Ten pull">十连</span><span><kbd>Shift</kbd>+<kbd>Space</kbd></span></div>
-          <div class="kbd-item"><span data-zh="导入名单" data-en="Import">导入名单</span><kbd>E</kbd></div>
-          <div class="kbd-item"><span data-zh="抽取历史" data-en="History">抽取历史</span><kbd>H</kbd></div>
-          <div class="kbd-item"><span data-zh="重置系统" data-en="Reset">重置系统</span><kbd>R</kbd></div>
-          <div class="kbd-item"><span data-zh="关闭弹窗" data-en="Close dialog">关闭弹窗</span><kbd>Esc</kbd></div>
-          <div class="kbd-item"><span data-zh="撤销 / 重做" data-en="Undo / Redo">撤销 / 重做</span><span><kbd>Ctrl</kbd>+<kbd>Z</kbd></span></div>
-          <div class="kbd-item"><span data-zh="打开设置" data-en="Settings">打开设置</span><kbd>S</kbd></div>
+        <label class="switch-row"><span data-zh="启用全局快捷键" data-en="Enable shortcuts">启用全局快捷键</span><span class="switch"><input type="checkbox" id="scEnable"><span></span></span></label>
+        <label class="switch-row"><span data-zh="空格 / 回车抽卡（可关闭，防误触）" data-en="Space / Enter to draw (disable to avoid mis-taps)">空格 / 回车抽卡（可关闭，防误触）</span><span class="switch"><input type="checkbox" id="scSpace"><span></span></span></label>
+        <div class="kbd-list" id="kbList"></div>
+        <p class="set-desc" id="kbWarn"></p>
+        <div class="kbd-foot">
+          <button type="button" class="mini-btn" id="kbReset" data-zh="恢复默认键位" data-en="Reset keys">恢复默认键位</button>
+          <span class="set-desc" data-zh="点「改」后按下新按键即可重绑；重复键位会在此提示。" data-en="Hit “Edit” then press the new key. Duplicate bindings are reported here.">点「改」后按下新按键即可重绑；重复键位会在此提示。</span>
         </div>
         <p class="set-desc" data-zh="输入框、文本域、下拉框聚焦时自动禁用快捷键；弹窗或抽卡动画打开时同样暂停抽卡快捷键。" data-en="Shortcuts are suspended while an input, textarea or select has focus, or while a dialog/overlay is open.">输入框、文本域、下拉框聚焦时自动禁用快捷键；弹窗或抽卡动画打开时同样暂停抽卡快捷键。</p>
       </section>
@@ -1308,6 +1571,8 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
         <button type="button" class="export-opt" data-format="txt"><b>TXT</b><span data-zh="纯文本结果，适合发群或贴进文档。" data-en="Plain-text results, handy for chat or documents.">纯文本结果，适合发群或贴进文档。</span></button>
         <button type="button" class="export-opt" data-format="json"><b>JSON</b><span data-zh="完整数据备份（名单 + 历史 + 设置），可再次导入。" data-en="Full backup (roster + history + settings) that can be re-imported.">完整数据备份（名单 + 历史 + 设置），可再次导入。</span></button>
         <button type="button" class="export-opt" data-format="png"><b data-zh="图片 PNG" data-en="Image PNG">图片 PNG</b><span data-zh="把最近一次抽中结果渲染成分享图。" data-en="Render the latest result as a shareable image.">把最近一次抽中结果渲染成分享图。</span></button>
+        <button type="button" class="export-opt" data-format="pnglong"><b data-zh="分享长图" data-en="Long share card">分享长图</b><span data-zh="含最近结果、抽取统计、星级分布与排行榜，适合发班级群。" data-en="Latest result plus stats, star breakdown and ranking — sized for a class group post.">含最近结果、抽取统计、星级分布与排行榜，适合发班级群。</span></button>
+        <button type="button" class="export-opt" data-format="print"><b data-zh="打印 / 存 PDF" data-en="Print / PDF">打印 / 存 PDF</b><span data-zh="用浏览器打印样式输出名单与历史（已隐藏特效与按钮），可另存为 PDF。" data-en="Print the roster and history with the print stylesheet (effects and buttons hidden); save as PDF if needed.">用浏览器打印样式输出名单与历史（已隐藏特效与按钮），可另存为 PDF。</span></button>
       </div>
     </div>
   </div>
@@ -1338,6 +1603,20 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     <div class="modal-body" id="guideBody"></div>
     <div class="modal-foot">
       <button type="button" class="primary" id="guideStart" data-zh="开始使用" data-en="Get started">开始使用</button>
+    </div>
+  </div>
+</div>
+
+<!-- PK 对抗弹窗 -->
+<div class="modal" id="pkModal">
+  <div class="modal-card glass wide">
+    <div class="modal-head">
+      <h3 data-zh="分组 PK" data-en="Group PK">分组 PK</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body" id="pkBody"></div>
+    <div class="modal-foot">
+      <button type="button" id="pkRunBtn" class="primary" data-zh="开始 PK" data-en="Start PK">开始 PK</button>
     </div>
   </div>
 </div>
@@ -1378,6 +1657,27 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     { id: 'nebula', zh: '深空星云', en: 'Nebula' },
     { id: 'aurora', zh: '极光', en: 'Aurora' },
     { id: 'gold', zh: '鎏金', en: 'Gold' }
+  ];
+  var SPEEDS = ['0.5', '1', '1.5'];
+  // 可重绑的快捷键动作（id 与 settings.shortcuts.keys 对应）
+  var ACTIONS = [
+    { id: 'single', zh: '单抽', en: 'Single draw', def: ' ' },
+    { id: 'ten', zh: '十连', en: 'Ten pull', def: 'shift+ ' },
+    { id: 'import', zh: '导入名单', en: 'Import roster', def: 'e' },
+    { id: 'history', zh: '抽取历史', en: 'History', def: 'h' },
+    { id: 'stats', zh: '统计面板', en: 'Stats', def: 'i' },
+    { id: 'settings', zh: '打开设置', en: 'Settings', def: 's' },
+    { id: 'pk', zh: '分组 PK', en: 'Group PK', def: 'p' },
+    { id: 'reset', zh: '重置系统', en: 'Reset', def: 'r' }
+  ];
+  // 称号：按次数 / 星级授予
+  var TITLES = [
+    { id: 'rookie', zh: '初出茅庐', en: 'Rookie', ico: '🌱', test: function (s) { return s.total >= 1; } },
+    { id: 'lucky', zh: '欧气初现', en: 'Lucky one', ico: '🍀', test: function (s) { return s.c5 >= 1; } },
+    { id: 'collector', zh: '五星收藏家', en: 'Star collector', ico: '👑', test: function (s) { return s.c5 >= 5; } },
+    { id: 'zealot', zh: '十连狂人', en: 'Ten-pull zealot', ico: '🔥', test: function (s) { return s.tenBatches >= 10; } },
+    { id: 'favorite', zh: '天选之子', en: "Teacher's pet", ico: '💫', test: function (s) { return s.maxCount >= 5; } },
+    { id: 'sweeper', zh: '全员制霸', en: 'Full sweep', ico: '🏆', test: function (s) { return s.roster > 0 && s.left === 0; } }
   ];
 
   /* ---------------- 工具 ---------------- */
@@ -1497,17 +1797,28 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
   function stopTicks() { if (tickTimer) { clearInterval(tickTimer); tickTimer = null; } }
 
   /* ---------------- 状态 ---------------- */
+  function defaultShortcutKeys() {
+    var o = {};
+    ACTIONS.forEach(function (a) { o[a.id] = a.def; });
+    return o;
+  }
   function defaultSettings() {
     return {
-      theme: 'light', animation: 'classic', lang: 'zh', mode: 'unique', groupOnly: false,
+      theme: 'light', animation: 'classic', lang: 'zh', mode: 'unique', scope: 'all',
       stars: { 5: 2, 4: 8, 3: 20, 2: 30, 1: 40 }, preset: 'standard',
-      pity: { enabled: false, tenFour: true, fiftyFive: true, c5: 0 },
+      weights: { enabled: false, mult: { 5: 5, 4: 4, 3: 3, 2: 2, 1: 1 } },
+      pity: { enabled: false, tenFour: true, fiftyFive: true, c5: 0, lucky: false, luckyStep: 1 },
       sound: { enabled: true, volume: 60 },
       skin: 'liquid', sort: 'order', filter: 'all', group: 'all', search: '',
+      animSpeed: '1',
+      shortcuts: { enabled: true, spaceDraw: true, keys: defaultShortcutKeys() },
       guideSeen: false
     };
   }
-  var state = { version: 3, seq: 1, participants: [], history: [], drawIndex: 0, last: null, settings: defaultSettings() };
+  function freshState() {
+    return { version: 4, seq: 1, participants: [], history: [], drawIndex: 0, last: null, achv: {}, logs: [], settings: defaultSettings() };
+  }
+  var state = freshState();
   var storageBroken = false;
   var lastQuotaToast = 0;
 
@@ -1516,9 +1827,20 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     if (o && typeof o === 'object') { for (var k = 5; k >= 1; k--) out[k] = n(o[k]); }
     return out;
   }
+  function numMult(o) {
+    var out = { 5: 5, 4: 4, 3: 3, 2: 2, 1: 1 };
+    if (o && typeof o === 'object') {
+      for (var k = 5; k >= 1; k--) {
+        var v = Number(o[k]);
+        out[k] = isNaN(v) ? out[k] : Math.max(0, Math.min(5, Math.round(v * 2) / 2));
+      }
+    }
+    return out;
+  }
 
   function loadState() {
     var raw = null;
+    state = freshState();
     try { raw = localStorage.getItem(KEY); } catch (e) { storageBroken = true; }
     if (raw) {
       try {
@@ -1529,7 +1851,8 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
               return {
                 uid: x.uid || ('p' + (i + 1)), name: String(x.name).slice(0, 20),
                 id: x.id ? String(x.id) : '', group: x.group ? String(x.group) : '',
-                drawn: !!x.drawn, drawnAt: Number(x.drawnAt) || 0, order: Number(x.order) || (i + 1)
+                drawn: !!x.drawn, drawnAt: Number(x.drawnAt) || 0, order: Number(x.order) || (i + 1),
+                excluded: !!x.excluded, count: Number(x.count) || 0
               };
             });
           }
@@ -1546,41 +1869,68 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
           state.seq = Number(p.seq) || (state.participants.length + 1);
           state.drawIndex = Number(p.drawIndex) || state.history.length;
           if (p.last && p.last.name) state.last = p.last;
-          var d = defaultSettings(), S = p.settings || {};
-          for (var k in d) { if (!(k in S)) continue; }
+          if (p.achv && typeof p.achv === 'object') { state.achv = p.achv; }
+          if (Array.isArray(p.logs)) {
+            state.logs = p.logs.filter(function (l) { return l && l.t; }).slice(-500).map(function (l) {
+              return { t: Number(l.t) || 0, kind: String(l.kind || 'misc'), text: String(l.text || '') };
+            });
+          }
+          var S = p.settings || {};
+          var scRaw = S.shortcuts || {};
+          var keys = defaultShortcutKeys();
+          if (scRaw.keys && typeof scRaw.keys === 'object') {
+            for (var ak in keys) { if (typeof scRaw.keys[ak] === 'string') keys[ak] = scRaw.keys[ak]; }
+          }
+          var legacyScope = S.groupOnly ? 'group' : null;
+          var lkStep = Number(S.pity && S.pity.luckyStep);
           state.settings = {
             theme: S.theme === 'dark' ? 'dark' : 'light',
             animation: ANIMS[S.animation] ? S.animation : 'classic',
             lang: S.lang === 'en' ? 'en' : 'zh',
             mode: S.mode === 'repeat' ? 'repeat' : 'unique',
-            groupOnly: !!S.groupOnly,
+            scope: (S.scope === 'group' || S.scope === 'all') ? S.scope : (legacyScope || 'all'),
             stars: numStars(S.stars),
             preset: PRESETS[S.preset] ? S.preset : 'custom',
+            weights: {
+              enabled: !!(S.weights && S.weights.enabled),
+              mult: numMult(S.weights && S.weights.mult)
+            },
             pity: {
               enabled: !!(S.pity && S.pity.enabled),
               tenFour: !(S.pity && S.pity.tenFour === false),
               fiftyFive: !(S.pity && S.pity.fiftyFive === false),
-              c5: Math.max(0, Math.min(999, Number(S.pity && S.pity.c5) || 0))
+              c5: Math.max(0, Math.min(999, Number(S.pity && S.pity.c5) || 0)),
+              lucky: !!(S.pity && S.pity.lucky),
+              luckyStep: isNaN(lkStep) ? 1 : Math.max(0, Math.min(5, lkStep))
             },
             sound: {
               enabled: !(S.sound && S.sound.enabled === false),
               volume: S.sound && S.sound.volume != null ? Math.max(0, Math.min(100, Number(S.sound.volume))) : 60
             },
             skin: SKINS.some(function (x) { return x.id === S.skin; }) ? S.skin : 'liquid',
-            sort: ['order', 'name', 'id', 'drawn'].indexOf(S.sort) >= 0 ? S.sort : 'order',
+            sort: ['order', 'name', 'id', 'drawn', 'count'].indexOf(S.sort) >= 0 ? S.sort : 'order',
             filter: ['all', 'undrawn', 'drawn'].indexOf(S.filter) >= 0 ? S.filter : 'all',
             group: typeof S.group === 'string' ? S.group : 'all',
             search: typeof S.search === 'string' ? S.search : '',
+            animSpeed: SPEEDS.indexOf(String(S.animSpeed)) >= 0 ? String(S.animSpeed) : '1',
+            shortcuts: {
+              enabled: !(scRaw.enabled === false),
+              spaceDraw: !(scRaw.spaceDraw === false),
+              keys: keys
+            },
             guideSeen: !!S.guideSeen
           };
-          // 首次载入若无概率总和，回落到标准预设
-          if (starSum() !== 100 && state.settings.preset === 'standard') { /* 保留用户设定 */ }
+          // 范围与分组保持一致：分组为「全部」时范围必然是全部名单
+          if (state.settings.group === 'all') state.settings.scope = 'all';
+          else if (state.settings.scope !== 'group') state.settings.scope = 'group';
         }
       } catch (e) {
-        state = { version: 3, seq: 1, participants: [], history: [], drawIndex: 0, last: null, settings: defaultSettings() };
+        state = freshState();
         setTimeout(function () { toast('本地数据读取失败，已从空名单开始', 'err'); }, 500);
       }
     }
+    // 抽中次数以历史为准重建，避免旧数据缺字段
+    recount();
     // 兼容旧版本主题 / 动画键
     try {
       var la = localStorage.getItem('lottery_anim_v2');
@@ -1589,6 +1939,21 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       if (lt === 'light' || lt === 'dark') { /* 新键优先，旧键只做兜底 */ }
     } catch (e) { }
     Sfx.sync();
+  }
+
+  function recount() {
+    var map = {};
+    state.history.forEach(function (h) { var k = h.uid || ('name:' + h.name); map[k] = (map[k] || 0) + 1; });
+    state.participants.forEach(function (p) {
+      var c = map[p.uid] || map['name:' + p.name] || 0;
+      p.count = Math.max(Number(p.count) || 0, c);
+      if (typeof p.excluded !== 'boolean') p.excluded = false;
+    });
+  }
+
+  function logAction(kind, text) {
+    state.logs.push({ t: Date.now(), kind: kind, text: String(text || '') });
+    if (state.logs.length > 500) state.logs = state.logs.slice(-500);
   }
 
   function save() {
@@ -1623,13 +1988,13 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     el.style.color = failed ? '#ffb3c4' : '';
   }
 
-  /* ---------------- 撤销 / 重做 ---------------- */
-  var undoStack = [], redoStack = [], MAX_UNDO = 30;
+  /* ---------------- 撤销 / 重做（50 步，覆盖设置类操作） ---------------- */
+  var undoStack = [], redoStack = [], MAX_UNDO = 50;
   function snapshot() {
     return JSON.stringify({
       participants: state.participants, history: state.history, seq: state.seq,
-      drawIndex: state.drawIndex, last: state.last, c5: state.settings.pity.c5,
-      mode: state.settings.mode
+      drawIndex: state.drawIndex, last: state.last,
+      settings: state.settings, achv: state.achv, logs: state.logs.slice(-60)
     });
   }
   function applySnap(json) {
@@ -1639,8 +2004,18 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     state.seq = o.seq || 1;
     state.drawIndex = o.drawIndex || 0;
     state.last = o.last || null;
-    state.settings.pity.c5 = o.c5 || 0;
-    if (o.mode === 'repeat' || o.mode === 'unique') state.settings.mode = o.mode;
+    if (o.settings && typeof o.settings === 'object') {
+      var merged = defaultSettings(), S = o.settings;
+      for (var k in merged) { if (k in S) merged[k] = S[k]; }
+      merged.pity = { enabled: !!(S.pity && S.pity.enabled), tenFour: !(S.pity && S.pity.tenFour === false), fiftyFive: !(S.pity && S.pity.fiftyFive === false), c5: Number(S.pity && S.pity.c5) || 0, lucky: !!(S.pity && S.pity.lucky), luckyStep: Number(S.pity && S.pity.luckyStep) || 1 };
+      merged.sound = { enabled: !(S.sound && S.sound.enabled === false), volume: Number(S.sound && S.sound.volume) || 0 };
+      merged.stars = numStars(S.stars);
+      merged.weights = { enabled: !!(S.weights && S.weights.enabled), mult: numMult(S.weights && S.weights.mult) };
+      merged.shortcuts = { enabled: !(S.shortcuts && S.shortcuts.enabled === false), spaceDraw: !(S.shortcuts && S.shortcuts.spaceDraw === false), keys: (S.shortcuts && S.shortcuts.keys) || defaultShortcutKeys() };
+      state.settings = merged;
+    }
+    if (o.achv && typeof o.achv === 'object') state.achv = o.achv;
+    if (Array.isArray(o.logs)) state.logs = o.logs;
   }
   function pushUndo() {
     undoStack.push(snapshot());
@@ -1652,15 +2027,21 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     if (!undoStack.length) { toast('没有可撤销的操作', 'err'); return; }
     redoStack.push(snapshot());
     applySnap(undoStack.pop());
-    save(); renderAll(); syncUndoBtns();
+    afterStateReplace();
     toast('已撤销', 'ok');
   }
   function redo() {
     if (!redoStack.length) { toast('没有可重做的操作', 'err'); return; }
     undoStack.push(snapshot());
     applySnap(redoStack.pop());
-    save(); renderAll(); syncUndoBtns();
+    afterStateReplace();
     toast('已重做', 'ok');
+  }
+  function afterStateReplace() {
+    save();
+    applyTheme(); applySkin(); applySoundBtn(); applyLang();
+    buildStarConfig(); buildWeightGrid(); buildKbList();
+    renderAll(); renderSettings(); syncUndoBtns();
   }
   function syncUndoBtns() {
     var u = $('#undoBtn'), r = $('#redoBtn');
@@ -1748,8 +2129,30 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 
   /* ---------------- 名单 ---------------- */
   function starSum() { var s = 0; for (var k = 5; k >= 1; k--) s += n(state.settings.stars[k]); return s; }
-  function oddsOk() { return starSum() === 100; }
+  function oddsOk() { return state.settings.weights.enabled ? true : starSum() === 100; }
   function drawnCount() { return state.participants.filter(function (p) { return p.drawn; }).length; }
+  function excludedCount() { return state.participants.filter(function (p) { return p.excluded; }).length; }
+  function luckBonus() {
+    var P = state.settings.pity;
+    if (!P.lucky || P.luckyStep <= 0) return 0;
+    return Math.min(60, P.luckyStep * Math.max(0, P.c5));
+  }
+  function starWeights() {
+    var w = {}, k;
+    if (state.settings.weights.enabled) {
+      for (k = 5; k >= 1; k--) w[k] = Math.max(0, Number(state.settings.weights.mult[k]) || 0);
+    } else {
+      for (k = 5; k >= 1; k--) w[k] = n(state.settings.stars[k]);
+    }
+    if (w[5] > 0) w[5] = w[5] + luckBonus();
+    return w;
+  }
+  function weightPercent() {
+    var w = starWeights(), sum = 0, k, out = {};
+    for (k = 5; k >= 1; k--) sum += w[k];
+    for (k = 5; k >= 1; k--) out[k] = sum > 0 ? (w[k] / sum * 100) : 0;
+    return out;
+  }
   function groups() {
     var set = {}, list = [];
     state.participants.forEach(function (p) { if (p.group && !set[p.group]) { set[p.group] = 1; list.push(p.group); } });
@@ -1765,7 +2168,8 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
   function pool() {
     var arr = state.participants.slice();
     if (state.settings.mode === 'unique') arr = arr.filter(function (p) { return !p.drawn; });
-    if (state.settings.groupOnly && state.settings.group !== 'all') {
+    arr = arr.filter(function (p) { return !p.excluded; });
+    if (state.settings.scope === 'group' && state.settings.group !== 'all') {
       var g = state.settings.group;
       arr = arr.filter(function (p) { return g === '__none' ? !p.group : p.group === g; });
     }
@@ -1796,9 +2200,54 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
         if (a.drawn) return (b.drawnAt || 0) - (a.drawnAt || 0);
         return a.order - b.order;
       }
+      if (s === 'count') {
+        var ca = Number(a.count) || 0, cb = Number(b.count) || 0;
+        if (ca !== cb) return cb - ca;
+        return a.order - b.order;
+      }
       return a.order - b.order;
     });
     return list;
+  }
+
+  var VS_LIMIT = 200, VS_BUFFER = 8, ROW_H = 58;
+
+  function hl(text, q) {
+    var raw = String(text == null ? '' : text);
+    if (!q) return esc(raw);
+    var i = raw.toLowerCase().indexOf(String(q).toLowerCase());
+    if (i < 0) return esc(raw);
+    return esc(raw.slice(0, i)) + '<mark class="search-hl">' + esc(raw.slice(i, i + q.length)) + '</mark>' + esc(raw.slice(i + q.length));
+  }
+
+  function rosterRowHtml(p, q) {
+    var L = lang();
+    if (editingUid === p.uid) {
+      return '<div class="p-row editing" data-uid="' + p.uid + '">' +
+        '<input type="text" data-f="name" maxlength="20" value="' + esc(p.name) + '" placeholder="' + (L === 'en' ? 'Name' : '姓名') + '">' +
+        '<input type="text" data-f="id" maxlength="30" value="' + esc(p.id) + '" placeholder="' + (L === 'en' ? 'Student ID' : '学号') + '">' +
+        '<input type="text" data-f="group" maxlength="12" value="' + esc(p.group) + '" placeholder="' + (L === 'en' ? 'Group' : '分组') + '">' +
+        '<div class="p-actions"><button type="button" class="mini-btn save" data-act="save">' + (L === 'en' ? 'Save' : '保存') + '</button>' +
+        '<button type="button" class="mini-btn" data-act="cancel">' + (L === 'en' ? 'Cancel' : '取消') + '</button></div></div>';
+    }
+    var sel = !!selected[p.uid];
+    var rep = state.settings.mode === 'repeat';
+    var cnt = Number(p.count) || 0;
+    return '<div class="p-row' + (p.drawn ? ' is-drawn' : '') + (p.excluded ? ' is-excluded' : '') + (sel ? ' selected' : '') + '" data-uid="' + p.uid + '">' +
+      '<label class="p-check"><input type="checkbox" data-role="sel"' + (sel ? ' checked' : '') + '></label>' +
+      '<div class="p-avatar">' + (p.drawn && !rep ? '✓' : esc(firstChar(p.name))) + '</div>' +
+      '<div class="p-info"><b>' + hl(p.name, q) + '</b><span class="' + (p.id ? '' : 'is-empty') + '">' +
+      (p.id ? hl(p.id, q) : (L === 'en' ? 'NO ID' : '无学号')) + '</span></div>' +
+      (p.group ? '<span class="p-group">' + esc(p.group) + '</span>' : '') +
+      '<span class="p-count' + (cnt ? '' : ' zero') + '" title="' + (L === 'en' ? 'Times drawn' : '抽中次数') + '">×' + cnt + '</span>' +
+      '<div class="p-actions">' +
+      '<button type="button" class="mini-btn" data-act="edit">' + (L === 'en' ? 'Edit' : '改') + '</button>' +
+      (p.excluded
+        ? '<button type="button" class="mini-btn excl on" data-act="include">' + (L === 'en' ? 'Include' : '恢复') + '</button>'
+        : '<button type="button" class="mini-btn excl" data-act="exclude">' + (L === 'en' ? 'Exclude' : '排除') + '</button>') +
+      (p.drawn && !rep ? '<button type="button" class="mini-btn return" data-act="return">' + (L === 'en' ? 'Return' : '放回') + '</button>' : '') +
+      '<button type="button" class="mini-btn del" data-act="del">' + (L === 'en' ? 'Del' : '删') + '</button>' +
+      '</div></div>';
   }
 
   function renderRoster() {
@@ -1806,12 +2255,14 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     if (!list || !empty) return;
     var rows = visibleParticipants();
     var total = state.participants.length;
+    var q = (state.settings.search || '').trim();
+    var L = lang();
     var emptyMsg;
     if (!total) {
-      emptyMsg = '<b>' + (lang() === 'en' ? 'No participants yet' : '暂无参与者') + '</b><br>' +
-        (lang() === 'en' ? 'Import a roster, or add one above.' : '请点击下方「导入」或在上方手动添加');
+      emptyMsg = '<b>' + (L === 'en' ? 'No participants yet' : '暂无参与者') + '</b><br>' +
+        (L === 'en' ? 'Import a roster, or add one above.' : '请点击下方「导入」或在上方手动添加');
     } else if (!rows.length) {
-      emptyMsg = (lang() === 'en' ? 'No match for the current filter / search' : '当前筛选或搜索没有匹配的人');
+      emptyMsg = (L === 'en' ? 'No match for the current filter / search' : '当前筛选或搜索没有匹配的人');
     } else { emptyMsg = ''; }
 
     list.style.display = emptyMsg ? 'none' : 'flex';
@@ -1819,29 +2270,20 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     if (emptyMsg) { empty.innerHTML = emptyMsg; list.innerHTML = ''; }
     if (!rows.length) { renderSelectionBar(); return; }
 
-    var html = rows.map(function (p) {
-      if (editingUid === p.uid) {
-        return '<div class="p-row editing" data-uid="' + p.uid + '">' +
-          '<input type="text" data-f="name" maxlength="20" value="' + esc(p.name) + '" placeholder="姓名">' +
-          '<input type="text" data-f="id" maxlength="30" value="' + esc(p.id) + '" placeholder="学号">' +
-          '<input type="text" data-f="group" maxlength="12" value="' + esc(p.group) + '" placeholder="分组">' +
-          '<div class="p-actions"><button type="button" class="mini-btn save" data-act="save">保存</button>' +
-          '<button type="button" class="mini-btn" data-act="cancel">取消</button></div></div>';
-      }
-      var sel = !!selected[p.uid];
-      return '<div class="p-row' + (p.drawn ? ' is-drawn' : '') + (sel ? ' selected' : '') + '" data-uid="' + p.uid + '">' +
-        '<label class="p-check"><input type="checkbox" data-role="sel"' + (sel ? ' checked' : '') + '></label>' +
-        '<div class="p-avatar">' + (p.drawn ? '✓' : esc(firstChar(p.name))) + '</div>' +
-        '<div class="p-info"><b>' + esc(p.name) + '</b><span class="' + (p.id ? '' : 'is-empty') + '">' +
-        (p.id ? esc(p.id) : (lang() === 'en' ? 'NO ID' : '无学号')) + '</span></div>' +
-        (p.group ? '<span class="p-group">' + esc(p.group) + '</span>' : '') +
-        '<div class="p-actions">' +
-        '<button type="button" class="mini-btn" data-act="edit">' + (lang() === 'en' ? 'Edit' : '改') + '</button>' +
-        (p.drawn ? '<button type="button" class="mini-btn return" data-act="return">' + (lang() === 'en' ? 'Return' : '放回') + '</button>' : '') +
-        '<button type="button" class="mini-btn del" data-act="del">' + (lang() === 'en' ? 'Del' : '删') + '</button>' +
-        '</div></div>';
-    }).join('');
-    list.innerHTML = html;
+    var virtual = rows.length > VS_LIMIT && !editingUid;
+    if (virtual) {
+      var h = list.clientHeight || 420;
+      var top = list.scrollTop || 0;
+      var start = Math.max(0, Math.floor(top / ROW_H) - VS_BUFFER);
+      var end = Math.min(rows.length, start + Math.ceil(h / ROW_H) + VS_BUFFER * 2);
+      var slice = rows.slice(start, end);
+      list.innerHTML =
+        (start ? '<div class="vs-spacer" style="height:' + (start * ROW_H) + 'px"></div>' : '') +
+        slice.map(function (p) { return rosterRowHtml(p, q); }).join('') +
+        (end < rows.length ? '<div class="vs-spacer" style="height:' + ((rows.length - end) * ROW_H) + 'px"></div>' : '');
+    } else {
+      list.innerHTML = rows.map(function (p) { return rosterRowHtml(p, q); }).join('');
+    }
     renderSelectionBar();
   }
 
@@ -1875,13 +2317,30 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     gs.forEach(function (g) { html += '<option value="' + esc(g) + '">' + esc(g) + '</option>'; });
     sel.innerHTML = html;
     sel.value = cur;
-    var chip = $('#groupOnlyChip');
-    if (chip) {
-      var on = !!state.settings.groupOnly;
-      var name = cur === 'all' ? (lang() === 'en' ? 'all' : '全部') : (cur === '__none' ? (lang() === 'en' ? 'ungrouped' : '未分组') : cur);
-      chip.textContent = '🎯 ' + (lang() === 'en' ? 'Current group only: ' : '仅当前分组：') + (on ? (lang() === 'en' ? 'ON' : '开') : (lang() === 'en' ? 'OFF' : '关')) + ' · ' + name;
-      chip.classList.toggle('on', on);
+    renderScope();
+  }
+
+  /* 抽取范围：与分组选择严格同步（分组 = 全部 ⟺ 范围为全部名单） */
+  function renderScope() {
+    var L = lang();
+    var isGroup = state.settings.group !== 'all';
+    $$('#scopeSeg button').forEach(function (b) {
+      var on = b.dataset.scope === (isGroup ? 'group' : 'all');
+      b.classList.toggle('active', on);
+      if (b.dataset.scope === 'group') b.disabled = !isGroup;
+    });
+    var name = $('#scopeName');
+    if (name) {
+      if (isGroup) {
+        name.textContent = state.settings.group === '__none' ? (L === 'en' ? 'Ungrouped' : '未分组') : state.settings.group;
+        name.classList.remove('off');
+      } else {
+        name.textContent = L === 'en' ? 'All' : '全部分组';
+        name.classList.add('off');
+      }
     }
+    var sp = $('#speedChip');
+    if (sp) sp.textContent = '⏩ ' + state.settings.animSpeed + 'x';
   }
 
   /* ---------------- 舞台 ---------------- */
@@ -1938,22 +2397,27 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
   function renderPity() {
     var el = $('#pityHint');
     if (!el) return;
+    var L = lang();
     var P = state.settings.pity;
-    if (!P.enabled) {
-      el.innerHTML = lang() === 'en' ? 'Pity system off · enable it in Settings' : '保底未开启 · 可在设置中启用';
-      return;
-    }
     var parts = [];
-    if (P.fiftyFive) {
-      var left = Math.max(0, 50 - (P.c5 + 1));
-      parts.push((lang() === 'en' ? '5★ in ' : '再 <b>' + left + '</b> 抽必出 5★'));
-      if (lang() === 'en') parts[parts.length - 1] = '5★ guaranteed in ' + left + ' pulls';
+    if (!P.enabled) {
+      parts.push(L === 'en' ? 'Pity off' : '保底未开启');
+      if (P.lucky && P.luckyStep > 0) parts.push((L === 'en' ? 'luck +' : '幸运值 +') + luckBonus().toFixed(1) + '%');
+      parts.push(L === 'en' ? 'enable in Settings' : '可在设置中启用');
+    } else {
+      if (P.fiftyFive) {
+        var left = Math.max(0, 50 - (P.c5 + 1));
+        parts.push(L === 'en' ? ('5★ guaranteed in ' + left + ' pulls') : ('再 <b>' + left + '</b> 抽必出 5★'));
+      }
+      if (P.tenFour) parts.push(L === 'en' ? 'Ten-pull: ≥1 4★' : '十连至少 1 个 4★');
+      if (P.lucky && P.luckyStep > 0) parts.push((L === 'en' ? 'luck +' : '幸运值 +') + luckBonus().toFixed(1) + '%');
     }
-    if (P.tenFour) parts.push(lang() === 'en' ? 'Ten-pull: ≥1 4★' : '十连至少 1 个 4★');
+    if (excludedCount()) parts.push(L === 'en' ? (excludedCount() + ' excluded') : (excludedCount() + ' 人已排除'));
     el.innerHTML = parts.join(' · ');
   }
 
   function renderAll() {
+    syncModeUI();
     renderStage();
     renderRoster();
     renderGroups();
@@ -1961,13 +2425,13 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 
   /* ---------------- 抽取 ---------------- */
   function pickStar() {
-    var total = starSum();
+    var w = starWeights(), total = 0, k;
+    for (k = 5; k >= 1; k--) total += w[k];
     if (total <= 0) return 1;
     var r = Math.random() * total;
-    for (var k = 5; k >= 1; k--) {
-      var w = n(state.settings.stars[k]);
-      if (r < w) return k;
-      r -= w;
+    for (k = 5; k >= 1; k--) {
+      if (r < w[k]) return k;
+      r -= w[k];
     }
     return 1;
   }
@@ -1994,16 +2458,37 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 
   function animClass() { return 'anim-' + state.settings.animation; }
 
+  /* 动画速度与「跳过」：所有等待都走 waitSkip，可被照遮罩上的跳过按钮/ Esc 提前结束 */
+  function speedFactor() { var v = Number(state.settings.animSpeed); return v > 0 ? v : 1; }
+  function spd(ms) { return Math.max(40, Math.round(ms / speedFactor())); }
+  var skipWaiters = [];
+  function waitSkip(ms) {
+    return new Promise(function (resolve) {
+      var done = false;
+      var to = setTimeout(function () { if (done) return; done = true; resolve(false); }, ms);
+      skipWaiters.push(function () { if (done) return; done = true; clearTimeout(to); resolve(true); });
+    });
+  }
+  function doSkip() {
+    if (!skipWaiters.length) return;
+    var list = skipWaiters;
+    skipWaiters = [];
+    Sfx.play('click', 0.6);
+    list.forEach(function (f) { f(); });
+  }
+
   function showDrawOverlay() {
     var o = $('#drawOverlay'); if (!o) return;
     o.className = 'draw-overlay ' + animClass();
     void o.offsetWidth;
     o.classList.add('active');
+    var sk = $('#skipDrawBtn'); if (sk) sk.classList.add('active');
     markOpen(o);
   }
   function hideDrawOverlay() {
     var o = $('#drawOverlay'); if (!o) return;
     o.classList.remove('active');
+    var sk = $('#skipDrawBtn'); if (sk) sk.classList.remove('active');
     markClosed(o);
   }
   function showTenOverlay() {
@@ -2011,12 +2496,14 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     o.className = 'ten-overlay ' + animClass();
     void o.offsetWidth;
     o.classList.add('active');
+    var sk = $('#skipTenBtn'); if (sk) sk.classList.add('active');
     markOpen(o);
     tenOpenedAt = Date.now();
   }
   function hideTenOverlay() {
     var o = $('#tenOverlay'); if (!o) return;
     o.classList.remove('active');
+    var sk = $('#skipTenBtn'); if (sk) sk.classList.remove('active');
     markClosed(o);
   }
 
@@ -2066,7 +2553,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       nm.classList.remove('anim'); void nm.offsetWidth; nm.classList.add('anim');
     }, 72);
 
-    await wait(1000);
+    var skipped = await waitSkip(spd(1000));
     clearInterval(cyc); stopTicks();
     if (card) { card.classList.remove('rolling'); card.classList.add('winner'); }
     if (nm) nm.textContent = winner.name;
@@ -2077,7 +2564,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     }
     if (hint) hint.textContent = star === 5 ? (lang() === 'en' ? '★ FIVE STAR ★' : '★ 五星出货 ★') : (lang() === 'en' ? 'Done' : '抽选完成');
     Sfx.play(star === 5 ? 'five' : 'result', star === 5 ? 1 : 0.9);
-    await wait(star === 5 ? 1450 : 1150);
+    await waitSkip(spd(skipped ? 160 : (star === 5 ? 1450 : 1150)));
     hideDrawOverlay();
 
     registerDraw([{ p: winner, star: star }]);
@@ -2133,8 +2620,11 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     showTenOverlay();
     Sfx.play('ten', 1);
     startTicks(115);
-    await wait(320 + results.length * 70 + 260);
+    var skippedTen = await waitSkip(spd(320 + results.length * 70 + 260));
     stopTicks();
+    if (skippedTen) {
+      $$('#tenGrid .ten-card').forEach(function (c) { c.style.animation = 'none'; c.style.opacity = '1'; });
+    }
     var anyFive = results.some(function (r) { return r.star === 5; });
     Sfx.play(anyFive ? 'five' : 'result', anyFive ? 1 : 0.9);
 
@@ -2150,6 +2640,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     items.forEach(function (it) {
       var p = it.p;
       state.drawIndex = (state.drawIndex || 0) + 1;
+      p.count = (Number(p.count) || 0) + 1;
       if (mode === 'unique') { p.drawn = true; p.drawnAt = now.getTime(); }
       state.history.push({
         index: state.drawIndex, uid: p.uid, name: p.name, id: p.id || '', group: p.group || '',
@@ -2159,9 +2650,58 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     var best = items[0];
     items.forEach(function (it) { if (it.star > best.star) best = it; });
     state.last = { name: best.p.name, id: best.p.id || '', star: best.star, uid: best.p.uid, group: best.p.group || '', ts: now.getTime() };
+    logAction('draw', (items.length > 1 ? '十连：' : '单抽：') + items.map(function (it) { return it.p.name + ' ' + stars(it.star); }).join(' / '));
     save();
     renderAll();
     syncUndoBtns();
+    checkAchievements();
+  }
+
+  /* ---------------- 成就 / 称号 ---------------- */
+  function achievementStats() {
+    var total = state.history.length;
+    var c5 = state.history.filter(function (h) { return h.star === 5; }).length;
+    var batches = groupHistory();
+    var tenBatches = batches.filter(function (g) { return g.items.length > 1; }).length;
+    var maxCount = 0;
+    state.participants.forEach(function (p) { maxCount = Math.max(maxCount, Number(p.count) || 0); });
+    var roster = state.participants.length;
+    var left = roster ? pool().length : 0;
+    var bestStar = 0;
+    state.history.forEach(function (h) { if (h.star > bestStar) bestStar = h.star; });
+    var sumObj = {};
+    for (var s = 1; s <= 5; s++) sumObj[s] = state.history.filter(function (h) { return h.star === s; }).length;
+    var repeatDraws = state.history.filter(function (h) { return h.mode === 'repeat'; }).length;
+    return {
+      total: total, c5: c5, c4: sumObj[4], tenBatches: tenBatches, batches: batches.length,
+      maxCount: maxCount, roster: roster, left: left, bestStar: bestStar,
+      starCounts: sumObj, repeatDraws: repeatDraws
+    };
+  }
+
+  function currentTitle() {
+    var st = achievementStats(), best = null;
+    TITLES.forEach(function (t) { if (t.test(st)) best = t; });
+    return best;
+  }
+
+  function checkAchievements() {
+    var st = achievementStats();
+    var newly = [];
+    ACHV.forEach(function (a) {
+      var ok = false;
+      try { ok = !!a.test(st); } catch (e) { ok = false; }
+      if (ok && !state.achv[a.id]) { state.achv[a.id] = Date.now(); newly.push(a); }
+    });
+    if (!newly.length) return;
+    save();
+    newly.forEach(function (a, i) {
+      setTimeout(function () {
+        toast((lang() === 'en' ? '🏅 Achievement: ' : '🏅 成就解锁：') + (lang() === 'en' ? a.en : a.zh), 'achv');
+        Sfx.play('five', 0.75);
+      }, i * 420);
+    });
+    if (newly.length && $('#statsModal').classList.contains('active')) renderStats();
   }
 
   /* ---------------- 历史 ---------------- */
@@ -2267,12 +2807,18 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     var sumEl = $('#starSum'), warn = $('#starSumWarn');
     if (sumEl) sumEl.textContent = sum;
     if (warn) {
-      warn.className = sum === 100 ? 'good' : 'bad';
-      warn.textContent = sum === 100 ? (lang() === 'en' ? '✓ valid' : '✓ 可用') : (lang() === 'en' ? 'must be 100%' : '必须为 100%');
+      if (state.settings.weights.enabled) {
+        warn.className = 'good';
+        warn.textContent = lang() === 'en' ? 'weights on' : '权重模式生效';
+      } else {
+        warn.className = sum === 100 ? 'good' : 'bad';
+        warn.textContent = sum === 100 ? (lang() === 'en' ? '✓ valid' : '✓ 可用') : (lang() === 'en' ? 'must be 100%' : '必须为 100%');
+      }
     }
     $$('#presetRow button[data-preset]').forEach(function (b) {
       b.classList.toggle('active', b.dataset.preset === state.settings.preset);
     });
+    syncWeightPct();
   }
 
   function buildPresets() {
@@ -2281,6 +2827,48 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       var p = PRESETS[k];
       return '<button type="button" data-preset="' + k + '">' + (lang() === 'en' ? p.en : p.zh) + '</button>';
     }).join('') + '<button type="button" data-preset="__norm">' + (lang() === 'en' ? 'Normalise' : '归一化') + '</button>';
+  }
+
+  /* 星级权重（1–5 倍）：仅在权重模式下参与概率换算 */
+  function buildWeightGrid() {
+    var box = $('#weightGrid'); if (!box) return;
+    var L = lang();
+    box.innerHTML = '';
+    for (var s = 5; s >= 1; s--) {
+      var row = document.createElement('div');
+      row.className = 'weight-row';
+      row.innerHTML = '<span class="w-lab" style="color:' + STAR_COLORS[s] + '">' + s + '★</span>' +
+        '<input type="number" min="0" max="5" step="0.5" data-w="' + s + '" value="' + Number(state.settings.weights.mult[s]) + '" aria-label="' + s + '★ ' + (L === 'en' ? 'weight' : '权重') + '">' +
+        '<span class="w-pct" data-wpct="' + s + '">—</span>';
+      box.appendChild(row);
+    }
+    syncWeightPct();
+  }
+
+  function syncWeightPct() {
+    var box = $('#weightGrid'), en = $('#weightEnable');
+    if (en) en.checked = !!state.settings.weights.enabled;
+    if (box) box.classList.toggle('disabled', !state.settings.weights.enabled);
+    $$('#weightGrid [data-w]').forEach(function (el) {
+      var v = String(Number(state.settings.weights.mult[Number(el.dataset.w)]));
+      if (el.value !== v) el.value = v;
+    });
+    var pct = weightPercent();
+    var L = lang();
+    $$('#weightGrid [data-wpct]').forEach(function (el) {
+      var s = Number(el.dataset.wpct);
+      el.textContent = pct[s].toFixed(1) + '%';
+    });
+    var tip = $('#weightPct');
+    if (tip) {
+      var note = state.settings.weights.enabled
+        ? (L === 'en' ? 'Probability = weight ÷ total weight. Percentages above are what the current weights produce.' : '概率 = 该星级权重 ÷ 权重总和；右侧百分比就是当前权重的实际概率。')
+        : (L === 'en' ? 'Weight mode is off — the 1–5★ percentages above are used directly.' : '权重模式未启用，仍按上方 1–5★ 百分比抽取。');
+      if (state.settings.pity.lucky && state.settings.pity.luckyStep > 0 && luckBonus() > 0) {
+        note += (L === 'en' ? ' Luck bonus currently adds ' : ' 幸运值当前额外加成 ') + luckBonus().toFixed(1) + (L === 'en' ? ' points to 5★.' : ' 点到 5★。');
+      }
+      tip.textContent = note;
+    }
   }
 
   function buildSkins() {
@@ -2316,8 +2904,94 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     if (se) se.checked = !!state.settings.sound.enabled;
     if (sv) sv.value = state.settings.sound.volume;
     if (svo) svo.textContent = state.settings.sound.volume;
+
+    // 幸运值
+    var le = $('#luckyEnable'), ls = $('#luckyStep'), lso = $('#luckyStepOut'), lst = $('#luckyStatus');
+    if (le) le.checked = !!state.settings.pity.lucky;
+    if (ls) { ls.value = state.settings.pity.luckyStep; ls.disabled = !state.settings.pity.lucky; }
+    if (lso) lso.textContent = state.settings.pity.luckyStep + '%';
+    if (lst) {
+      lst.innerHTML = state.settings.pity.lucky
+        ? (lang() === 'en'
+          ? ('Current bonus: +' + luckBonus().toFixed(1) + ' points to 5★ (' + state.settings.pity.c5 + ' dry pulls, cap +60).')
+          : ('当前加成：+' + luckBonus().toFixed(1) + ' 点到 5★（已连续 ' + state.settings.pity.c5 + ' 抽未出，上限 +60）。'))
+        : (lang() === 'en' ? 'Off — 5★ odds stay flat.' : '关闭时 5★ 概率保持不变。');
+    }
+    // 权重 / 速度 / 快捷键
+    buildWeightGrid();
+    $$('#speedSeg button').forEach(function (b) { b.classList.toggle('active', b.dataset.speed === state.settings.animSpeed); });
+    var sce = $('#scEnable'), scs = $('#scSpace');
+    if (sce) sce.checked = !!state.settings.shortcuts.enabled;
+    if (scs) scs.disabled = !state.settings.shortcuts.enabled;
     buildSkins();
+    buildKbList();
     updateStorageInfo(storageBroken);
+  }
+
+  /* ---------------- 快捷键：可关闭、可自定义、冲突提示 ---------------- */
+  var recordingKb = null;
+  function keyLabel(k) {
+    if (k === ' ' || k === 'space') return 'Space';
+    if (k === 'shift+ ') return 'Shift + Space';
+    if (k === 'escape') return 'Esc';
+    if (k === 'enter') return 'Enter';
+    if (k === 'tab') return 'Tab';
+    if (String(k).length === 1) return String(k).toUpperCase();
+    return String(k);
+  }
+  function keyFromEvent(e) {
+    var k = e.key;
+    if (k === ' ' || k === 'Spacebar') return e.shiftKey ? 'shift+ ' : ' ';
+    if (k === 'Shift' || k === 'Control' || k === 'Meta' || k === 'Alt') return '';
+    var low = String(k).toLowerCase();
+    var parts = [];
+    if (e.ctrlKey || e.metaKey) parts.push('ctrl');
+    if (e.altKey) parts.push('alt');
+    if (e.shiftKey && low !== 'shift') parts.push('shift');
+    parts.push(low);
+    return parts.join('+');
+  }
+  function kbConflicts() {
+    var keys = state.settings.shortcuts.keys, seen = {}, dup = [];
+    ACTIONS.forEach(function (a) {
+      var v = keys[a.id];
+      if (!v) return;
+      if (seen[v]) { var l = keyLabel(v); if (dup.indexOf(l) < 0) dup.push(l); }
+      seen[v] = 1;
+    });
+    return dup;
+  }
+  function buildKbList() {
+    var box = $('#kbList'); if (!box) return;
+    var L = lang(), keys = state.settings.shortcuts.keys;
+    box.innerHTML = ACTIONS.map(function (a) {
+      return '<div class="kbd-item"><span>' + (L === 'en' ? a.en : a.zh) + '</span>' +
+        '<span class="kb-val"><kbd data-kbkey="' + a.id + '">' + esc(keyLabel(keys[a.id])) + '</kbd>' +
+        '<button type="button" class="kb-edit" data-kb="' + a.id + '">' + (L === 'en' ? 'Edit' : '改') + '</button></span></div>';
+    }).join('') +
+      '<div class="kbd-item"><span>' + (L === 'en' ? 'Close dialog' : '关闭弹窗') + '</span><span><kbd>Esc</kbd></span></div>' +
+      '<div class="kbd-item"><span>' + (L === 'en' ? 'Undo / Redo' : '撤销 / 重做') + '</span><span><kbd>Ctrl</kbd> + <kbd>Z</kbd></span></div>';
+    syncKb();
+  }
+  function syncKb() {
+    var L = lang(), keys = state.settings.shortcuts.keys, sc = state.settings.shortcuts;
+    $$('#kbList [data-kbkey]').forEach(function (el) { el.textContent = keyLabel(keys[el.dataset.kbkey]); });
+    $$('#kbList [data-kb]').forEach(function (b) {
+      b.classList.toggle('rec', recordingKb === b.dataset.kb);
+      b.textContent = recordingKb === b.dataset.kb ? (L === 'en' ? 'Press…' : '按下…') : (L === 'en' ? 'Edit' : '改');
+    });
+    var warn = $('#kbWarn');
+    if (warn) {
+      var dup = kbConflicts();
+      if (!sc.enabled) { warn.className = 'bad'; warn.textContent = L === 'en' ? 'All shortcuts are disabled.' : '快捷键已全部关闭。'; }
+      else if (dup.length) {
+        warn.className = 'bad';
+        warn.textContent = (L === 'en' ? 'Conflict: ' : '键位冲突：') + dup.join(' / ') +
+          (L === 'en' ? ' is used twice — the first match wins.' : ' 被重复绑定，先匹配到的动作生效。');
+      } else { warn.className = 'good'; warn.textContent = L === 'en' ? 'No key conflicts.' : '键位没有冲突。'; }
+    }
+    var sp = $('#scSpace');
+    if (sp) sp.checked = !!sc.spaceDraw;
   }
 
   function applyTheme() {
@@ -2341,9 +3015,10 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
 
   var SKIP_I18N = {
     statTotal: 1, statDrawn: 1, statLeft: 1, rosterCount: 1, stageBadge: 1, animLabel: 1,
-    groupOnlyChip: 1, starSum: 1, pityStatus: 1, storageSize: 1, batchCount: 1, pityHint: 1,
+    starSum: 1, pityStatus: 1, storageSize: 1, batchCount: 1, pityHint: 1,
     lastName: 1, lastId: 1, lastStar: 1, confirmTitle: 1, confirmMsg: 1, historyBody: 1,
-    statsBody: 1, guideBody: 1, importPreview: 1, starSumWarn: 1, soundVolOut: 1, tenGrid: 1
+    statsBody: 1, guideBody: 1, importPreview: 1, starSumWarn: 1, soundVolOut: 1, tenGrid: 1,
+    scopeName: 1, speedChip: 1, weightPct: 1, kbWarn: 1, luckyStatus: 1, luckyStepOut: 1, tenHint: 1
   };
 
   function applyLang() {
@@ -2366,6 +3041,8 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     buildPresets();
     syncStarInputs();
     buildSkins();
+    buildKbList();
+    buildWeightGrid();
     renderAll();
   }
 
@@ -2376,29 +3053,100 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     return t.trim();
   }
 
-  function parseImport(text, existingIds) {
-    var rows = [], dupeIds = [], bad = [], blank = 0;
-    var seen = {};
+  var HEAD_WORDS = /^(姓名|名字|学生|学生姓名|学号|编号|序号|班级|分组|组别|备注|name|names|student|students|id|ids|no|no\.|number|group|class|team)$/i;
+  function isHeaderRow(parts) {
+    var filled = parts.filter(function (x) { return String(x || '').trim() !== ''; });
+    if (!filled.length) return false;
+    return filled.every(function (x) { return HEAD_WORDS.test(String(x).trim()); });
+  }
+
+  function parseImport(text, existingIds, existingNames) {
+    var rows = [], dupeIds = [], dupeNames = [], bad = [], blank = 0;
+    var seen = {}, nameCount = {};
     (existingIds || []).forEach(function (id) { if (id) seen[String(id).toLowerCase()] = 1; });
-    String(text || '').split(/\r?\n/).forEach(function (line, li) {
-      var raw = line.trim();
-      if (!raw) { blank++; return; }
-      var s = raw.replace(/[,，;；、\t]+$/, '');
-      var parts = s.split(/[,，;；、\t]+/);
-      var name = cleanCell(parts[0] || '');
-      var id = cleanCell(parts[1] || '');
-      var group = cleanCell(parts[2] || '');
-      if (!name) { bad.push({ line: li + 1, raw: raw }); return; }
-      if (name.length > 20) name = name.slice(0, 20);
-      if (id) {
-        var key = id.toLowerCase();
-        if (seen[key]) { dupeIds.push({ line: li + 1, name: name, id: id }); return; }
-        seen[key] = 1;
-      }
-      if (group.length > 12) group = group.slice(0, 12);
-      rows.push({ name: name, id: id, group: group });
+    (existingNames || []).forEach(function (nm) {
+      var k = String(nm || '').trim();
+      if (k) nameCount[k] = (nameCount[k] || 0) + 1;
     });
-    return { rows: rows, dupeIds: dupeIds, bad: bad, blank: blank };
+    String(text || '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/[\u200b-\u200d\ufeff]/g, '')
+      .split(/\r?\n/)
+      .forEach(function (line, li) {
+        var raw = line.trim();
+        if (!raw) { blank++; return; }
+        var s = raw.replace(/[,，;；、\t]+$/, '');
+        var parts;
+        if (/\t/.test(s)) {
+          parts = s.split('\t').map(function (x) { return x.trim(); });
+        } else {
+          parts = s.split(/[,，;；、]+/);
+          if (parts.length <= 1) {
+            var t2 = s.trim();
+            if (/\s{2,}/.test(t2)) {
+              parts = t2.split(/\s{2,}/);
+            } else {
+              var sp = t2.split(/\s+/);
+              if (sp.length >= 2 && /^\d{2,}$/.test(sp[1])) parts = [sp[0], sp[1], sp.slice(2).join(' ')];
+              else if (sp.length === 3) parts = sp;
+            }
+          }
+        }
+        if (isHeaderRow(parts)) return;
+        var name = cleanCell(parts[0] || '');
+        var id = cleanCell(parts[1] || '');
+        var group = cleanCell(parts[2] || '');
+        if (!name) { bad.push({ line: li + 1, raw: raw }); return; }
+        if (name.length > 20) name = name.slice(0, 20);
+        if (id) {
+          var key = id.toLowerCase();
+          if (seen[key]) { dupeIds.push({ line: li + 1, name: name, id: id }); return; }
+          seen[key] = 1;
+        }
+        if (nameCount[name]) dupeNames.push({ line: li + 1, name: name });
+        nameCount[name] = (nameCount[name] || 0) + 1;
+        if (group.length > 12) group = group.slice(0, 12);
+        rows.push({ name: name, id: id, group: group });
+      });
+    return { rows: rows, dupeIds: dupeIds, dupeNames: dupeNames, bad: bad, blank: blank };
+  }
+
+  /* xlsx / xls：按需加载 SheetJS，避免常驻体积 */
+  var sheetLoading = null;
+  function loadSheetJS() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (sheetLoading) return sheetLoading;
+    sheetLoading = new Promise(function (resolve, reject) {
+      var urls = [
+        'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+        'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js'
+      ];
+      var i = 0;
+      function next() {
+        if (i >= urls.length) { sheetLoading = null; reject(new Error('sheetjs')); return; }
+        var sc = document.createElement('script');
+        sc.src = urls[i++];
+        sc.onload = function () { window.XLSX ? resolve(window.XLSX) : next(); };
+        sc.onerror = next;
+        document.head.appendChild(sc);
+      }
+      next();
+    });
+    return sheetLoading;
+  }
+
+  function sheetToText(data) {
+    var XLSX = window.XLSX;
+    var wb = XLSX.read(data, { type: 'array' });
+    var sheet = wb.Sheets[wb.SheetNames[0]];
+    if (!sheet) return '';
+    var arr = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false, defval: '' });
+    return arr.map(function (row) {
+      var cells = [];
+      for (var i = 0; i < 3; i++) cells.push(String(row[i] == null ? '' : row[i]).trim());
+      while (cells.length && cells[cells.length - 1] === '') cells.pop();
+      return cells.join('\t');
+    }).filter(function (l) { return l.replace(/\t/g, '').trim() !== ''; }).join('\n');
   }
 
   function renderImportPreview() {
@@ -2412,7 +3160,8 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       return;
     }
     var existing = state.participants.map(function (p) { return p.id; });
-    var r = parseImport(text, existing);
+    var names = state.participants.map(function (p) { return p.name; });
+    var r = parseImport(text, existing, names);
     var L = lang();
     var html = '<b>' + r.rows.length + '</b> ' + (L === 'en' ? 'valid entries' : '条有效') +
       ' · <b>' + r.blank + '</b> ' + (L === 'en' ? 'blank lines skipped' : '空行跳过');
@@ -2421,6 +3170,13 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       html += '<br><span class="warn">' + r.dupeIds.slice(0, 6).map(function (d) {
         return (L === 'en' ? 'line ' : '第') + d.line + (L === 'en' ? ': ' : ' 行：') + esc(d.name) + ' / ' + esc(d.id);
       }).join('，') + (r.dupeIds.length > 6 ? ' …' : '') + '</span>';
+    }
+    if (r.dupeNames.length) {
+      html += '<br><span class="warn">' + (L === 'en'
+        ? (r.dupeNames.length + ' entries share a name with an existing participant (kept, please double-check)')
+        : (r.dupeNames.length + ' 条与已有姓名重名（仍会导入，请自行确认）')) + '：' +
+        esc(r.dupeNames.slice(0, 6).map(function (d) { return d.name; }).join('、')) +
+        (r.dupeNames.length > 6 ? ' …' : '') + '</span>';
     }
     if (r.bad.length) {
       html += '<br><span class="warn">' + r.bad.length + ' ' + (L === 'en' ? 'invalid lines' : '行无法解析') +
@@ -2440,7 +3196,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     rows.forEach(function (r) {
       state.participants.push({
         uid: nextUid(), name: r.name, id: r.id || '', group: r.group || '',
-        drawn: false, drawnAt: 0, order: order++
+        drawn: false, drawnAt: 0, order: order++, excluded: false, count: 0
       });
     });
   }
@@ -2469,62 +3225,73 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
   function renderStats() {
     var body = $('#statsBody'); if (!body) return;
     var L = lang();
-    var hist = state.history;
-    if (!hist.length) {
+    var st = achievementStats();
+    if (!st.total) {
       body.innerHTML = '<div class="empty">' + (L === 'en' ? 'No data yet — draw a few times.' : '还没有数据，先抽几次吧。') + '</div>';
       return;
     }
-    var total = hist.length;
     var uniq = {};
-    hist.forEach(function (h) { uniq[h.uid || h.name] = 1; });
-    var c5 = hist.filter(function (h) { return h.star === 5; }).length;
-    var c4 = hist.filter(function (h) { return h.star === 4; }).length;
-    var batchMap = {};
-    hist.forEach(function (h) { batchMap[h.batchId] = 1; });
-    var batches = Object.keys(batchMap).length;
-    var tenBatches = groupHistory().filter(function (g) { return g.items.length > 1; }).length;
-    var repeatDraws = hist.filter(function (h) { return h.mode === 'repeat'; }).length;
-    var drawn = drawnCount();
-    var roster = state.participants.length;
-
-    var counts = {};
-    hist.forEach(function (h) {
-      var k = h.uid || h.name;
-      if (!counts[k]) counts[k] = { name: h.name, id: h.id, n: 0, best: 1, sum: 0 };
-      counts[k].n++;
-      counts[k].sum += h.star;
-      if (h.star > counts[k].best) counts[k].best = h.star;
-    });
-    var rank = Object.keys(counts).map(function (k) { return counts[k]; })
-      .sort(function (a, b) { return b.n - a.n || b.best - a.best; }).slice(0, 10);
-
-    var sumObj = { total: total, c5: c5, c4: c4, batches: batches, tenBatches: tenBatches, roster: roster, left: roster - drawn, repeatDraws: repeatDraws };
+    state.history.forEach(function (h) { uniq[h.uid || h.name] = 1; });
+    var drawn = drawnCount(), roster = st.roster;
 
     var cards = [
-      [total, L === 'en' ? 'TOTAL DRAWS' : '总抽取'],
+      [st.total, L === 'en' ? 'TOTAL DRAWS' : '总抽取'],
       [Object.keys(uniq).length, L === 'en' ? 'UNIQUE WINNERS' : '去重人数'],
-      [c5, L === 'en' ? 'FIVE STAR' : '五星次数'],
-      [batches, L === 'en' ? 'BATCHES' : '抽卡批次'],
-      [(c5 / total * 100).toFixed(1) + '%', L === 'en' ? '5★ RATE' : '五星出率'],
-      [roster ? Math.round(drawn / roster * 100) + '%' : '0%', L === 'en' ? 'COVERAGE' : '名单覆盖率']
+      [st.c5, L === 'en' ? 'FIVE STAR' : '五星次数'],
+      [st.batches, L === 'en' ? 'BATCHES' : '抽卡批次'],
+      [(st.c5 / st.total * 100).toFixed(1) + '%', L === 'en' ? '5★ RATE' : '五星出率'],
+      [roster ? Math.round(drawn / roster * 100) + '%' : '0%', L === 'en' ? 'COVERAGE' : '名单覆盖率'],
+      [st.maxCount + (L === 'en' ? '×' : ' 次'), L === 'en' ? 'MOST DRAWN' : '最高抽中']
     ];
+
+    var counts = {};
+    state.history.forEach(function (h) {
+      var k = h.uid || h.name;
+      if (!counts[k]) counts[k] = { name: h.name, id: h.id, n: 0, best: 1 };
+      counts[k].n++;
+      if (h.star > counts[k].best) counts[k].best = h.star;
+    });
+    var rank = Object.keys(counts).map(function (k) { return counts[k]; }).sort(function (a, b) {
+      if (state.settings.mode === 'repeat') return b.n - a.n || b.best - a.best || a.name.localeCompare(b.name, 'zh-Hans-CN');
+      return b.best - a.best || b.n - a.n || a.name.localeCompare(b.name, 'zh-Hans-CN');
+    }).slice(0, 10);
+    var rankTitle = state.settings.mode === 'repeat'
+      ? (L === 'en' ? 'MOST DRAWN (TOP 10)' : '抽中次数排行（前十）')
+      : (L === 'en' ? 'BEST STARS (TOP 10)' : '按星级排行（前十）');
+
+    var ttl = currentTitle();
+    var logs = (state.logs || []).slice(-14).reverse();
 
     body.innerHTML =
       '<div class="stat-grid">' + cards.map(function (c) {
         return '<div class="stat-card"><b>' + c[0] + '</b><span>' + c[1] + '</span></div>';
       }).join('') + '</div>' +
-      '<div class="sec-title">' + (L === 'en' ? 'ACHIEVEMENTS' : '成就') + '</div>' +
+      '<div class="sec-title">' + (L === 'en' ? 'TITLE' : '当前称号') + '</div>' +
+      '<div class="achv on" style="cursor:default">' +
+        '<span class="ico">' + (ttl ? ttl.ico : '🌱') + '</span>' +
+        '<span>' + (ttl ? (L === 'en' ? ttl.en : ttl.zh) : (L === 'en' ? 'Newcomer — keep drawing' : '新人 · 继续抽卡')) + '</span>' +
+      '</div>' +
+      '<div class="sec-title">' + (L === 'en' ? 'ACHIEVEMENTS (' + Object.keys(state.achv || {}).length + '/' + ACHV.length + ')' : '成就（' + Object.keys(state.achv || {}).length + '/' + ACHV.length + '）') + '</div>' +
       '<div class="achv-list">' + ACHV.map(function (a) {
-        var on = a.test(sumObj);
-        return '<div class="achv' + (on ? ' on' : '') + '"><span class="ico">' + a.ico + '</span><span>' + (L === 'en' ? a.en : a.zh) + '</span></div>';
+        var at = state.achv && state.achv[a.id];
+        return '<div class="achv' + (at ? ' on' : '') + '"><span class="ico">' + a.ico + '</span>' +
+          '<span>' + (L === 'en' ? a.en : a.zh) + '</span>' +
+          (at ? '<span class="achv-time">' + fmtDate(at) + '</span>' : '') + '</div>';
       }).join('') + '</div>' +
-      '<div class="sec-title">' + (L === 'en' ? 'RANKING (TOP 10)' : '排行榜（前十）') + '</div>' +
+      '<div class="sec-title">' + rankTitle + '</div>' +
       '<div>' + rank.map(function (r, i) {
         var cls = i === 0 ? ' top1' : (i === 1 ? ' top2' : (i === 2 ? ' top3' : ''));
         return '<div class="rank-row' + cls + '"><span class="rank-no">' + (i + 1) + '</span>' +
           '<div class="rank-main"><b>' + esc(r.name) + '</b><span>' + (r.id ? esc(r.id) : (L === 'en' ? 'NO ID' : '无学号')) + '</span></div>' +
           '<span class="rank-stat">' + r.n + (L === 'en' ? '× · best ' : ' 次 · 最高 ') + stars(r.best) + '</span></div>';
-      }).join('') + '</div>';
+      }).join('') + '</div>' +
+      (logs.length
+        ? '<div class="sec-title">' + (L === 'en' ? 'RECENT ACTIVITY' : '最近操作') + '</div>' +
+          '<div>' + logs.map(function (g) {
+            return '<div class="hist-row"><span class="hist-time">' + esc(g.t || '') + '</span>' +
+              '<div class="hist-main"><span>' + esc(g.text || '') + '</span></div></div>';
+          }).join('') + '</div>'
+        : '');
   }
 
   /* ---------------- 导出 ---------------- */
@@ -2629,11 +3396,159 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     }, 'image/png');
   }
 
+  /* 分享长图：班级信息 + 最新结果 + 星级分布 + 排行 + 成就 */
+  function exportShareLong() {
+    var L = lang(), st = achievementStats();
+    if (!st.total && !state.participants.length) {
+      toast(L === 'en' ? 'Add a roster first' : '先添加名单再生成分享图', 'err');
+      return;
+    }
+    var W = 900, H = 1420;
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var g = cv.getContext('2d');
+    var F = function (w, s) { return w + ' ' + s + 'px "Microsoft YaHei", system-ui, sans-serif'; };
+
+    var grd = g.createLinearGradient(0, 0, W, H);
+    grd.addColorStop(0, '#0d1430'); grd.addColorStop(0.55, '#161d3e'); grd.addColorStop(1, '#2a1b45');
+    g.fillStyle = grd; g.fillRect(0, 0, W, H);
+    for (var i = 0; i < 220; i++) {
+      g.globalAlpha = Math.random() * 0.6 + 0.1;
+      g.fillStyle = '#fff';
+      g.beginPath(); g.arc(Math.random() * W, Math.random() * H, Math.random() * 1.6 + 0.3, 0, 6.2832); g.fill();
+    }
+    g.globalAlpha = 1;
+
+    var pad = 64;
+    g.textAlign = 'left';
+    g.fillStyle = 'rgba(234,240,255,.95)';
+    g.font = F(700, 44);
+    g.fillText(L === 'en' ? 'Random Roll · Class Report' : '随机点名 · 班级抽卡报告', pad, 110);
+    g.fillStyle = 'rgba(234,240,255,.55)';
+    g.font = F(500, 20);
+    g.fillText(new Date().toLocaleString(), pad, 148);
+
+    // 概览
+    var boxes = [
+      [state.participants.length, L === 'en' ? 'ROSTER' : '名单人数'],
+      [st.total, L === 'en' ? 'DRAWS' : '抽取次数'],
+      [st.c5, L === 'en' ? 'FIVE STAR' : '五星次数'],
+      [Object.keys(state.achv || {}).length + '/' + ACHV.length, L === 'en' ? 'ACHV' : '成就']
+    ];
+    var bw = (W - pad * 2 - 36) / 4, y0 = 190;
+    boxes.forEach(function (b, k) {
+      var x = pad + k * (bw + 12);
+      g.fillStyle = 'rgba(255,255,255,.06)';
+      g.beginPath();
+      if (g.roundRect) { g.roundRect(x, y0, bw, 104, 18); g.fill(); } else g.fillRect(x, y0, bw, 104);
+      g.fillStyle = 'rgba(234,240,255,.96)';
+      g.font = F(700, 34); g.textAlign = 'center';
+      g.fillText(String(b[0]), x + bw / 2, y0 + 52);
+      g.fillStyle = 'rgba(234,240,255,.5)';
+      g.font = F(500, 15);
+      g.fillText(String(b[1]), x + bw / 2, y0 + 82);
+      g.textAlign = 'left';
+    });
+
+    // 最新结果
+    var y = y0 + 150;
+    g.fillStyle = 'rgba(234,240,255,.45)';
+    g.font = F(600, 16);
+    g.fillText(L === 'en' ? 'LATEST RESULT' : '最近一次结果', pad, y);
+    y += 26;
+    var last = state.last;
+    if (last) {
+      g.fillStyle = STAR_COLORS[last.star] || '#6ee7ff';
+      g.font = F(700, 64);
+      g.fillText(String(last.name).slice(0, 10), pad, y + 56);
+      g.font = F(600, 30);
+      g.fillText(stars(last.star), pad, y + 100);
+      if (last.id) {
+        g.fillStyle = 'rgba(234,240,255,.5)';
+        g.font = F(500, 20);
+        g.fillText(last.id, pad + 320, y + 100);
+      }
+      y += 140;
+    } else {
+      g.fillStyle = 'rgba(234,240,255,.4)';
+      g.font = F(500, 22);
+      g.fillText(L === 'en' ? 'No draws yet' : '还没有抽取记录', pad, y + 30);
+      y += 76;
+    }
+
+    // 星级分布
+    g.fillStyle = 'rgba(234,240,255,.45)';
+    g.font = F(600, 16);
+    g.fillText(L === 'en' ? 'STAR DISTRIBUTION' : '星级分布', pad, y);
+    y += 34;
+    var maxC = 1;
+    for (var s = 5; s >= 1; s--) maxC = Math.max(maxC, st.starCounts[s] || 0);
+    for (var s2 = 5; s2 >= 1; s2--) {
+      var cnt = st.starCounts[s2] || 0;
+      var barW = Math.round((W - pad * 2 - 190) * (cnt / maxC));
+      g.fillStyle = STAR_COLORS[s2];
+      g.font = F(600, 18);
+      g.fillText(stars(s2), pad, y + 16);
+      g.globalAlpha = 0.85;
+      g.beginPath();
+      if (g.roundRect) { g.roundRect(pad + 150, y, Math.max(4, barW), 22, 11); g.fill(); } else g.fillRect(pad + 150, y, Math.max(4, barW), 22);
+      g.globalAlpha = 1;
+      g.fillStyle = 'rgba(234,240,255,.6)';
+      g.font = F(500, 16);
+      g.fillText(cnt + (L === 'en' ? '×' : ' 次'), pad + 150 + Math.max(4, barW) + 14, y + 17);
+      y += 34;
+    }
+
+    // 排行前五
+    y += 22;
+    g.fillStyle = 'rgba(234,240,255,.45)';
+    g.font = F(600, 16);
+    g.fillText(L === 'en' ? 'TOP 5' : '抽中排行前五', pad, y);
+    y += 34;
+    var counts = {};
+    state.history.forEach(function (h) {
+      var k = h.uid || h.name;
+      if (!counts[k]) counts[k] = { name: h.name, id: h.id, n: 0, best: 1 };
+      counts[k].n++; if (h.star > counts[k].best) counts[k].best = h.star;
+    });
+    var top = Object.keys(counts).map(function (k) { return counts[k]; })
+      .sort(function (a, b) { return b.n - a.n || b.best - a.best; }).slice(0, 5);
+    if (!top.length) {
+      g.fillStyle = 'rgba(234,240,255,.4)';
+      g.font = F(500, 18);
+      g.fillText('—', pad, y + 18);
+      y += 40;
+    } else {
+      top.forEach(function (r, idx) {
+        g.fillStyle = 'rgba(234,240,255,.9)';
+        g.font = F(600, 22);
+        g.fillText((idx + 1) + '. ' + String(r.name).slice(0, 12), pad, y + 20);
+        g.fillStyle = 'rgba(234,240,255,.55)';
+        g.font = F(500, 17);
+        g.fillText(r.n + (L === 'en' ? '× ' : ' 次 ') + stars(r.best), pad + 380, y + 20);
+        y += 34;
+      });
+    }
+
+    var ttl = currentTitle();
+    g.fillStyle = 'rgba(234,240,255,.4)';
+    g.font = F(500, 18);
+    g.fillText((L === 'en' ? 'Title: ' : '称号：') + (ttl ? (L === 'en' ? ttl.en : ttl.zh) : (L === 'en' ? 'Newcomer' : '新人')), pad, H - 52);
+
+    cv.toBlob(function (blob) {
+      if (!blob) { toast(L === 'en' ? 'Image failed' : '图片生成失败', 'err'); return; }
+      download('点名长图_' + stamp() + '.png', blob);
+      toast(L === 'en' ? 'Long image exported' : '分享长图已导出', 'ok');
+    }, 'image/png');
+  }
+
   function doExport(fmt) {
     if (fmt === 'csv') exportCsv();
     else if (fmt === 'txt') exportTxt();
     else if (fmt === 'json') exportJson();
     else if (fmt === 'png') exportPng();
+    else if (fmt === 'pnglong') exportShareLong();
+    else if (fmt === 'print') window.print();
   }
 
   /* ---------------- 背景特效 ---------------- */
@@ -2754,14 +3669,15 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     state.drawIndex = 0;
     state.seq = 1;
     state.settings.group = 'all';
+    state.settings.scope = 'all';
     state.settings.search = '';
     state.settings.filter = 'all';
-    state.settings.groupOnly = false;
     state.settings.pity.c5 = 0;
     selected = {};
     editingUid = null;
     save();
     renderAll();
+    logAction('reset', lang() === 'en' ? 'Roster and history cleared' : '重置：清空名单与历史');
     toast(lang() === 'en' ? 'Reset done' : '已重置，名单与历史清空', 'ok');
   }
 
@@ -2849,6 +3765,24 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
           p.drawn = false; p.drawnAt = 0;
           save(); renderAll();
           toast(lang() === 'en' ? (p.name + ' returned to the pool') : ('已把 ' + p.name + ' 放回候选池'), 'ok');
+          return;
+        }
+        if (act === 'exclude') {
+          pushUndo();
+          p.excluded = true;
+          delete selected[uid];
+          save(); renderAll();
+          logAction('exclude', (lang() === 'en' ? 'Excluded ' : '临时排除：') + p.name);
+          toast(lang() === 'en' ? (p.name + ' temporarily excluded') : ('已临时排除 ' + p.name), 'ok');
+          return;
+        }
+        if (act === 'include') {
+          pushUndo();
+          p.excluded = false;
+          save(); renderAll();
+          logAction('include', (lang() === 'en' ? 'Restored ' : '恢复参与：') + p.name);
+          toast(lang() === 'en' ? (p.name + ' is back in the pool') : ('已恢复 ' + p.name + ' 参与抽取'), 'ok');
+          return;
         }
       });
       listEl.addEventListener('change', function (e) {
@@ -2858,6 +3792,35 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
         if (cb.checked) selected[row.dataset.uid] = true; else delete selected[row.dataset.uid];
         row.classList.toggle('selected', cb.checked);
         renderSelectionBar();
+      });
+      // 行内编辑键位：Enter 保存 / Esc 取消 / Tab 在三个字段间切换
+      listEl.addEventListener('keydown', function (e) {
+        var t = e.target;
+        if (!t || !t.dataset || !t.dataset.f) return;
+        var row = t.closest ? t.closest('.p-row') : null;
+        if (!row) return;
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          var sv = row.querySelector('[data-act="save"]');
+          if (sv) sv.click();
+          return;
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          editingUid = null;
+          renderRoster();
+          return;
+        }
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          var fields = row.querySelectorAll('[data-f]');
+          var idx = Array.prototype.indexOf.call(fields, t);
+          var next = e.shiftKey ? idx - 1 : idx + 1;
+          if (next < 0) next = fields.length - 1;
+          if (next >= fields.length) next = 0;
+          fields[next].focus();
+          if (fields[next].select) fields[next].select();
+        }
       });
     }
 
@@ -2884,6 +3847,17 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
         state.participants.forEach(function (p) { if (selected[p.uid] && p.drawn) { p.drawn = false; p.drawnAt = 0; cnt++; } });
         save(); renderAll();
         toast(lang() === 'en' ? (cnt + ' returned') : ('已放回 ' + cnt + ' 人'), 'ok');
+        return;
+      }
+      if (act === 'exclude' || act === 'include') {
+        pushUndo();
+        var on = act === 'exclude';
+        state.participants.forEach(function (p) { if (selected[p.uid]) p.excluded = on; });
+        save(); renderAll();
+        logAction(on ? 'exclude' : 'include', (on ? '批量临时排除 ' : '批量恢复 ') + uids.length + ' 人');
+        toast(lang() === 'en'
+          ? (uids.length + (on ? ' excluded' : ' restored'))
+          : ('已' + (on ? '排除 ' : '恢复 ') + uids.length + ' 人'), 'ok');
         return;
       }
       if (act === 'delete') {
@@ -2927,17 +3901,43 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     });
     var groupEl = $('#groupSelect');
     if (groupEl) groupEl.addEventListener('change', function () {
-      state.settings.group = groupEl.value; save(); renderGroups(); renderRoster(); renderStage();
+      state.settings.group = groupEl.value;
+      state.settings.scope = groupEl.value === 'all' ? 'all' : 'group';
+      save(); renderGroups(); renderRoster(); renderStage();
     });
-    var chip = $('#groupOnlyChip');
-    if (chip) chip.addEventListener('click', function () {
-      if (!state.settings.groupOnly && state.settings.group === 'all') {
-        toast(lang() === 'en' ? 'Pick a specific group first' : '请先在上方选择具体分组', 'err');
-        return;
+
+    // 抽取范围 segmented：与分组选择严格同步（选全部 = 抽全名单）
+    var scopeSeg = $('#scopeSeg');
+    if (scopeSeg) scopeSeg.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-scope]') : null;
+      if (!b || b.disabled) return;
+      if (b.dataset.scope === 'all') {
+        state.settings.group = 'all';
+        state.settings.scope = 'all';
+      } else {
+        if (state.settings.group === 'all') {
+          toast(lang() === 'en' ? 'Pick a group in the roster panel first' : '请先在左侧名单里选择一个分组', 'err');
+          return;
+        }
+        state.settings.scope = 'group';
       }
-      state.settings.groupOnly = !state.settings.groupOnly;
       save(); renderGroups(); renderRoster(); renderStage();
       Sfx.play('click', 0.5);
+    });
+
+    // 速度徽标：点击循环 0.5x → 1x → 1.5x
+    var speedChip = $('#speedChip');
+    if (speedChip) speedChip.addEventListener('click', function () {
+      var i = SPEEDS.indexOf(state.settings.animSpeed);
+      state.settings.animSpeed = SPEEDS[(i + 1) % SPEEDS.length];
+      save(); renderScope(); renderSettings();
+      toast(lang() === 'en' ? ('Animation speed ' + state.settings.animSpeed + 'x') : ('动画速度：' + state.settings.animSpeed + 'x'), 'ok');
+    });
+
+    // 跳过本轮动画
+    ['#skipDrawBtn', '#skipTenBtn'].forEach(function (sel) {
+      var b = $(sel);
+      if (b) b.addEventListener('click', function (e) { e.stopPropagation(); doSkip(); });
     });
 
     // 模式切换（二次确认）
@@ -3004,6 +4004,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       else if (a === 'stats') openModal($('#statsModal'));
       else if (a === 'export') openModal($('#exportModal'));
       else if (a === 'settings') openModal($('#settingsModal'));
+      else if (a === 'pk') { openModal($('#pkModal')); renderPk(); }
       else if (a === 'undo') undo();
       else if (a === 'redo') redo();
       else if (a === 'reset') resetAll();
@@ -3045,9 +4046,31 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       fileInput.addEventListener('change', async function () {
         var f = fileInput.files && fileInput.files[0];
         if (!f) return;
+        var fname = f.name || '';
         try {
-          var text = await readFileText(f);
-          if (/\.json$/i.test(f.name)) {
+          var text = '';
+          if (/\.(xlsx|xls)$/i.test(fname)) {
+            toast(lang() === 'en' ? 'Loading spreadsheet parser…' : '正在加载表格解析库…');
+            var buf = await new Promise(function (res, rej) {
+              var fr = new FileReader();
+              fr.onload = function () { res(fr.result); };
+              fr.onerror = function () { rej(fr.error || new Error('read error')); };
+              fr.readAsArrayBuffer(f);
+            });
+            try {
+              await loadSheetJS();
+              text = sheetToText(new Uint8Array(buf));
+            } catch (e3) {
+              toast(lang() === 'en'
+                ? 'Spreadsheet parser unavailable (offline?) — paste the cells instead'
+                : '表格解析库加载失败（可能离线），请改为直接粘贴单元格内容', 'err');
+              fileInput.value = '';
+              return;
+            }
+          } else {
+            text = await readFileText(f);
+          }
+          if (/\.json$/i.test(fname)) {
             try {
               var data = JSON.parse(text);
               var arr = Array.isArray(data) ? data : (Array.isArray(data.participants) ? data.participants : null);
@@ -3061,7 +4084,7 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
           }
           ta.value = text;
           renderImportPreview();
-          toast(lang() === 'en' ? ('Loaded ' + f.name) : ('已读取 ' + f.name), 'ok');
+          toast(lang() === 'en' ? ('Loaded ' + fname) : ('已读取 ' + fname), 'ok');
         } catch (e) { toast(lang() === 'en' ? 'File read failed' : '文件读取失败', 'err'); }
         fileInput.value = '';
       });
@@ -3208,6 +4231,121 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       Sfx.play('click', 0.5);
     });
 
+    // 星级权重（1–5 倍）
+    var we = $('#weightEnable');
+    if (we) we.addEventListener('change', function () {
+      state.settings.weights.enabled = we.checked;
+      save(); syncStarInputs(); syncWeightPct();
+      toast(we.checked
+        ? (lang() === 'en' ? 'Weight mode on: 1–5★ acts as a multiplier' : '已启用 1–5 倍权重：星级作为倍率参与概率')
+        : (lang() === 'en' ? 'Weight mode off' : '已关闭权重模式'), 'ok');
+    });
+    var wg = $('#weightGrid');
+    if (wg) wg.addEventListener('input', function (e) {
+      var t = e.target;
+      if (!t.dataset || !t.dataset.w) return;
+      state.settings.weights.mult[Number(t.dataset.w)] = Math.max(0, Math.min(5, Number(t.value) || 0));
+      save(); syncWeightPct();
+    });
+
+    // 动画速度 0.5x / 1x / 1.5x
+    var spSeg = $('#speedSeg');
+    if (spSeg) spSeg.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-speed]') : null;
+      if (!b) return;
+      state.settings.animSpeed = b.dataset.speed;
+      save(); renderScope(); renderSettings();
+      Sfx.play('click', 0.5);
+    });
+
+    // 幸运值
+    var leEl = $('#luckyEnable'), lsEl = $('#luckyStep');
+    if (leEl) leEl.addEventListener('change', function () {
+      state.settings.pity.lucky = leEl.checked;
+      save(); renderSettings(); renderPity(); syncWeightPct();
+    });
+    if (lsEl) lsEl.addEventListener('input', function () {
+      state.settings.pity.luckyStep = Math.max(0, Math.min(5, Number(lsEl.value) || 0));
+      save(); renderSettings(); renderPity(); syncWeightPct();
+    });
+
+    // 快捷键总开关 / 空格抽卡 / 自定义 / 复位
+    var sceEl = $('#scEnable'), scsEl = $('#scSpace');
+    if (sceEl) sceEl.addEventListener('change', function () {
+      state.settings.shortcuts.enabled = sceEl.checked;
+      recordingKb = null;
+      save(); renderSettings();
+      toast(sceEl.checked ? (lang() === 'en' ? 'Shortcuts on' : '快捷键已开启') : (lang() === 'en' ? 'Shortcuts off' : '快捷键已全部关闭'), 'ok');
+    });
+    if (scsEl) scsEl.addEventListener('change', function () {
+      state.settings.shortcuts.spaceDraw = scsEl.checked;
+      save(); syncKb();
+    });
+    var kbList = $('#kbList');
+    if (kbList) kbList.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-kb]') : null;
+      if (!b) return;
+      recordingKb = recordingKb === b.dataset.kb ? null : b.dataset.kb;
+      syncKb();
+    });
+    var kbReset = $('#kbReset');
+    if (kbReset) kbReset.addEventListener('click', function () {
+      state.settings.shortcuts.keys = defaultShortcutKeys();
+      state.settings.shortcuts.enabled = true;
+      recordingKb = null;
+      save(); renderSettings();
+      toast(lang() === 'en' ? 'Shortcuts restored' : '快捷键已恢复默认', 'ok');
+    });
+
+    // 长按多选 + 右键菜单 + 虚拟滚动
+    if (listEl) {
+      var pressTimer = null, pressUid = null;
+      listEl.addEventListener('pointerdown', function (e) {
+        var row = e.target.closest ? e.target.closest('.p-row') : null;
+        if (!row || row.classList.contains('editing')) return;
+        var uid = row.dataset.uid;
+        pressTimer = setTimeout(function () {
+          pressTimer = null;
+          pressUid = uid;
+          if (selected[uid]) delete selected[uid]; else selected[uid] = true;
+          renderRoster();
+          toast(lang() === 'en' ? ('Selected ' + selectedUids().length) : ('已勾选 ' + selectedUids().length + ' 人'), 'ok');
+        }, 480);
+      });
+      ['pointerup', 'pointercancel', 'pointermove', 'pointerleave', 'scroll'].forEach(function (ev) {
+        listEl.addEventListener(ev, function () { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }, { passive: true });
+      });
+      var scrollTick = null;
+      listEl.addEventListener('scroll', function () {
+        if (scrollTick) return;
+        scrollTick = setTimeout(function () { scrollTick = null; renderRoster(); }, 60);
+      }, { passive: true });
+      listEl.addEventListener('contextmenu', function (e) {
+        var row = e.target.closest ? e.target.closest('.p-row') : null;
+        if (!row) return;
+        e.preventDefault();
+        var p = state.participants.filter(function (x) { return x.uid === row.dataset.uid; })[0];
+        if (p) openCtxMenu(e.clientX, e.clientY, p);
+      });
+    }
+
+    // 多标签同步
+    var syncTimer = 0;
+    window.addEventListener('storage', function (e) {
+      if (e.key !== KEY || !e.newValue) return;
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(function () {
+        loadState();
+        applyTheme(); applySkin(); applySoundBtn(); applyLang();
+        buildStarConfig(); renderAll(); renderSettings(); syncUndoBtns();
+        toast(lang() === 'en' ? 'Synced changes from another tab' : '已同步其他标签页的改动', 'ok');
+      }, 180);
+    });
+
+    // PK 面板
+    var pkRun = $('#pkRunBtn');
+    if (pkRun) pkRun.addEventListener('click', runPk);
+
     // 数据
     var ej = $('#exportJsonBtn');
     if (ej) ej.addEventListener('click', exportJson);
@@ -3230,9 +4368,9 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
         if (!ok) return;
         pushUndo();
         try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { }
-        state = { version: 3, seq: 1, participants: [], history: [], drawIndex: 0, last: null, settings: defaultSettings() };
+        state = freshState();
         loadState();
-        applyTheme(); applySkin(); applySoundBtn(); applyLang(); buildStarConfig(); renderAll(); renderSettings();
+        afterStateReplace();
         toast(lang() === 'en' ? 'Backup restored' : '备份已恢复', 'ok');
       } catch (e) {
         toast(lang() === 'en' ? 'Invalid backup file' : '备份文件无法解析', 'err');
@@ -3267,8 +4405,27 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       var mod = e.ctrlKey || e.metaKey;
       var k = e.key;
 
+      // 键位录制中
+      if (recordingKb) {
+        var rid = recordingKb;
+        var got = keyFromEvent(e);
+        if (!got) return;
+        e.preventDefault();
+        recordingKb = null;
+        if (got !== 'escape') {
+          state.settings.shortcuts.keys[rid] = got;
+          save(); syncKb(); renderSettings();
+          toast(lang() === 'en' ? ('Bound to ' + keyLabel(got)) : ('已绑定：' + keyLabel(got)), 'ok');
+        } else syncKb();
+        return;
+      }
+
       if (mod && (k === 'z' || k === 'Z')) { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
-      if (k === 'Escape') { if (anyLayerOpen()) { e.preventDefault(); closeTop(); } return; }
+      if (k === 'Escape') {
+        if (anyLayerOpen()) { e.preventDefault(); closeTop(); return; }
+        if (skipWaiters.length) { doSkip(); return; }
+        return;
+      }
 
       var t = e.target;
       var typing = false;
@@ -3279,23 +4436,48 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
       if (typing) return;
       if (anyLayerOpen()) return;
 
-      if (k === ' ' || k === 'Spacebar' || k === 'Enter') {
-        e.preventDefault();
-        if (e.shiftKey) drawTen(); else drawSingle();
-        return;
+      var sc = state.settings.shortcuts;
+      if (!sc.enabled) return;
+      var pressed = keyFromEvent(e);
+      if (!pressed || pressed === 'shift') return;
+      if (pressed === ' ' && !sc.spaceDraw) return;
+
+      var keys = sc.keys, hit = null;
+      for (var i = 0; i < ACTIONS.length; i++) {
+        if (keys[ACTIONS[i].id] === pressed) { hit = ACTIONS[i].id; break; }
       }
-      var low = String(k).toLowerCase();
-      if (low === 'e') { e.preventDefault(); openModal($('#importModal')); }
-      else if (low === 'h') { e.preventDefault(); openModal($('#historyModal')); }
-      else if (low === 'r') { e.preventDefault(); resetAll(); }
-      else if (low === 's') { e.preventDefault(); openModal($('#settingsModal')); }
+      if (!hit) return;
+      e.preventDefault();
+      runAction(hit);
     });
+
+    // 移动端：键盘弹出时隐藏 Dock
+    if (window.visualViewport) {
+      var vv = window.visualViewport;
+      var onVV = function () {
+        var open = (window.innerHeight - vv.height) > 160;
+        document.body.classList.toggle('kb-open', open);
+      };
+      vv.addEventListener('resize', onVV);
+      vv.addEventListener('scroll', onVV);
+    }
 
     // 离开前保存
     window.addEventListener('beforeunload', function () { save(); });
   }
 
   /* ---------------- 模式切换 ---------------- */
+  function runAction(id) {
+    if (id === 'single') drawSingle();
+    else if (id === 'ten') drawTen();
+    else if (id === 'import') openModal($('#importModal'));
+    else if (id === 'history') openModal($('#historyModal'));
+    else if (id === 'stats') openModal($('#statsModal'));
+    else if (id === 'settings') openModal($('#settingsModal'));
+    else if (id === 'pk') { openModal($('#pkModal')); renderPk(); }
+    else if (id === 'reset') resetAll();
+  }
+
   async function switchMode(mode) {
     if (mode !== 'unique' && mode !== 'repeat') return;
     if (mode === state.settings.mode) { syncModeUI(); return; }
@@ -3303,35 +4485,197 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     var toRepeat = mode === 'repeat';
     var msg = toRepeat
       ? (L === 'en'
-        ? 'Repeatable mode: every draw picks from the <b>full roster</b>. Winners are <b>not</b> marked as drawn, but history is still recorded.'
-        : '可重复模式：每次都从 <b>全量名单</b> 抽取，抽中者 <b>不会</b> 被标记为已抽中，历史仍照常记录。')
+        ? 'Repeatable mode: every draw picks from the <b>full roster</b>. Winners are <b>not</b> marked as drawn, the 1–5★ star is still a <b>rating after the draw</b>, and the ranking switches to “most drawn”.'
+        : '可重复模式：每次都从 <b>全量名单</b> 抽取，抽中者 <b>不会</b> 被标记为已抽中；1–5★ 仍只是 <b>抽中后的评级</b>；排行榜改为按「抽中次数」排序。')
       : (L === 'en'
-        ? 'No-repeat mode: winners are <b>removed from the pool</b> until you return them manually.'
-        : '不重复模式：抽中者会 <b>移出候选池</b>，直到你手动放回。');
+        ? 'No-repeat mode: winners are <b>removed from the pool</b> until you return them. The ranking switches to “best stars”.'
+        : '不重复模式：抽中者会 <b>移出候选池</b>，直到你手动放回；排行榜改为按「星级」排序。');
     var ok = await ask({
       title: L === 'en' ? 'Switch draw mode' : '切换抽取模式',
       msg: '<p style="line-height:1.8">' + msg + '</p>' +
         '<p style="margin-top:8px;opacity:.72;font-size:12px">' + (L === 'en'
-          ? ('Currently ' + drawnCount() + ' of ' + state.participants.length + ' marked as drawn. History is kept.')
-          : ('当前已抽中 ' + drawnCount() + ' / ' + state.participants.length + ' 人，切换不会清空历史。')) + '</p>',
+          ? ('Currently ' + drawnCount() + ' of ' + state.participants.length + ' marked as drawn. History is kept, and the switch can be undone.')
+          : ('当前已抽中 ' + drawnCount() + ' / ' + state.participants.length + ' 人，切换不会清空历史，且可撤销。')) + '</p>',
       ok: L === 'en' ? 'Switch' : '确认切换',
       cancel: L === 'en' ? 'Cancel' : '取消'
     });
     if (!ok) { syncModeUI(); return; }
+    pushUndo();
     state.settings.mode = mode;
+    if (toRepeat) { state.settings.filter = 'all'; }
     save();
     syncModeUI();
     renderAll();
+    renderSettings();
     Sfx.play('click', 0.6);
-    toast(L === 'en' ? ('Mode: ' + (toRepeat ? 'repeatable' : 'no repeat')) : ('已切换到' + (toRepeat ? '可重复' : '不重复') + '模式'), 'ok');
+    logAction('mode', (L === 'en' ? 'Mode → ' : '模式切换为 ') + (toRepeat ? (L === 'en' ? 'repeatable' : '可重复') : (L === 'en' ? 'no-repeat' : '不重复')));
+    toast(L === 'en'
+      ? (toRepeat ? 'Mode: repeatable · filter 未抽/已抽 disabled · ranking by count' : 'Mode: no-repeat · ranking by stars')
+      : (toRepeat ? '已切换到可重复模式：未抽/已抽筛选已禁用，排行按次数' : '已切换到不重复模式：排行按星级'), 'ok');
   }
 
   function syncModeUI() {
+    var repeat = state.settings.mode === 'repeat';
     $$('#modeSeg button, #modeSeg2 button').forEach(function (b) {
       b.classList.toggle('active', b.dataset.mode === state.settings.mode);
     });
+    var fs = $('#filterSelect');
+    if (fs) {
+      $$('option', fs).forEach(function (o) {
+        if (o.value === 'undrawn' || o.value === 'drawn') o.disabled = repeat;
+      });
+      if (repeat && state.settings.filter !== 'all') {
+        state.settings.filter = 'all';
+        fs.value = 'all';
+      }
+    }
     var badge = $('#modeSeg');
-    if (badge) badge.title = state.settings.mode === 'repeat' ? '可重复抽取' : '不重复抽取';
+    if (badge) badge.title = repeat
+      ? (lang() === 'en' ? 'Repeatable: drawn marks are ignored' : '可重复抽取：不标记已抽中')
+      : (lang() === 'en' ? 'No-repeat: winners leave the pool' : '不重复抽取：抽中者移出候选池');
+  }
+
+  /* ---------------- 分组 PK ---------------- */
+  var pkLast = null;
+  function renderPk() {
+    var body = $('#pkBody'); if (!body) return;
+    var L = lang(), gs = groups();
+    if (!pkLast) pkLast = { a: '', b: '', rounds: 10, scoreA: 0, scoreB: 0, rows: [], msg: '' };
+    var a = pkLast.a || gs[0] || '';
+    var b = pkLast.b || gs[1] || '';
+    function opt(cur) {
+      if (!gs.length) return '<option value="">' + (L === 'en' ? 'no groups in roster' : '名单里还没有分组') + '</option>';
+      return gs.map(function (g) {
+        return '<option value="' + esc(g) + '"' + (g === cur ? ' selected' : '') + '>' + esc(g) + '</option>';
+      }).join('');
+    }
+    var rows = pkLast.rows.slice(-10).map(function (r) {
+      return '<div class="pk-hist"><span>' + stars(r.sa) + '</span><b>' + esc(r.wa) + ' / ' + esc(r.wb) + '</b><span>' + stars(r.sb) + '</span></div>';
+    }).join('');
+    body.innerHTML =
+      '<div class="pk-grid">' +
+        '<div class="pk-side"><span class="pk-sub">' + (L === 'en' ? 'SIDE A' : 'A 组') + '</span>' +
+          '<select class="pk-select" id="pkA">' + opt(a) + '</select>' +
+          '<b class="pk-score">' + pkLast.scoreA + '</b></div>' +
+        '<div class="pk-vs">VS</div>' +
+        '<div class="pk-side"><span class="pk-sub">' + (L === 'en' ? 'SIDE B' : 'B 组') + '</span>' +
+          '<select class="pk-select" id="pkB">' + opt(b) + '</select>' +
+          '<b class="pk-score">' + pkLast.scoreB + '</b></div>' +
+      '</div>' +
+      '<div class="pk-result">' + (pkLast.msg || (L === 'en' ? 'Pick two groups, then run 10 rounds. Higher star wins the round.' : '选择 A/B 两个分组，跑 10 轮，星级高者胜一轮。')) + '</div>' +
+      (rows ? '<div>' + rows + '</div>' : '');
+    var sa = $('#pkA'), sb = $('#pkB');
+    if (sa) sa.addEventListener('change', function () { pkLast.a = sa.value; });
+    if (sb) sb.addEventListener('change', function () { pkLast.b = sb.value; });
+    if (a) pkLast.a = a;
+    if (b) pkLast.b = b;
+  }
+
+  function runPk() {
+    var L = lang();
+    var sa = $('#pkA'), sb = $('#pkB');
+    var a = sa && sa.value, b = sb && sb.value;
+    if (!a || !b) { toast(L === 'en' ? 'Pick two groups first' : '请先选择 A / B 两个分组', 'err'); return; }
+    if (a === b) { toast(L === 'en' ? 'A and B must differ' : 'A / B 不能是同一个分组', 'err'); return; }
+    function members(g) {
+      return state.participants.filter(function (p) { return (p.group || '__none') === g && !p.excluded; });
+    }
+    var A = members(a), B = members(b);
+    if (!A.length || !B.length) { toast(L === 'en' ? 'One side has no available participants' : '有一组没有可抽取的成员', 'err'); return; }
+    var rounds = 10, scoreA = 0, scoreB = 0, rows = [];
+    for (var i = 0; i < rounds; i++) {
+      var pa = A[Math.floor(Math.random() * A.length)];
+      var pb = B[Math.floor(Math.random() * B.length)];
+      var x = pickStar(), y = pickStar();
+      if (x > y) scoreA++;
+      else if (y > x) scoreB++;
+      rows.push({ wa: pa.name, wb: pb.name, sa: x, sb: y });
+    }
+    var msg;
+    if (scoreA > scoreB) msg = (L === 'en' ? 'Winner: ' : '本轮胜者：') + esc(a) + ' · ' + scoreA + ' : ' + scoreB;
+    else if (scoreB > scoreA) msg = (L === 'en' ? 'Winner: ' : '本轮胜者：') + esc(b) + ' · ' + scoreA + ' : ' + scoreB;
+    else msg = (L === 'en' ? 'Draw ' : '平局 ') + scoreA + ' : ' + scoreB;
+    pkLast = { a: a, b: b, rounds: rounds, scoreA: scoreA, scoreB: scoreB, rows: (pkLast ? pkLast.rows : []).concat(rows).slice(-60), msg: msg };
+    renderPk();
+    logAction('pk', 'PK ' + a + ' ' + scoreA + ':' + scoreB + ' ' + b);
+    Sfx.play(scoreA === scoreB ? 'result' : 'five', 0.8);
+    toast(msg, 'ok');
+  }
+
+  /* ---------------- 右键菜单 ---------------- */
+  var ctxEl = null;
+  function ensureCtx() {
+    if (ctxEl) return ctxEl;
+    ctxEl = document.createElement('div');
+    ctxEl.className = 'ctx-menu';
+    document.body.appendChild(ctxEl);
+    document.addEventListener('click', function () { ctxEl.classList.remove('open'); });
+    window.addEventListener('scroll', function () { ctxEl.classList.remove('open'); }, true);
+    return ctxEl;
+  }
+  function openCtxMenu(x, y, p) {
+    var el = ensureCtx(), L = lang();
+    var items = [
+      ['edit', L === 'en' ? 'Edit' : '编辑', 0],
+      [p.excluded ? 'include' : 'exclude', p.excluded ? (L === 'en' ? 'Restore' : '恢复参与') : (L === 'en' ? 'Exclude temporarily' : '临时排除'), 0],
+      ['return', L === 'en' ? 'Return to pool' : '放回候选池', 0],
+      ['del', L === 'en' ? 'Delete' : '删除', 1]
+    ];
+    el.innerHTML = items.map(function (it) {
+      return '<button type="button"' + (it[2] ? ' class="danger"' : '') + ' data-cact="' + it[0] + '">' + it[1] + '</button>';
+    }).join('');
+    el.style.left = Math.min(x, Math.max(8, window.innerWidth - 180)) + 'px';
+    el.style.top = Math.min(y, Math.max(8, window.innerHeight - 180)) + 'px';
+    el.classList.add('open');
+    $$('[data-cact]', el).forEach(function (b) {
+      b.addEventListener('click', function () {
+        el.classList.remove('open');
+        var act = b.dataset.cact;
+        if (act === 'edit') { editingUid = p.uid; renderRoster(); return; }
+        if (act === 'exclude' || act === 'include') {
+          pushUndo();
+          p.excluded = act === 'exclude';
+          save(); renderAll();
+          toast(L === 'en' ? (p.excluded ? (p.name + ' excluded') : (p.name + ' restored')) : (p.excluded ? ('已临时排除 ' + p.name) : ('已恢复 ' + p.name)), 'ok');
+          return;
+        }
+        if (act === 'return') {
+          pushUndo();
+          p.drawn = false; p.drawnAt = 0;
+          save(); renderAll();
+          toast(L === 'en' ? (p.name + ' returned') : ('已把 ' + p.name + ' 放回候选池'), 'ok');
+          return;
+        }
+        if (act === 'del') {
+          pushUndo();
+          state.participants = state.participants.filter(function (x) { return x.uid !== p.uid; });
+          delete selected[p.uid];
+          save(); renderAll();
+          toast(L === 'en' ? 'Deleted' : '已删除', 'ok');
+        }
+      });
+    });
+  }
+
+  /* ---------------- PWA 清单（file:// 下跳过） ---------------- */
+  function initPwa() {
+    if (location.protocol === 'file:') return;
+    try {
+      var manifest = {
+        name: '随机点名 · 抽卡系统', short_name: '随机点名', start_url: location.pathname,
+        display: 'standalone', background_color: '#0d1430', theme_color: '#161d3e',
+        icons: []
+      };
+      var blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      var link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = URL.createObjectURL(blob);
+      document.head.appendChild(link);
+      var meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      meta.content = '#161d3e';
+      document.head.appendChild(meta);
+    } catch (e) { }
   }
 
   /* ---------------- 启动 ---------------- */
@@ -3343,6 +4687,9 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     buildStarConfig();
     buildPresets();
     buildSkins();
+    buildWeightGrid();
+    buildKbList();
+    syncKb();
     renderGuide();
 
     var s = state.settings;
@@ -3357,6 +4704,8 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     if (lbl) lbl.textContent = ANIMS[s.animation] || ANIMS.classic;
     $$('#animMenu button').forEach(function (b) { b.classList.toggle('active', b.dataset.anim === s.animation); });
 
+    syncModeUI();
+    renderScope();
     renderAll();
     syncUndoBtns();
     updateStorageInfo(storageBroken);
@@ -3364,11 +4713,16 @@ body.skin-gold .last-name,body.skin-gold .roll-name{
     initStarfield();
     initGlow();
     initTilt();
+    initPwa();
 
     if (!s.guideSeen) setTimeout(function () { openModal($('#guideModal')); }, 420);
 
     if (s.mode === 'repeat') {
-      setTimeout(function () { toast('当前为可重复抽取模式：抽中者不会被标记为已抽中', 'ok'); }, 2200);
+      setTimeout(function () {
+        toast(lang() === 'en'
+          ? 'Repeatable mode: drawn marks are ignored, ranking uses draw counts'
+          : '当前为可重复模式：忽略已抽中标记，排行榜按抽中次数', 'ok');
+      }, 2200);
     }
   }
 
