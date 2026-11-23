@@ -1129,6 +1129,33 @@ body.light.skin-nebula{background-color:#3d1f7a}
 body.light.skin-aurora{background-color:#0b4a52}
 
 /* 星级标识（详情强调） */
+/* ---- 十连逐张揭示 ---- */
+.ten-card{transition:border-color .25s,box-shadow .25s,background .25s;animation-delay:0ms!important}
+.ten-card.covered{
+  background:linear-gradient(160deg,rgba(120,170,255,.16),rgba(30,48,92,.34));
+  border-color:rgba(140,200,255,.26);
+  box-shadow:0 0 18px rgba(110,170,255,.16),inset 0 1px 0 rgba(255,255,255,.14);
+}
+.ten-card.covered .ten-stars,.ten-card.covered .ten-name,.ten-card.covered .ten-id{
+  visibility:hidden;opacity:0;
+}
+.ten-card.covered::after{
+  content:'?';position:absolute;inset:0;display:grid;place-items:center;
+  font-size:30px;font-weight:800;color:rgba(184,216,255,.62);
+  text-shadow:0 0 18px rgba(110,170,255,.55);
+  animation:qPulse 1.6s ease-in-out infinite;
+}
+@keyframes qPulse{0%,100%{opacity:.6;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+.ten-card.revealed{animation:tenReveal .42s cubic-bezier(.2,1.15,.3,1) both}
+.ten-card.revealed[data-star="5"]{animation:tenReveal .42s cubic-bezier(.2,1.15,.3,1) both,fivePulse 1.9s ease-in-out .45s infinite}
+@keyframes tenReveal{
+  0%{opacity:.3;transform:scale(.84) rotateX(26deg)}
+  60%{opacity:1;transform:scale(1.06) rotateX(-4deg)}
+  100%{opacity:1;transform:none}
+}
+body.light .ten-card.covered{background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(226,236,252,.86));border-color:rgba(120,150,200,.3)}
+body.light .ten-card.covered::after{color:rgba(90,120,170,.55);text-shadow:none}
+
 .set-desc.strong{color:#dbeafe;opacity:.95}
 
 /* ---------- 移动端 ---------- */
@@ -2082,6 +2109,8 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
   function closeEl(el) {
     if (!el) return;
     if (el.id === 'confirmModal') { settleConfirm(false); return; }
+    if (el.id === 'tenOverlay') { hideTenOverlay(); return; }
+    if (el.id === 'drawOverlay') { hideDrawOverlay(); return; }
     el.classList.remove('active');
     markClosed(el);
   }
@@ -2504,6 +2533,8 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
     var o = $('#tenOverlay'); if (!o) return;
     o.classList.remove('active');
     var sk = $('#skipTenBtn'); if (sk) sk.classList.remove('active');
+    tenState.open = false;
+    busy = false;
     markClosed(o);
   }
 
@@ -2571,20 +2602,61 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
     busy = false;
   }
 
+  /* 十连展示牌：全部先背面朝上（.covered），再按顺序逐张揭示 */
+  var tenState = { items: [], shown: 0, open: false };
+
   function renderTenCards(items) {
     var grid = $('#tenGrid'); if (!grid) return;
     grid.innerHTML = '';
+    tenState = { items: items.slice(), shown: 0, open: false };
     items.forEach(function (it, idx) {
       var d = document.createElement('div');
-      d.className = 'ten-card';
-      d.dataset.star = it.star;
-      d.style.animationDelay = (idx * 70) + 'ms';
+      d.className = 'ten-card covered';
+      d.dataset.idx = idx;
+      d.dataset.pre = it.star;
       d.innerHTML = '<div class="ten-stars" style="color:' + (STAR_COLORS[it.star] || '') + '">' + stars(it.star) + '</div>' +
         '<div class="ten-name">' + esc(it.name || (it.p && it.p.name) || '') + '</div>' +
         '<div class="ten-id' + (((it.id || (it.p && it.p.id)) ? '' : ' is-empty')) + '">' +
         esc(it.id || (it.p && it.p.id) || (lang() === 'en' ? 'NO ID' : '无学号')) + '</div>';
       grid.appendChild(d);
     });
+    updateTenHint();
+  }
+
+  function updateTenHint() {
+    var hint = $('#tenHint'); if (!hint) return;
+    var total = tenState.items.length, shown = tenState.shown;
+    if (!total) { hint.textContent = ''; return; }
+    hint.textContent = shown >= total
+      ? (lang() === 'en' ? 'All revealed · click to close' : '已全部揭示 · 点击任意处关闭')
+      : (lang() === 'en'
+        ? ('Click to reveal ' + (shown + 1) + ' / ' + total)
+        : ('点击揭示下一张（' + shown + ' / ' + total + '）'));
+  }
+
+  function revealTenNext() {
+    if (!tenState.open) return;
+    if (tenState.shown >= tenState.items.length) return;
+    var i = tenState.shown;
+    tenState.shown = i + 1;
+    var card = document.querySelector('#tenGrid .ten-card[data-idx="' + i + '"]');
+    var star = tenState.items[i] ? tenState.items[i].star : 1;
+    if (card) {
+      card.dataset.star = card.dataset.pre || star;
+      card.classList.remove('covered');
+      card.classList.add('revealed');
+      void card.offsetWidth;
+    }
+    Sfx.ensure();
+    if (star === 5) { Sfx.play('five', 1); }
+    else { Sfx.play('tick', 0.55); Sfx.play('result', 0.45); }
+    updateTenHint();
+  }
+
+  function revealAllTen() {
+    if (!tenState.open) return;
+    var guard = 0;
+    while (tenState.shown < tenState.items.length && guard++ < 100) revealTenNext();
   }
 
   async function drawTen() {
@@ -2618,17 +2690,10 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
 
     renderTenCards(results);
     showTenOverlay();
+    tenState.open = true;
     Sfx.play('ten', 1);
-    startTicks(115);
-    var skippedTen = await waitSkip(spd(320 + results.length * 70 + 260));
-    stopTicks();
-    if (skippedTen) {
-      $$('#tenGrid .ten-card').forEach(function (c) { c.style.animation = 'none'; c.style.opacity = '1'; });
-    }
-    var anyFive = results.some(function (r) { return r.star === 5; });
-    Sfx.play(anyFive ? 'five' : 'result', anyFive ? 1 : 0.9);
-
     registerDraw(results);
+    revealTenNext();
     busy = false;
   }
 
@@ -2756,10 +2821,11 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
     if (items.length > 1) {
       renderTenCards(items);
       showTenOverlay();
+      tenState.open = true;
       Sfx.play('ten', 1);
-      await wait(320 + items.length * 70 + 200);
-      var anyFive = items.some(function (i) { return i.star === 5; });
-      Sfx.play(anyFive ? 'five' : 'result', 0.9);
+      revealTenNext();
+      busy = false;
+      return;
     } else {
       var it = items[0];
       var card = $('#rollCard'), nm = $('#rollName'), idEl = $('#rollId'), stEl = $('#rollStar'), hint = $('#drawHint');
@@ -3934,10 +4000,14 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
       toast(lang() === 'en' ? ('Animation speed ' + state.settings.animSpeed + 'x') : ('动画速度：' + state.settings.animSpeed + 'x'), 'ok');
     });
 
-    // 跳过本轮动画
-    ['#skipDrawBtn', '#skipTenBtn'].forEach(function (sel) {
-      var b = $(sel);
-      if (b) b.addEventListener('click', function (e) { e.stopPropagation(); doSkip(); });
+    // 跳过本轮动画 / 十连：立即揭示全部
+    var sdb = $('#skipDrawBtn');
+    if (sdb) sdb.addEventListener('click', function (e) { e.stopPropagation(); doSkip(); });
+    var stb = $('#skipTenBtn');
+    if (stb) stb.addEventListener('click', function (e) {
+      e.stopPropagation();
+      Sfx.play('click', 0.6);
+      revealAllTen();
     });
 
     // 模式切换（二次确认）
@@ -4029,11 +4099,12 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
     if (cancelBtn) cancelBtn.addEventListener('click', function () { settleConfirm(false); });
     if (cclose) cclose.addEventListener('click', function () { settleConfirm(false); });
 
-    // 十连遮罩点击关闭
+    // 十连遮罩：未揭示完 → 揭示下一张；全部揭示后 → 关闭
     var ten = $('#tenOverlay');
     if (ten) ten.addEventListener('click', function () {
       if (!ten.classList.contains('active')) return;
-      if (Date.now() - tenOpenedAt < 500) return;
+      if (Date.now() - tenOpenedAt < 240) return;
+      if (tenState.open && tenState.shown < tenState.items.length) { revealTenNext(); return; }
       hideTenOverlay();
     });
 
