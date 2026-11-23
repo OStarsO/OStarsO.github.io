@@ -1129,32 +1129,51 @@ body.light.skin-nebula{background-color:#3d1f7a}
 body.light.skin-aurora{background-color:#0b4a52}
 
 /* 星级标识（详情强调） */
-/* ---- 十连逐张揭示 ---- */
-.ten-card{transition:border-color .25s,box-shadow .25s,background .25s;animation-delay:0ms!important}
-.ten-card.covered{
-  background:linear-gradient(160deg,rgba(120,170,255,.16),rgba(30,48,92,.34));
-  border-color:rgba(140,200,255,.26);
-  box-shadow:0 0 18px rgba(110,170,255,.16),inset 0 1px 0 rgba(255,255,255,.14);
+/* ---- 十连：卡堆（一次只显示一张牌） ---- */
+#tenGrid{
+  display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;align-items:center;
+  gap:14px;max-width:360px;width:100%;
 }
-.ten-card.covered .ten-stars,.ten-card.covered .ten-name,.ten-card.covered .ten-id{
-  visibility:hidden;opacity:0;
+.deck-box{position:relative;width:min(340px,80vw);display:block}
+#tenGrid .ten-card.deck-front{
+  position:relative;z-index:3;width:100%;padding:22px 14px 20px;
+  font-size:1em;transition:border-color .25s,box-shadow .25s;
 }
-.ten-card.covered::after{
-  content:'?';position:absolute;inset:0;display:grid;place-items:center;
-  font-size:30px;font-weight:800;color:rgba(184,216,255,.62);
-  text-shadow:0 0 18px rgba(110,170,255,.55);
-  animation:qPulse 1.6s ease-in-out infinite;
+#tenGrid .ten-card.deck-front .ten-stars{font-size:16px;height:20px;line-height:20px}
+#tenGrid .ten-card.deck-front .ten-name{font-size:20px}
+#tenGrid .ten-card.deck-front .ten-id{font-size:11.5px}
+.deck-shadow{
+  position:absolute;left:50%;border-radius:16px;height:100%;
+  border:1px solid rgba(150,190,255,.16);
+  background:linear-gradient(160deg,rgba(62,84,126,.62),rgba(12,20,38,.78));
+  box-shadow:0 10px 24px rgba(0,0,0,.38);
+  transform:translateX(-50%);pointer-events:none;
 }
-@keyframes qPulse{0%,100%{opacity:.6;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+.deck-shadow.s1{top:9px;width:calc(100% - 20px);z-index:2;opacity:.9}
+.deck-shadow.s2{top:18px;width:calc(100% - 40px);z-index:1;opacity:.62}
+body.light .deck-shadow{
+  border-color:rgba(150,190,255,.16);
+  background:linear-gradient(160deg,rgba(58,78,120,.6),rgba(12,20,38,.76));
+}
+.deck-meta{display:flex;align-items:center;gap:10px;font-size:11.5px;letter-spacing:.14em;color:rgba(234,240,255,.62)}
+.deck-meta .deck-count{padding:2px 9px;border-radius:999px;border:1px solid rgba(140,200,255,.28);background:rgba(110,170,255,.12)}
+.deck-meta .deck-pos{font-variant-numeric:tabular-nums}
+body.light .deck-meta{color:rgba(30,45,80,.66)}
+body.light .deck-meta .deck-count{border-color:rgba(120,150,200,.34);background:rgba(120,160,220,.14)}
+.deck-sum{font-size:12px;letter-spacing:.08em;color:rgba(255,215,0,.85);font-weight:600;text-align:center}
+body.light .deck-sum{color:#a98000}
 .ten-card.revealed{animation:tenReveal .42s cubic-bezier(.2,1.15,.3,1) both}
 .ten-card.revealed[data-star="5"]{animation:tenReveal .42s cubic-bezier(.2,1.15,.3,1) both,fivePulse 1.9s ease-in-out .45s infinite}
 @keyframes tenReveal{
-  0%{opacity:.3;transform:scale(.84) rotateX(26deg)}
-  60%{opacity:1;transform:scale(1.06) rotateX(-4deg)}
+  0%{opacity:.3;transform:scale(.9) rotateX(22deg) translateY(10px)}
+  60%{opacity:1;transform:scale(1.03) rotateX(-3deg)}
   100%{opacity:1;transform:none}
 }
-body.light .ten-card.covered{background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(226,236,252,.86));border-color:rgba(120,150,200,.3)}
-body.light .ten-card.covered::after{color:rgba(90,120,170,.55);text-shadow:none}
+@media(max-width:720px){
+  #tenGrid{max-width:78vw}
+  .deck-box{width:min(240px,78vw)}
+  #tenGrid .ten-card.deck-front .ten-name{font-size:18px}
+}
 
 .set-desc.strong{color:#dbeafe;opacity:.95}
 
@@ -1244,6 +1263,165 @@ body.kb-open .app{padding-bottom:24px}
 body.light .ctx-menu { background: rgba(255, 255, 255, .98); border-color: rgba(60, 90, 140, .18); }
 body.light .ctx-menu button { color: #1b2436; }
 body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
+
+/* ================= 动画切换菜单层级修复 ================= */
+/* `.glass > *` 给每个直接子元素 z-index:1 并自建层叠上下文；
+   `.stage` 与 `.panel-head` 同级且 DOM 更靠后，所以菜单即使 z-index:200 也被压住 */
+.stage-panel > .panel-head { position: relative; z-index: 5; }
+.stage-panel { overflow: visible; }
+.anim-switcher { position: relative; z-index: 6; }
+.anim-switcher.open { z-index: 420; }
+.anim-switcher.open .anim-menu { box-shadow: 0 26px 60px rgba(0, 0, 0, .55); }
+.anim-menu { max-height: min(62vh, 430px); overflow-y: auto; overscroll-behavior: contain; }
+
+/* ================= 十连牌面：高级质感（恒定深色金属卡，不随主题变浅） ================= */
+#tenGrid .ten-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 17px 11px 14px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background:
+    radial-gradient(132% 88% at 50% -20%, rgba(255, 255, 255, .26), rgba(255, 255, 255, 0) 58%),
+    radial-gradient(104% 76% at 50% 118%, var(--sg, rgba(154, 165, 196, .3)), rgba(0, 0, 0, 0) 72%),
+    linear-gradient(168deg, rgba(44, 62, 96, .94) 0%, rgba(16, 24, 42, .96) 58%, rgba(8, 12, 24, .98) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .38),
+    inset 0 0 0 1px rgba(255, 255, 255, .05),
+    inset 0 -24px 42px -28px var(--sc, transparent),
+    0 18px 38px rgba(0, 0, 0, .48),
+    0 0 22px var(--sg, transparent);
+  isolation: isolate;
+}
+/* 顶部镜面高光 + 底部稀有度辉光 */
+#tenGrid .ten-card .tc-foil {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background:
+    linear-gradient(133deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 38%),
+    radial-gradient(68% 44% at 84% 4%, rgba(255, 255, 255, .22), transparent 72%);
+  opacity: .68;
+}
+/* 斜向扫光 */
+#tenGrid .ten-card .tc-sheen {
+  position: absolute; top: -40%; left: -60%; width: 44%; height: 180%;
+  pointer-events: none; opacity: 0;
+  background: linear-gradient(96deg, transparent, rgba(255, 255, 255, .5), transparent);
+  transform: skewX(-16deg); filter: blur(.5px);
+  animation: cardSheen 6.2s ease-in-out 1.4s infinite;
+}
+@keyframes cardSheen {
+  0% { opacity: 0; left: -60%; }
+  10% { opacity: .9; }
+  38% { opacity: .45; }
+  58%, 100% { opacity: 0; left: 118%; }
+}
+/* 右上角稀有度光晕 */
+#tenGrid .ten-card .tc-corner {
+  position: absolute; top: 0; right: 0; width: 54px; height: 54px;
+  pointer-events: none; border-top-right-radius: inherit;
+  background: radial-gradient(circle at 100% 0, var(--sg, transparent), transparent 74%);
+  opacity: .95;
+}
+/* 稀有度小铭牌（5★ 自动显示为 5★） */
+#tenGrid .ten-card::after {
+  content: attr(data-star) '\2605';
+  position: absolute; top: 7px; left: 9px;
+  font-size: 9px; font-weight: 800; letter-spacing: .04em;
+  color: var(--sc, #9aa5c4); opacity: .82;
+  text-shadow: 0 0 8px var(--sg, transparent);
+}
+#tenGrid .ten-card .tc-line {
+  display: block; width: 46px; height: 1px; margin: 1px 0 0;
+  background: linear-gradient(90deg, transparent, var(--sc, #9aa5c4), transparent);
+  opacity: .85;
+}
+#tenGrid .ten-card .ten-stars {
+  font-size: 13px; letter-spacing: .18em; color: var(--sc, #9aa5c4);
+  text-shadow: 0 0 14px var(--sg, transparent), 0 0 3px rgba(255, 255, 255, .5);
+}
+#tenGrid .ten-card .ten-name {
+  font-size: 16px; font-weight: 800; letter-spacing: .06em; color: #f4f8ff;
+  background: linear-gradient(180deg, #ffffff 0%, #e8f1ff 46%, var(--sc, #9aa5c4) 130%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .45);
+}
+#tenGrid .ten-card .ten-id {
+  color: rgba(206, 220, 244, .64); letter-spacing: .12em;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+#tenGrid .ten-card[data-star="5"] {
+  border-color: rgba(255, 216, 92, .5);
+  background:
+    radial-gradient(132% 88% at 50% -20%, rgba(255, 246, 214, .34), rgba(255, 255, 255, 0) 58%),
+    radial-gradient(104% 76% at 50% 118%, rgba(255, 205, 60, .55), rgba(0, 0, 0, 0) 74%),
+    linear-gradient(168deg, rgba(72, 58, 26, .95) 0%, rgba(34, 26, 14, .97) 58%, rgba(16, 11, 6, .99) 100%);
+}
+#tenGrid .ten-card[data-star="5"] .ten-name {
+  background: linear-gradient(180deg, #fffdf3 0%, #ffe9a8 46%, #ffca28 128%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 12px rgba(255, 205, 60, .45));
+}
+#tenGrid .ten-card[data-star="5"] .tc-sheen { animation-duration: 3.6s; }
+
+/* 卡堆顶牌（逐张展示阶段） */
+#tenGrid .ten-card.deck-front {
+  width: 100%;
+  padding: 30px 22px 26px;
+  gap: 10px;
+  border-radius: 20px;
+}
+#tenGrid .ten-card.deck-front .ten-name { font-size: 23px; letter-spacing: .1em; }
+#tenGrid .ten-card.deck-front .ten-stars { font-size: 17px; letter-spacing: .22em; }
+#tenGrid .ten-card.deck-front .ten-id { font-size: 12px; }
+#tenGrid .ten-card.deck-front::after { top: 10px; left: 13px; font-size: 11px; }
+#tenGrid .ten-card.deck-front .tc-line { width: 74px; }
+
+/* 卡堆计数与汇总 */
+.ten-overlay .deck-meta {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 6px 15px; border-radius: 999px;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .16);
+  color: rgba(234, 240, 255, .86); font-size: 11.5px; letter-spacing: .08em;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.ten-overlay .deck-count { font-weight: 700; color: #bfe6ff; }
+.ten-overlay .deck-pos { font-variant-numeric: tabular-nums; color: rgba(234, 240, 255, .7); }
+.ten-overlay .deck-sum {
+  margin-top: 2px; color: #ffe6a1; font-weight: 700; letter-spacing: .12em;
+  text-shadow: 0 0 16px rgba(255, 215, 0, .35);
+}
+
+/* 全部展示完成：平铺整副牌 */
+#tenGrid.flat {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
+  gap: 12px;
+  max-width: calc(var(--cols, 5) * 178px);
+  width: 100%;
+  margin: 0 auto;
+  justify-items: stretch;
+}
+#tenGrid.flat .deck-meta,
+#tenGrid.flat .deck-sum { grid-column: 1 / -1; justify-self: center; }
+#tenGrid.flat .ten-card {
+  padding: 15px 8px 12px;
+  border-radius: 14px;
+  animation: flatIn .5s cubic-bezier(.2, 1.1, .3, 1) both;
+}
+#tenGrid.flat .ten-card[data-star="5"] {
+  animation: flatIn .5s cubic-bezier(.2, 1.1, .3, 1) both, fivePulse 2s ease-in-out .6s infinite;
+}
+#tenGrid.flat .ten-card .ten-name { font-size: 13.5px; letter-spacing: .03em; }
+#tenGrid.flat .ten-card .ten-stars { font-size: 10.5px; letter-spacing: .1em; }
+#tenGrid.flat .ten-card .ten-id { font-size: 9.5px; letter-spacing: .06em; }
+#tenGrid.flat .ten-card .tc-line { width: 30px; }
+@keyframes flatIn {
+  0% { opacity: 0; transform: translateY(20px) scale(.86); }
+  100% { opacity: 1; transform: none; }
+}
+@media (max-width: 520px) { #tenGrid.flat { gap: 8px; } }
 
 </style>
 </head>
@@ -1852,6 +2030,7 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
   function numStars(o) {
     var out = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     if (o && typeof o === 'object') { for (var k = 5; k >= 1; k--) out[k] = n(o[k]); }
+    else { var d = PRESETS.standard.stars; for (var s = 5; s >= 1; s--) out[s] = n(d[s]); }
     return out;
   }
   function numMult(o) {
@@ -2602,61 +2781,146 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
     busy = false;
   }
 
-  /* 十连展示牌：全部先背面朝上（.covered），再按顺序逐张揭示 */
-  var tenState = { items: [], shown: 0, open: false };
+  /* 十连展示：卡堆模式 —— 屏幕一次只显示一张牌；当前牌展示完成后移到堆尾，继续展示下一张未展示过的牌 */
+  var tenState = { items: [], queue: [], shown: 0, open: false };
+
+  function tenCardHtml(it, idx, cls, extraStyle) {
+    var nm = it.name || (it.p && it.p.name) || '';
+    var nid = it.id || (it.p && it.p.id) || '';
+    var sc = STAR_COLORS[it.star] || '#9aa5c4';
+    var sg = STAR_GLOW[it.star] || 'rgba(154,165,196,.3)';
+    var st = '--sc:' + sc + ';--sg:' + sg + (extraStyle ? ';' + extraStyle : '');
+    return '<div class="ten-card ' + (cls || 'deck-front') + '" data-idx="' + idx + '" data-star="' + it.star + '" style="' + st + '">' +
+      '<span class="tc-foil" aria-hidden="true"></span>' +
+      '<span class="tc-sheen" aria-hidden="true"></span>' +
+      '<span class="tc-corner" aria-hidden="true"></span>' +
+      '<div class="ten-stars">' + stars(it.star) + '</div>' +
+      '<div class="ten-name">' + esc(nm) + '</div>' +
+      '<span class="tc-line" aria-hidden="true"></span>' +
+      '<div class="ten-id' + (nid ? '' : ' is-empty') + '">' +
+      esc(nid || (lang() === 'en' ? 'NO ID' : '无学号')) + '</div>' +
+      '</div>';
+  }
+
+  function tenSummary() {
+    var cnt = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    tenState.items.forEach(function (i) { cnt[i.star] = (cnt[i.star] || 0) + 1; });
+    var parts = [];
+    for (var s = 5; s >= 1; s--) if (cnt[s]) parts.push(s + '★×' + cnt[s]);
+    return parts.join(' · ');
+  }
+
+  function tenMetaHtml() {
+    var total = tenState.items.length, shown = tenState.shown, L = lang();
+    var left = Math.max(0, total - shown);
+    var done = shown >= total;
+    return '<div class="deck-meta">' +
+      '<span class="deck-count">' + (done
+        ? (L === 'en' ? 'All revealed' : '已全部展示')
+        : (L === 'en' ? ('Deck ' + left) : ('卡堆 ' + left))) + '</span>' +
+      '<span class="deck-pos">' + (L === 'en'
+        ? ((done ? total : shown + 1) + ' / ' + total)
+        : ('第 ' + (done ? total : shown + 1) + ' / ' + total + ' 张')) + '</span>' +
+      '</div>' +
+      (done ? '<div class="deck-sum">' + tenSummary() + '</div>' : '');
+  }
+
+  /* 全部展示完成（或跳过）后：把整副牌按原始抽取顺序平铺出来 */
+  function renderTenFlat(instant) {
+    var grid = $('#tenGrid'); if (!grid || !tenState.items.length) return;
+    grid.classList.add('flat');
+    var total = tenState.items.length;
+    var vw = window.innerWidth || 1280;
+    var cols = Math.min(total, vw <= 520 ? 2 : (vw <= 820 ? 3 : 5));
+    grid.style.setProperty('--cols', String(Math.max(1, cols)));
+    var order = tenState.queue.slice();
+    var body = order.map(function (idx, i) {
+      var it = tenState.items[idx];
+      return tenCardHtml(it, idx, 'flat-card', instant ? '' : ('animation-delay:' + (i * 52) + 'ms'));
+    }).join('');
+    grid.innerHTML = body + tenMetaHtml();
+    updateTenHint();
+  }
+
+  /* 只渲染堆顶（当前被展示）的那一张，其余牌只以卡堆厚度与计数体现 */
+  function drawTenFront(instant) {
+    var grid = $('#tenGrid'); if (!grid || !tenState.items.length) return;
+    grid.classList.remove('flat');
+    var idx = tenState.queue[0];
+    var it = tenState.items[idx];
+    grid.innerHTML = '<div class="deck-box">' +
+      '<span class="deck-shadow s2"></span><span class="deck-shadow s1"></span>' +
+      tenCardHtml(it, idx, 'deck-front') + '</div>' + tenMetaHtml();
+    var card = grid.querySelector('.ten-card');
+    if (card && !instant) { card.classList.add('revealed'); }
+    updateTenHint();
+  }
 
   function renderTenCards(items) {
-    var grid = $('#tenGrid'); if (!grid) return;
-    grid.innerHTML = '';
-    tenState = { items: items.slice(), shown: 0, open: false };
-    items.forEach(function (it, idx) {
-      var d = document.createElement('div');
-      d.className = 'ten-card covered';
-      d.dataset.idx = idx;
-      d.dataset.pre = it.star;
-      d.innerHTML = '<div class="ten-stars" style="color:' + (STAR_COLORS[it.star] || '') + '">' + stars(it.star) + '</div>' +
-        '<div class="ten-name">' + esc(it.name || (it.p && it.p.name) || '') + '</div>' +
-        '<div class="ten-id' + (((it.id || (it.p && it.p.id)) ? '' : ' is-empty')) + '">' +
-        esc(it.id || (it.p && it.p.id) || (lang() === 'en' ? 'NO ID' : '无学号')) + '</div>';
-      grid.appendChild(d);
-    });
-    updateTenHint();
+    if (!$('#tenGrid')) return;
+    tenState = {
+      items: items.slice(),
+      queue: items.map(function (_, i) { return i; }),
+      shown: 0,
+      open: false
+    };
+    drawTenFront(false);
   }
 
   function updateTenHint() {
     var hint = $('#tenHint'); if (!hint) return;
-    var total = tenState.items.length, shown = tenState.shown;
+    var total = tenState.items.length, shown = tenState.shown, L = lang();
     if (!total) { hint.textContent = ''; return; }
-    hint.textContent = shown >= total
-      ? (lang() === 'en' ? 'All revealed · click to close' : '已全部揭示 · 点击任意处关闭')
-      : (lang() === 'en'
-        ? ('Click to reveal ' + (shown + 1) + ' / ' + total)
-        : ('点击揭示下一张（' + shown + ' / ' + total + '）'));
+    if (shown >= total) {
+      hint.textContent = L === 'en'
+        ? ('All ' + total + ' shown · click to close')
+        : ('已全部展示 ' + total + ' 张 · 点击任意处关闭');
+      return;
+    }
+    hint.textContent = L === 'en'
+      ? ('Showing card ' + (shown + 1) + ' / ' + total + ' · click for the next')
+      : ('正在展示第 ' + (shown + 1) + ' / ' + total + ' 张 · 点击展示下一张');
   }
 
-  function revealTenNext() {
+  /* 当前牌展示完成：记为已展示 → 移到卡堆末尾 → 接着展示新的堆顶（下一张未展示的牌） */
+  function tenAdvance() {
     if (!tenState.open) return;
-    if (tenState.shown >= tenState.items.length) return;
-    var i = tenState.shown;
-    tenState.shown = i + 1;
-    var card = document.querySelector('#tenGrid .ten-card[data-idx="' + i + '"]');
-    var star = tenState.items[i] ? tenState.items[i].star : 1;
-    if (card) {
-      card.dataset.star = card.dataset.pre || star;
-      card.classList.remove('covered');
-      card.classList.add('revealed');
-      void card.offsetWidth;
-    }
+    var total = tenState.items.length;
+    if (tenState.shown >= total) return;
+    var cur = tenState.queue.shift();
+    if (cur === undefined) return;
+    tenState.queue.push(cur);
+    tenState.shown = Math.min(total, tenState.shown + 1);
     Sfx.ensure();
-    if (star === 5) { Sfx.play('five', 1); }
-    else { Sfx.play('tick', 0.55); Sfx.play('result', 0.45); }
+    var star = tenState.items[cur] ? tenState.items[cur].star : 1;
+    if (star === 5) Sfx.play('five', 0.9); else Sfx.play('tick', 0.5);
+    if (tenState.shown >= total) {
+      /* 最后一张展示完成：整副牌平铺出来（顺序回到抽取顺序） */
+      tenState.queue = tenState.items.map(function (_, i) { return i; });
+      Sfx.play(star === 5 ? 'five' : 'result', 0.95);
+      renderTenFlat(false);
+      return;
+    }
+    var card = document.querySelector('#tenGrid .ten-card');
+    if (card) card.classList.remove('revealed');
+    setTimeout(function () { if (tenState.open) drawTenFront(false); }, 90);
     updateTenHint();
   }
 
-  function revealAllTen() {
+  /* 跳过：一次性走完整个卡堆顺序，结束时停在最后一张，并给出星级汇总 */
+  /* 跳过：直接平铺整副牌（与逐张展示完成后的终态完全一致） */
+  function tenShowAll() {
     if (!tenState.open) return;
-    var guard = 0;
-    while (tenState.shown < tenState.items.length && guard++ < 100) revealTenNext();
+    var total = tenState.items.length;
+    if (!total) return;
+    var wasFlat = tenState.shown >= total && $('#tenGrid').classList.contains('flat');
+    if (wasFlat) return;
+    tenState.queue = tenState.items.map(function (_, i) { return i; });
+    tenState.shown = total;
+    Sfx.ensure();
+    var five = tenState.items.filter(function (i) { return i.star === 5; }).length;
+    Sfx.play(five ? 'five' : 'result', 1);
+    renderTenFlat(true);
   }
 
   async function drawTen() {
@@ -2693,7 +2957,6 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
     tenState.open = true;
     Sfx.play('ten', 1);
     registerDraw(results);
-    revealTenNext();
     busy = false;
   }
 
@@ -2823,7 +3086,6 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
       showTenOverlay();
       tenState.open = true;
       Sfx.play('ten', 1);
-      revealTenNext();
       busy = false;
       return;
     } else {
@@ -4007,7 +4269,7 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
     if (stb) stb.addEventListener('click', function (e) {
       e.stopPropagation();
       Sfx.play('click', 0.6);
-      revealAllTen();
+      tenShowAll();
     });
 
     // 模式切换（二次确认）
@@ -4099,12 +4361,12 @@ body.light .ctx-menu button:hover { background: rgba(80, 150, 240, .12); }
     if (cancelBtn) cancelBtn.addEventListener('click', function () { settleConfirm(false); });
     if (cclose) cclose.addEventListener('click', function () { settleConfirm(false); });
 
-    // 十连遮罩：未揭示完 → 揭示下一张；全部揭示后 → 关闭
+    // 十连卡堆：当前牌未展示完 → 展示下一张；全部展示完成 → 关闭
     var ten = $('#tenOverlay');
     if (ten) ten.addEventListener('click', function () {
       if (!ten.classList.contains('active')) return;
       if (Date.now() - tenOpenedAt < 240) return;
-      if (tenState.open && tenState.shown < tenState.items.length) { revealTenNext(); return; }
+      if (tenState.open && tenState.shown < tenState.items.length) { tenAdvance(); return; }
       hideTenOverlay();
     });
 
