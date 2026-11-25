@@ -1770,6 +1770,106 @@ body.light .stage::before{
   .p-count{font-size:10.5px;padding:2px 7px}
 }
 
+
+/* ================= 第八轮：课堂积分 ================= */
+.pts-card{width:min(820px,100%)}
+#pointsBody{gap:12px}
+.pts-sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pts-stat{padding:9px 12px;border-radius:13px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1)}
+.pts-stat b{display:block;font-size:19px;line-height:1.15;font-variant-numeric:tabular-nums;color:#eaf4ff}
+.pts-stat span{font-size:10px;letter-spacing:.1em;color:var(--muted)}
+.pts-stat.pos b{color:#8affc1}
+.pts-stat.neg b{color:#ff9db1}
+body.light .pts-stat b{color:#f2f8ff}
+
+.pts-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pts-toolbar select{width:auto;min-width:150px;max-width:230px;padding:8px 24px 8px 10px;font-size:12px}
+.pts-toolbar .pts-count{margin-left:auto;font-size:11.5px;color:var(--muted)}
+.pts-list{display:flex;flex-direction:column;gap:7px;max-height:250px;overflow-y:auto;padding-right:4px;overscroll-behavior:contain}
+.pts-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:10px;align-items:center;
+  padding:9px 12px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  cursor:pointer;transition:.18s}
+.pts-row:hover{background:rgba(255,255,255,.08)}
+.pts-row.on{background:rgba(110,231,255,.12);border-color:rgba(110,231,255,.45)}
+.pts-row input{width:16px;height:16px;accent-color:#6ee7ff;cursor:pointer}
+.pts-main{min-width:0;display:flex;flex-direction:column;gap:1px}
+.pts-main b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pts-main span{font-size:10.5px;color:var(--muted);font-family:ui-monospace,monospace;letter-spacing:.05em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pts-when{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.pts-total{font-size:13px;font-weight:800;padding:3px 9px;border-radius:9px;font-variant-numeric:tabular-nums;
+  color:#8affc1;background:rgba(138,255,193,.12);border:1px solid rgba(138,255,193,.3)}
+.pts-total.neg{color:#ff9db1;background:rgba(255,120,150,.12);border-color:rgba(255,120,150,.3)}
+.pts-total.zero{color:var(--muted);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+
+.pts-form{display:flex;flex-direction:column;gap:9px;padding:12px 14px;border-radius:15px;
+  background:rgba(110,231,255,.06);border:1px dashed rgba(110,231,255,.28)}
+.pts-line{display:flex;gap:9px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.pts-quick,.pts-reasons{display:flex;gap:6px;flex-wrap:wrap}
+.pts-quick button,.pts-reasons button{font-size:11px;padding:4px 9px;border-radius:8px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.14);color:var(--text);cursor:pointer;transition:.18s}
+.pts-quick button:hover,.pts-reasons button:hover{background:rgba(255,255,255,.18)}
+.pts-quick button.on{background:rgba(110,231,255,.22);border-color:rgba(110,231,255,.55);color:#c9f4ff}
+.pts-quick button[data-delta^="-"]{color:#ffb3c4}
+.pts-delta{width:76px;padding:7px 9px;border-radius:9px;font:inherit;font-size:13px;font-weight:700;text-align:center;
+  background:rgba(8,14,30,.5);border:1px solid rgba(140,200,255,.28);color:inherit;outline:none}
+.pts-delta:focus{border-color:#6ee7ff;box-shadow:0 0 0 3px rgba(110,231,255,.16)}
+.pts-reason{flex:1;min-width:160px;padding:8px 11px;border-radius:9px;font:inherit;font-size:12.5px;
+  background:rgba(8,14,30,.44);border:1px solid rgba(140,200,255,.24);color:inherit;outline:none}
+.pts-reason:focus{border-color:#6ee7ff;box-shadow:0 0 0 3px rgba(110,231,255,.16)}
+.pts-apply{align-self:flex-end;min-width:170px;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:800;
+  color:#07101f;background:linear-gradient(120deg,#6ee7ff,#b98cff);cursor:pointer;border:none;
+  box-shadow:0 10px 26px rgba(110,231,255,.28);transition:.2s}
+.pts-apply:hover{filter:brightness(1.06)}
+.pts-apply:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+
+.pts-log-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px;font-size:12px}
+.pts-log-head b{font-size:12px;letter-spacing:.1em;color:rgba(255,255,255,.8)}
+.pts-log-head .pts-meta{margin-left:auto;font-size:10.5px;color:var(--muted)}
+.pts-log-head button{font-size:10.5px;padding:4px 9px;border-radius:8px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.14);color:var(--muted);cursor:pointer}
+.pts-log-head button:hover{color:#fff;background:rgba(255,255,255,.16)}
+.pts-log{display:flex;flex-direction:column;max-height:210px;overflow-y:auto}
+.pts-log-row{display:grid;grid-template-columns:60px minmax(0,1fr) 52px;gap:9px;align-items:center;
+  padding:7px 6px;border-bottom:1px dashed rgba(255,255,255,.08);font-size:11.5px}
+.pts-log-row:last-child{border-bottom:none}
+.pts-log-time{font-size:10px;color:var(--muted);font-family:ui-monospace,monospace}
+.pts-log-main{min-width:0;display:flex;flex-direction:column;gap:1px}
+.pts-log-main b{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pts-log-main span{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pts-delta-tag{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.pts-delta-tag.pos{color:#8affc1}
+.pts-delta-tag.neg{color:#ff9db1}
+.pts-empty{padding:20px 10px;text-align:center;font-size:12px;line-height:1.9;color:var(--muted)}
+.pts-empty button{margin-top:8px}
+
+.p-points{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:8px;flex:0 0 auto;
+  color:#8affc1;background:rgba(138,255,193,.12);border:1px solid rgba(138,255,193,.3);font-variant-numeric:tabular-nums}
+.p-points.neg{color:#ff9db1;background:rgba(255,120,150,.12);border-color:rgba(255,120,150,.3)}
+.p-points.zero{color:var(--muted);background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+
+@media(max-width:720px){
+  .pts-card{width:100%}
+  .pts-sum{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pts-list{max-height:210px}
+  .pts-row{grid-template-columns:auto minmax(0,1fr) auto;row-gap:4px}
+  .pts-when{display:none}
+  .pts-form{padding:10px}
+  .pts-apply{width:100%;align-self:stretch}
+  .pts-log{max-height:180px}
+  .pts-log-row{grid-template-columns:52px minmax(0,1fr) 44px}
+  .p-points{font-size:10px;padding:2px 6px}
+}
+
+@media(max-width:430px){
+  .p-row{gap:7px;padding:10px 10px}
+  .p-group{max-width:64px;font-size:10px;padding:2px 7px}
+  .p-count{display:none}
+  .p-points{font-size:9.5px;padding:1px 5px}
+  .p-actions{gap:4px}
+  .p-actions .mini-btn{font-size:10.5px;padding:4px 6px}
+  .pts-toolbar select{min-width:130px}
+}
 </style>
 </head>
 <body class="light">
@@ -1963,6 +2063,7 @@ body.light .stage::before{
   <button type="button" data-action="import"><span class="ico">📥</span><span data-zh="导入" data-en="Import">导入</span></button>
   <button type="button" data-action="history"><span class="ico">📜</span><span data-zh="历史" data-en="History">历史</span></button>
   <button type="button" data-action="stats"><span class="ico">📊</span><span data-zh="统计" data-en="Stats">统计</span></button>
+  <button type="button" data-action="points"><span class="ico">💯</span><span data-zh="积分" data-en="Points">积分</span></button>
   <button type="button" data-action="pk"><span class="ico">⚔️</span><span data-zh="PK" data-en="PK">PK</span></button>
   <button type="button" data-action="export"><span class="ico">📤</span><span data-zh="导出" data-en="Export">导出</span></button>
   <button type="button" data-action="settings"><span class="ico">⚙</span><span data-zh="设置" data-en="Settings">设置</span></button>
@@ -2294,6 +2395,21 @@ body.light .stage::before{
   </div>
 </div>
 
+<!-- 积分弹窗 -->
+<div class="modal" id="pointsModal">
+  <div class="modal-card glass wide pts-card">
+    <div class="modal-head">
+      <h3 data-zh="课堂积分" data-en="Class points">课堂积分</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body" id="pointsBody"></div>
+    <div class="modal-foot">
+      <button type="button" id="ptsExportBtn" title="最近 10 抽 + 积分变动 + 当前积分" data-zh="导出积分报表" data-en="Export points report">导出积分报表</button>
+      <button type="button" class="primary" data-close data-zh="关闭" data-en="Close">关闭</button>
+    </div>
+  </div>
+</div>
+
 <!-- 导出弹窗 -->
 <div class="modal" id="exportModal">
   <div class="modal-card glass">
@@ -2309,6 +2425,7 @@ body.light .stage::before{
         <button type="button" class="export-opt" data-format="json"><b>JSON</b><span data-zh="完整数据备份（名单 + 历史 + 设置），可再次导入。" data-en="Full backup (roster + history + settings) that can be re-imported.">完整数据备份（名单 + 历史 + 设置），可再次导入。</span></button>
         <button type="button" class="export-opt" data-format="png"><b data-zh="图片 PNG" data-en="Image PNG">图片 PNG</b><span data-zh="把最近一次抽中结果渲染成分享图。" data-en="Render the latest result as a shareable image.">把最近一次抽中结果渲染成分享图。</span></button>
         <button type="button" class="export-opt" data-format="pnglong"><b data-zh="分享长图" data-en="Long share card">分享长图</b><span data-zh="含最近结果、抽取统计、星级分布与排行榜，适合发班级群。" data-en="Latest result plus stats, star breakdown and ranking — sized for a class group post.">含最近结果、抽取统计、星级分布与排行榜，适合发班级群。</span></button>
+        <button type="button" class="export-opt" data-format="points"><b data-zh="积分报表" data-en="Points report">积分报表</b><span data-zh="一个工作簿三张表：最近抽到（近 10 抽去重）、积分变动记录、当前积分汇总。" data-en="One workbook, three sheets: recent winners (last 10 draws, de-duplicated), point changes and current totals.">一个工作簿三张表：最近抽到（近 10 抽去重）、积分变动记录、当前积分汇总。</span></button>
         <button type="button" class="export-opt" data-format="print"><b data-zh="打印 / 存 PDF" data-en="Print / PDF">打印 / 存 PDF</b><span data-zh="用浏览器打印样式输出名单与历史（已隐藏特效与按钮），可另存为 PDF。" data-en="Print the roster and history with the print stylesheet (effects and buttons hidden); save as PDF if needed.">用浏览器打印样式输出名单与历史（已隐藏特效与按钮），可另存为 PDF。</span></button>
         <button type="button" class="export-opt" data-format="xl"><b>Excel</b><span data-zh="生成真正的 .xlsx 工作簿（名单、历史、统计三个工作表）。" data-en="A real .xlsx workbook with roster, history and stats sheets.">生成真正的 .xlsx 工作簿（名单、历史、统计三个工作表）。</span></button>
         <button type="button" class="export-opt" data-format="tenpng"><b data-zh="十连长图" data-en="Ten-pull card">十连长图</b><span data-zh="把最近一次十连的十张卡渲染成一张长图。" data-en="Render the latest ten-pull as one tall card image.">把最近一次十连的十张卡渲染成一张长图。</span></button>
@@ -2734,6 +2851,7 @@ body.light .stage::before{
       skin: 'liquid', sort: 'order', sortDir: 'asc', filter: 'all', group: 'all', search: '',
       groupColors: {},
       starFilter: 'all', countFilter: 'all', excludeFilter: 'all',
+      pointScope: 'recent10',
       accent: '', bg: 'auto', bgImage: '',
       animSpeed: '1', title: 'auto',
       seed: '', pickCount: 10, balance: false, longPressMs: 480,
@@ -2742,7 +2860,7 @@ body.light .stage::before{
     };
   }
   function freshState() {
-    return { version: 4, seq: 1, participants: [], history: [], drawIndex: 0, last: null, achv: {}, logs: [], archive: null, settings: defaultSettings() };
+    return { version: 4, seq: 1, participants: [], history: [], drawIndex: 0, last: null, achv: {}, logs: [], archive: null, pointLog: [], points: {}, pointSeq: 1, settings: defaultSettings() };
   }
   var state = freshState();
   var storageBroken = false;
@@ -2751,7 +2869,7 @@ body.light .stage::before{
   var WARN_RATIO = 0.8;               // 超过 80% 提前提示备份
   var storageWarned = false, histHinted = false;
   var UKEY = 'lottery_undo_v4';
-  var LOG_CAP = 200, HIST_SOFT = 1000, UNDO_PERSIST = 10;
+  var LOG_CAP = 200, HIST_SOFT = 1000, UNDO_PERSIST = 10, POINT_LOG_CAP = 2000;
 
   function numStars(o) {
     var out = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
@@ -2797,6 +2915,22 @@ body.light .stage::before{
                 time: h.time || '', batchId: h.batchId || ('legacy' + (h.ts || 0)), mode: h.mode || 'unique'
               };
             });
+          }
+          if (Array.isArray(p.pointLog)) {
+            state.pointLog = p.pointLog.filter(function (r) {
+              return r && (r.uid || r.name) && Number(r.delta);
+            }).slice(-POINT_LOG_CAP).map(function (r, ri) {
+              return {
+                rid: r.rid ? String(r.rid) : ('pt' + (ri + 1)),
+                uid: String(r.uid || ''), name: String(r.name || '').slice(0, 20),
+                sid: r.sid ? String(r.sid) : '', group: r.group ? String(r.group).slice(0, 12) : '',
+                delta: Math.max(-99, Math.min(99, Math.round(Number(r.delta) || 0))),
+                reason: String(r.reason || '').slice(0, 40),
+                ts: Number(r.ts) || Date.now(),
+                batch: r.batch ? String(r.batch) : ''
+              };
+            });
+            state.pointSeq = Math.max(1, Number(p.pointSeq) || (state.pointLog.length + 1));
           }
           state.seq = Number(p.seq) || (state.participants.length + 1);
           state.drawIndex = Number(p.drawIndex) || state.history.length;
@@ -2864,6 +2998,7 @@ body.light .stage::before{
             starFilter: ['all', 'none', '5', '4', '3', '2', '1'].indexOf(String(S.starFilter)) >= 0 ? String(S.starFilter) : 'all',
             countFilter: ['all', '0', '1', '3', '5'].indexOf(String(S.countFilter)) >= 0 ? String(S.countFilter) : 'all',
             excludeFilter: ['all', 'only', 'off'].indexOf(S.excludeFilter) >= 0 ? S.excludeFilter : 'all',
+            pointScope: ['recent1', 'recent10', 'recent20', 'all'].indexOf(S.pointScope) >= 0 ? S.pointScope : 'recent10',
             accent: typeof S.accent === 'string' && /^#[0-9a-fA-F]{6}$/.test(S.accent) ? S.accent : '',
             bg: ['auto', 'aurora', 'sunset', 'forest', 'mono'].indexOf(S.bg) >= 0 ? S.bg : 'auto',
             bgImage: typeof S.bgImage === 'string' && S.bgImage.slice(0, 11) === 'data:image/' ? S.bgImage : '',
@@ -2915,7 +3050,29 @@ body.light .stage::before{
       p.count = Math.max(Number(p.count) || 0, c);
       if (typeof p.excluded !== 'boolean') p.excluded = false;
     });
+    recountPoints();
   }
+
+  /* ---------------- 积分：以 pointLog 为准，points 为实时汇总 ---------------- */
+  function recountPoints() {
+    var m = {};
+    (state.pointLog || []).forEach(function (r) {
+      if (!r || !r.uid) return;
+      var d = Number(r.delta) || 0;
+      if (!d) return;
+      m[r.uid] = (m[r.uid] || 0) + d;
+    });
+    state.points = m;
+  }
+  function pointsOf(uid) {
+    return Number(state.points && state.points[uid]) || 0;
+  }
+  function participantsByUid() {
+    var m = {};
+    state.participants.forEach(function (p) { m[p.uid] = p; });
+    return m;
+  }
+  function fmtSigned(v) { return (v > 0 ? '+' : '') + v; }
 
   function logAction(kind, text) {
     state.logs.push({ t: Date.now(), kind: kind, text: String(text || '') });
@@ -3088,7 +3245,7 @@ body.light .stage::before{
     return JSON.stringify({
       version: state.version, seq: state.seq, participants: state.participants, history: state.history,
       drawIndex: state.drawIndex, last: state.last, achv: state.achv, logs: (state.logs || []).slice(-60),
-      archive: state.archive,
+      archive: state.archive, pointLog: state.pointLog, pointSeq: state.pointSeq,
       settings: { groupColors: state.settings.groupColors, pity: state.settings.pity }
     });
   }
@@ -3249,7 +3406,8 @@ body.light .stage::before{
     return JSON.stringify({
       participants: state.participants, history: state.history, seq: state.seq,
       drawIndex: state.drawIndex, last: state.last,
-      settings: state.settings, achv: state.achv, logs: state.logs.slice(-60), archive: state.archive
+      settings: state.settings, achv: state.achv, logs: state.logs.slice(-60), archive: state.archive,
+      pointLog: state.pointLog, pointSeq: state.pointSeq
     });
   }
   function applySnap(json) {
@@ -3271,6 +3429,9 @@ body.light .stage::before{
     }
     if (o.achv && typeof o.achv === 'object') state.achv = o.achv;
     state.archive = o.archive || null;
+    state.pointLog = Array.isArray(o.pointLog) ? o.pointLog : [];
+    state.pointSeq = Number(o.pointSeq) || (state.pointLog.length + 1);
+    recountPoints();
     if (Array.isArray(o.logs)) state.logs = o.logs;
   }
   function pushUndo() {
@@ -3331,6 +3492,7 @@ body.light .stage::before{
     applyTheme(); applyAccent(); applyBg(); applySkin(); applySoundBtn(); applyLang();
     buildStarConfig(); buildWeightGrid(); buildKbList();
     renderAll(); renderSettings(); syncUndoBtns();
+    if ($('#pointsModal') && $('#pointsModal').classList.contains('active')) renderPoints();
   }
   function syncUndoBtns() {
     var u = $('#undoBtn'), r = $('#redoBtn');
@@ -3365,6 +3527,7 @@ body.light .stage::before{
     if (el.id === 'settingsModal') { renderSettings(); var nv = $('#setNav'); if (nv) $$('[data-target]', nv).forEach(function (b, i) { b.classList.toggle('active', i === 0); }); }
     if (el.id === 'historyModal') renderHistory();
     if (el.id === 'statsModal') renderStats();
+    if (el.id === 'pointsModal') { pointSel = {}; renderPoints(); }
     if (el.id === 'importModal') { renderImportPreview(); setTimeout(function () { var t = $('#importText'); if (t) t.focus(); }, 60); }
     Sfx.play('click', 0.5);
   }
@@ -3687,6 +3850,7 @@ body.light .stage::before{
     var sel = !!selected[p.uid];
     var rep = state.settings.mode === 'repeat';
     var cnt = Number(p.count) || 0;
+    var pts = pointsOf(p.uid);
     var gc = groupColor(p.group);
     return '<div class="p-row' + (p.drawn ? ' is-drawn' : '') + (p.excluded ? ' is-excluded' : '') + (sel ? ' selected' : '') + '" data-uid="' + p.uid + '"' +
       (gc ? ' style="--gcolor:' + gc + '"' : '') + '>' +
@@ -3695,6 +3859,7 @@ body.light .stage::before{
       '<div class="p-info"><b>' + hl(p.name, q) + '</b><span class="' + (p.id ? '' : 'is-empty') + '">' +
       (p.id ? hl(p.id, q) : (L === 'en' ? 'NO ID' : '无学号')) + '</span></div>' +
       (p.group ? '<span class="p-group">' + esc(p.group) + '</span>' : '') +
+      '<span class="p-points' + (pts > 0 ? '' : (pts < 0 ? ' neg' : ' zero')) + '" title="' + (L === 'en' ? 'Current points' : '当前积分') + '">' + fmtSigned(pts) + '</span>' +
       '<span class="p-count' + (cnt ? '' : ' zero') + '" title="' + (L === 'en' ? 'Times drawn' : '抽中次数') + '">×' + cnt + '</span>' +
       '<div class="p-actions">' +
       '<button type="button" class="mini-btn" data-act="edit">' + (L === 'en' ? 'Edit' : '改') + '</button>' +
@@ -5337,6 +5502,332 @@ body.light .stage::before{
     { id: 'mode3', cat: 'easter', ico: '🎛', zh: '模式玩家', en: 'Mode player', test: function (s) { return s.modes >= 3; } }
   ];
 
+  /* ---------------- 课堂积分：候选、记录、汇总 ---------------- */
+  var pointSel = {};
+  function selectedPointUids() {
+    return Object.keys(pointSel).filter(function (k) { return pointSel[k]; });
+  }
+  function pointCandidates(scopeArg) {
+    var scope = scopeArg || state.settings.pointScope || 'recent10';
+    var by = participantsByUid();
+    if (scope === 'all') {
+      return state.participants.slice().sort(function (a, b) { return a.order - b.order; })
+        .map(function (p) { return { p: p, h: null }; });
+    }
+    var hist = state.history.slice();
+    if (!hist.length) return [];
+    var take;
+    if (scope === 'recent1') {
+      var bid = hist[hist.length - 1].batchId;
+      take = hist.filter(function (h) { return h.batchId === bid; });
+    } else {
+      take = hist.slice(-(scope === 'recent20' ? 20 : 10));
+    }
+    var seen = {}, out = [];
+    take.slice().reverse().forEach(function (h) {
+      var p = by[h.uid];
+      if (!p) {
+        for (var i = 0; i < state.participants.length; i++) {
+          if (state.participants[i].name === h.name) { p = state.participants[i]; break; }
+        }
+      }
+      if (!p || seen[p.uid]) return;
+      seen[p.uid] = 1;
+      out.push({ p: p, h: h });
+    });
+    return out;
+  }
+  function pointLogRows(limit) {
+    var rows = state.pointLog.slice().reverse();
+    return limit ? rows.slice(0, limit) : rows;
+  }
+  function pointAgg() {
+    var agg = {}, pos = 0, neg = 0;
+    state.pointLog.forEach(function (r) {
+      var d = Number(r.delta) || 0;
+      if (d > 0) pos += d; else if (d < 0) neg += d;
+      var a = agg[r.uid] || (agg[r.uid] = { pos: 0, neg: 0, n: 0 });
+      a.n++;
+      if (d > 0) a.pos += d; else a.neg += d;
+    });
+    return { byUid: agg, pos: pos, neg: neg };
+  }
+
+  function renderPoints() {
+    var body = $('#pointsBody'); if (!body) return;
+    var L = lang();
+    var cands = pointCandidates();
+    var valid = {};
+    cands.forEach(function (c) { valid[c.p.uid] = 1; });
+    Object.keys(pointSel).forEach(function (k) { if (!valid[k]) delete pointSel[k]; });
+    var selN = selectedPointUids().length;
+    var agg = pointAgg();
+    var logs = pointLogRows(40);
+
+    var scopeOpts = [
+      ['recent1', L === 'en' ? 'Latest batch' : '最近一批'],
+      ['recent10', L === 'en' ? 'Last 10 draws' : '最近 10 抽'],
+      ['recent20', L === 'en' ? 'Last 20 draws' : '最近 20 抽'],
+      ['all', L === 'en' ? 'Whole roster' : '全部名单']
+    ].map(function (o) {
+      return '<option value="' + o[0] + '"' + (state.settings.pointScope === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
+    }).join('');
+
+    var rows = cands.map(function (c) {
+      var p = c.p, pts = pointsOf(p.uid);
+      var when = c.h ? fmtDate(c.h.ts) : (L === 'en' ? 'in roster' : '名单内');
+      var cls = pts > 0 ? '' : (pts < 0 ? ' neg' : ' zero');
+      return '<label class="pts-row' + (pointSel[p.uid] ? ' on' : '') + '" data-puid="' + p.uid + '">' +
+        '<input type="checkbox" data-psel="1"' + (pointSel[p.uid] ? ' checked' : '') + '>' +
+        '<div class="pts-main"><b>' + esc(p.name) + '</b><span>' +
+        (p.id ? esc(p.id) : (L === 'en' ? 'NO ID' : '无学号')) + ' · ' + esc(p.group || (L === 'en' ? 'Ungrouped' : '未分组')) +
+        '</span></div>' +
+        '<span class="pts-when">' + esc(when) + '</span>' +
+        '<span class="pts-total' + cls + '">' + fmtSigned(pts) + '</span>' +
+        '</label>';
+    }).join('');
+
+    var empty = !cands.length
+      ? '<div class="pts-empty">' +
+        (L === 'en'
+          ? 'No recent draws yet.<br>Draw once first, or switch the scope to “Whole roster”.'
+          : '还没有可加分的同学。<br>先抽一次，或把上方范围切换到「全部名单」。') + '</div>'
+      : '';
+
+    var logHtml = logs.length ? logs.map(function (r) {
+      var d = Number(r.delta) || 0;
+      return '<div class="pts-log-row">' +
+        '<span class="pts-log-time">' + esc(fmtDate(r.ts)) + '</span>' +
+        '<div class="pts-log-main"><b>' + esc(r.name) + '</b><span>' + esc(r.reason || '—') + '</span></div>' +
+        '<span class="pts-delta-tag ' + (d > 0 ? 'pos' : (d < 0 ? 'neg' : '')) + '">' + fmtSigned(d) + '</span>' +
+        '</div>';
+    }).join('') : '<div class="pts-empty">' + (L === 'en' ? 'No point changes yet.' : '还没有积分变动记录。') + '</div>';
+
+    var reasonPresets = L === 'en'
+      ? ['Correct answer', 'Class performance', 'Great homework', 'Big progress', 'Rule breaking']
+      : ['回答正确', '课堂表现', '作业优秀', '进步明显', '违纪扣分'];
+
+    body.innerHTML =
+      '<div class="pts-sum">' +
+        '<div class="pts-stat"><b>' + cands.length + '</b><span>' + (L === 'en' ? 'CANDIDATES' : '候选学生') + '</span></div>' +
+        '<div class="pts-stat"><b id="ptsSelCount">' + selN + '</b><span>' + (L === 'en' ? 'SELECTED' : '已选学生') + '</span></div>' +
+        '<div class="pts-stat pos"><b>+' + agg.pos + '</b><span>' + (L === 'en' ? 'POINTS GIVEN' : '累计加分') + '</span></div>' +
+        '<div class="pts-stat neg"><b>' + agg.neg + '</b><span>' + (L === 'en' ? 'POINTS DEDUCTED' : '累计扣分') + '</span></div>' +
+      '</div>' +
+      '<div class="pts-toolbar">' +
+        '<select id="ptsScope" title="' + (L === 'en' ? 'Who can receive points' : '可加分范围') + '">' + scopeOpts + '</select>' +
+        '<button type="button" class="mini-btn" id="ptsSelectAll">' + (L === 'en' ? 'Select all' : '全选') + '</button>' +
+        '<button type="button" class="mini-btn" id="ptsClearSel">' + (L === 'en' ? 'Clear' : '清空选择') + '</button>' +
+        '<span class="pts-count" id="ptsCount"></span>' +
+      '</div>' +
+      '<div class="pts-list" id="ptsList">' + rows + empty + '</div>' +
+      '<div class="pts-form">' +
+        '<div class="pts-line"><span>' + (L === 'en' ? 'Points' : '分值') + '</span>' +
+          '<div class="pts-quick">' +
+            [-5, -2, -1, 1, 2, 5].map(function (d) {
+              return '<button type="button" data-delta="' + d + '">' + (d > 0 ? '+' : '') + d + '</button>';
+            }).join('') +
+          '</div>' +
+          '<input type="number" id="ptsDelta" class="pts-delta" value="1" min="-99" max="99" step="1" inputmode="numeric">' +
+        '</div>' +
+        '<div class="pts-line"><span>' + (L === 'en' ? 'Reason' : '原因') + '</span>' +
+          '<input type="text" id="ptsReason" class="pts-reason" maxlength="40" placeholder="' +
+          (L === 'en' ? 'e.g. answered correctly' : '例如：回答正确') + '">' +
+        '</div>' +
+        '<div class="pts-line"><span></span><div class="pts-reasons">' +
+          reasonPresets.map(function (t) { return '<button type="button" data-reason="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') +
+        '</div></div>' +
+        '<button type="button" class="pts-apply" id="ptsApply"></button>' +
+      '</div>' +
+      '<div class="pts-log-head"><b>' + (L === 'en' ? 'RECENT CHANGES' : '最近变动') + '</b>' +
+        '<span class="pts-meta">' + (L === 'en'
+          ? (state.pointLog.length + ' records · +' + agg.pos + ' / ' + agg.neg)
+          : ('共 ' + state.pointLog.length + ' 条 · 累计 +' + agg.pos + ' / ' + agg.neg)) + '</span>' +
+        '<button type="button" id="ptsUndoLast">' + (L === 'en' ? 'Undo last' : '撤销最近一次') + '</button>' +
+        '<button type="button" id="ptsClearLog">' + (L === 'en' ? 'Clear' : '清空记录') + '</button>' +
+      '</div>' +
+      '<div class="pts-log">' + logHtml + '</div>';
+
+    syncPointsUI();
+  }
+
+  function syncPointsUI() {
+    var body = $('#pointsBody'); if (!body) return;
+    var L = lang();
+    var uids = selectedPointUids();
+    var deltaEl = $('#ptsDelta');
+    var delta = Math.round(Number(deltaEl && deltaEl.value) || 0);
+    var cnt = $('#ptsSelCount'); if (cnt) cnt.textContent = uids.length;
+    var meta = $('#ptsCount');
+    if (meta) meta.textContent = (L === 'en'
+      ? (uids.length + ' selected · click a row to toggle')
+      : ('已选 ' + uids.length + ' 人 · 点击整行即可勾选'));
+    $$('#ptsList .pts-row').forEach(function (row) {
+      var on = !!pointSel[row.dataset.puid];
+      row.classList.toggle('on', on);
+      var cb = row.querySelector('input[data-psel]');
+      if (cb) cb.checked = on;
+    });
+    $$('#pointsBody .pts-quick button').forEach(function (b) {
+      b.classList.toggle('on', Number(b.dataset.delta) === delta);
+    });
+    var apply = $('#ptsApply');
+    if (apply) {
+      var enough = uids.length > 0 && delta !== 0;
+      apply.disabled = !enough;
+      apply.textContent = delta === 0
+        ? (L === 'en' ? 'Enter a non-zero value' : '请输入非 0 分值')
+        : (L === 'en'
+          ? (delta > 0 ? ('Add ' + delta + ' to ' + uids.length + ' students') : ('Deduct ' + Math.abs(delta) + ' from ' + uids.length + ' students'))
+          : (delta > 0 ? ('给 ' + uids.length + ' 人加 ' + delta + ' 分') : ('给 ' + uids.length + ' 人扣 ' + Math.abs(delta) + ' 分')));
+    }
+  }
+
+  function applyPoints() {
+    var L = lang();
+    var uids = selectedPointUids();
+    var deltaEl = $('#ptsDelta'), reasonEl = $('#ptsReason');
+    var delta = Math.max(-99, Math.min(99, Math.round(Number(deltaEl && deltaEl.value) || 0)));
+    if (!uids.length) { toast(L === 'en' ? 'Select at least one student' : '请先勾选至少一名学生', 'err'); Sfx.play('error', 0.6); return; }
+    if (!delta) { toast(L === 'en' ? 'Points cannot be zero' : '分值不能为 0', 'err'); return; }
+    var by = participantsByUid();
+    var valid = uids.filter(function (u) { return !!by[u]; });
+    if (!valid.length) { toast(L === 'en' ? 'Selected students are gone' : '选中的学生已不在名单里', 'err'); return; }
+    var reason = String((reasonEl && reasonEl.value) || '').trim().slice(0, 40) ||
+      (L === 'en' ? 'Class performance' : '课堂表现');
+    var now = Date.now();
+    var batch = 'pb' + now.toString(36) + Math.random().toString(36).slice(2, 5);
+    pushUndo();
+    valid.forEach(function (uid) {
+      var p = by[uid];
+      state.pointLog.push({
+        rid: 'pt' + (state.pointSeq++), uid: uid, name: p.name, sid: p.id || '', group: p.group || '',
+        delta: delta, reason: reason, ts: now, batch: batch
+      });
+    });
+    if (state.pointLog.length > POINT_LOG_CAP) state.pointLog = state.pointLog.slice(-POINT_LOG_CAP);
+    recountPoints();
+    pointSel = {};
+    save();
+    renderAll();
+    renderPoints();
+    if ($('#statsModal') && $('#statsModal').classList.contains('active')) renderStats();
+    logAction('points', (delta > 0 ? '加分 ' : '扣分 ') + valid.length + ' 人 ' + Math.abs(delta) + ' 分：' + reason);
+    Sfx.play(delta > 0 ? 'coin' : 'error', 0.75);
+    toast((delta > 0 ? (L === 'en' ? 'Added ' : '已给 ') : (L === 'en' ? 'Deducted ' : '已扣 ')) +
+      valid.length + (L === 'en' ? ' students ' : ' 人 ') + Math.abs(delta) +
+      (L === 'en' ? ' points · ' : ' 分 · ') + reason, delta > 0 ? 'ok' : 'err');
+  }
+
+  function undoLastPoints() {
+    var L = lang();
+    if (!state.pointLog.length) { toast(L === 'en' ? 'No point records' : '还没有积分记录', 'err'); return; }
+    var last = state.pointLog[state.pointLog.length - 1];
+    pushUndo();
+    var n = 0;
+    if (last.batch) {
+      state.pointLog = state.pointLog.filter(function (r) {
+        if (r.batch === last.batch) { n++; return false; }
+        return true;
+      });
+    } else { state.pointLog.pop(); n = 1; }
+    recountPoints();
+    save(); renderAll(); renderPoints();
+    if ($('#statsModal') && $('#statsModal').classList.contains('active')) renderStats();
+    toast((L === 'en' ? 'Undid ' : '已撤销 ') + n + (L === 'en' ? ' changes' : ' 条积分变动'), 'ok');
+  }
+
+  async function clearPoints() {
+    var L = lang();
+    if (!state.pointLog.length) { toast(L === 'en' ? 'No point records' : '还没有积分记录', 'err'); return; }
+    var ok = await ask({
+      title: L === 'en' ? 'Clear all points?' : '清空全部积分记录？',
+      msg: (L === 'en'
+        ? ('This removes <b>' + state.pointLog.length + '</b> point records and resets every total to 0. Roster and draw history stay.')
+        : ('将删除 <b>' + state.pointLog.length + '</b> 条积分记录，所有学生的当前积分归零。名单与抽卡历史不受影响。')),
+      ok: L === 'en' ? 'Clear' : '清空', danger: true
+    });
+    if (!ok) return;
+    pushUndo();
+    state.pointLog = [];
+    state.pointSeq = 1;
+    pointSel = {};
+    recountPoints();
+    save(); renderAll(); renderPoints();
+    if ($('#statsModal') && $('#statsModal').classList.contains('active')) renderStats();
+    toast(L === 'en' ? 'Points cleared' : '积分记录已清空', 'ok');
+  }
+
+  function pointsReport() {
+    // 报表里的「最近抽到」固定按最近 10 抽去重，不受界面范围切换影响
+    var cands = pointCandidates('recent10');
+    var agg = pointAgg().byUid;
+    var recent = cands.map(function (c, i) {
+      return {
+        index: i + 1, name: c.p.name, sid: c.p.id || '', group: c.p.group || '',
+        last: c.h ? fmtDate(c.h.ts) : '', points: pointsOf(c.p.uid)
+      };
+    });
+    var logs = state.pointLog.slice().reverse().map(function (r, i) {
+      return {
+        index: i + 1, time: fmtDate(r.ts), name: r.name, sid: r.sid || '',
+        group: r.group || '', delta: Number(r.delta) || 0, reason: r.reason || ''
+      };
+    });
+    var totals = state.participants.slice().map(function (p) {
+      var a = agg[p.uid] || { pos: 0, neg: 0, n: 0 };
+      return { p: p, pts: pointsOf(p.uid), pos: a.pos, neg: a.neg, n: a.n };
+    }).sort(function (a, b) {
+      return b.pts - a.pts || a.p.order - b.p.order;
+    }).map(function (x, i) {
+      return {
+        rank: i + 1, name: x.p.name, sid: x.p.id || '', group: x.p.group || '',
+        points: x.pts, plus: x.pos, minus: x.neg, count: x.n
+      };
+    });
+    return { recent: recent, logs: logs, totals: totals };
+  }
+
+  function exportPointsJson(d) {
+    var L = lang();
+    download('积分报表_' + stamp() + '.json', JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      recentWinners: d.recent, pointLog: d.logs, totals: d.totals
+    }, null, 2), 'application/json;charset=utf-8');
+    toast(L === 'en' ? 'Points report exported as JSON' : '积分报表已导出（JSON）', 'ok');
+  }
+
+  async function exportPoints() {
+    var L = lang();
+    var d = pointsReport();
+    if (!d.recent.length && !d.logs.length) {
+      toast(L === 'en' ? 'No points data to export yet' : '还没有可导出的积分数据', 'err');
+      return;
+    }
+    if (!window.XLSX) { try { await loadSheetJS(); } catch (e) { } }
+    if (!window.XLSX) { exportPointsJson(d); return; }
+    try {
+      var wb = XLSX.utils.book_new();
+      var h1 = L === 'en' ? ['#', 'Name', 'Student ID', 'Group', 'Last drawn', 'Current points']
+        : ['序号', '姓名', '学号', '分组', '最近抽中', '当前积分'];
+      var a1 = [h1].concat(d.recent.map(function (r) { return [r.index, r.name, r.sid, r.group, r.last, r.points]; }));
+      var h2 = L === 'en' ? ['#', 'Time', 'Name', 'Student ID', 'Group', 'Change', 'Reason']
+        : ['序号', '时间', '姓名', '学号', '分组', '变动', '原因'];
+      var a2 = [h2].concat(d.logs.map(function (r) { return [r.index, r.time, r.name, r.sid, r.group, r.delta, r.reason]; }));
+      var h3 = L === 'en' ? ['Rank', 'Name', 'Student ID', 'Group', 'Current points', 'Added', 'Deducted', 'Records']
+        : ['排名', '姓名', '学号', '分组', '当前积分', '加分合计', '扣分合计', '记录数'];
+      var a3 = [h3].concat(d.totals.map(function (r) { return [r.rank, r.name, r.sid, r.group, r.points, r.plus, r.minus, r.count]; }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(a1), L === 'en' ? 'Recent winners' : '最近抽到');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(a2), L === 'en' ? 'Point changes' : '积分变动');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(a3), L === 'en' ? 'Current totals' : '当前积分');
+      var out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      download('积分报表_' + stamp() + '.xlsx', new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      toast(L === 'en' ? 'Points report exported (3 sheets)' : '积分报表已导出（3 个工作表）', 'ok');
+    } catch (e) {
+      exportPointsJson(d);
+    }
+  }
+
   function renderStats() {
     var body = $('#statsBody'); if (!body) return;
     var L = lang();
@@ -5389,6 +5880,18 @@ body.light .stage::before{
         '<span><i style="background:#8affc1"></i>2★</span><span><i style="background:#9aa5c4"></i>1★</span>' +
         '<span style="opacity:.7">' + (L === 'en' ? 'right: last 20 draws' : '右侧：最近 20 抽走势') + '</span>' +
       '</div>' +
+      (function () {
+        var rows = state.participants.slice().map(function (p) { return { p: p, pts: pointsOf(p.uid) }; })
+          .filter(function (x) { return x.pts !== 0; })
+          .sort(function (a, b) { return b.pts - a.pts || a.p.order - b.p.order; }).slice(0, 5);
+        if (!rows.length) return '';
+        return '<div class="sec-title">' + (L === 'en' ? 'POINTS LEADERBOARD (TOP 5)' : '积分榜（前五）') + '</div>' +
+          '<div>' + rows.map(function (x, i) {
+            return '<div class="rank-row' + (i === 0 ? ' top1' : '') + '"><span class="rank-no">' + (i + 1) + '</span>' +
+              '<div class="rank-main"><b>' + esc(x.p.name) + '</b><span>' + (x.p.id ? esc(x.p.id) : (L === 'en' ? 'NO ID' : '无学号')) + '</span></div>' +
+              '<span class="rank-stat" style="color:' + (x.pts > 0 ? '#8affc1' : '#ff9db1') + '">' + fmtSigned(x.pts) + (L === 'en' ? ' pts' : ' 分') + '</span></div>';
+          }).join('') + '</div>';
+      })() +
       '<div class="sec-title">' + (L === 'en' ? 'TITLE' : '当前称号') + '</div>' +
       '<div class="achv on" style="cursor:default">' +
         '<span class="ico">' + (ttl ? ttl.ico : '🌱') + '</span>' +
@@ -5978,6 +6481,7 @@ body.light .stage::before{
     else if (fmt === 'png') exportPng();
     else if (fmt === 'pnglong') exportShareLong();
     else if (fmt === 'xl') exportXlsx();
+    else if (fmt === 'points') exportPoints();
     else if (fmt === 'tenpng') exportTenLong();
     else if (fmt === 'print') {
       var ps = $('#printScope');
@@ -6087,8 +6591,8 @@ body.light .stage::before{
     var ok = await ask({
       title: lang() === 'en' ? 'Reset system' : '重置系统',
       msg: (lang() === 'en'
-        ? 'This clears <b>the whole roster</b> and <b>all draw history</b>. Your settings, odds, pity and sound preferences are kept. You can undo afterwards.'
-        : '将清空 <b>全部名单</b> 与 <b>抽取历史</b>。设置、概率、保底与音效偏好会保留。操作后仍可撤销。') +
+        ? 'This clears <b>the whole roster</b>, <b>all draw history</b> and <b>point records</b>. Your settings, odds, pity and sound preferences are kept. You can undo afterwards.'
+        : '将清空 <b>全部名单</b>、<b>抽取历史</b> 与 <b>积分记录</b>。设置、概率、保底与音效偏好会保留。操作后仍可撤销。') +
         '<br><span style="opacity:.7;font-size:12px">' + (lang() === 'en' ? 'Roster: ' : '当前名单：') +
         state.participants.length + (lang() === 'en' ? ' · history: ' : ' 人 · 历史 ') + state.history.length + (lang() === 'en' ? ' draws' : ' 次') + '</span>',
       ok: lang() === 'en' ? 'Reset' : '确认重置',
@@ -6110,6 +6614,10 @@ body.light .stage::before{
     state.settings.countFilter = 'all';
     state.settings.excludeFilter = 'all';
     state.settings.pity.c5 = 0;
+    state.pointLog = [];
+    state.points = {};
+    state.pointSeq = 1;
+    pointSel = {};
     selected = {};
     editingUid = null;
     save();
@@ -6553,6 +7061,7 @@ body.light .stage::before{
       if (a === 'import') openModal($('#importModal'));
       else if (a === 'history') openModal($('#historyModal'));
       else if (a === 'stats') openModal($('#statsModal'));
+      else if (a === 'points') openModal($('#pointsModal'));
       else if (a === 'export') openModal($('#exportModal'));
       else if (a === 'settings') openModal($('#settingsModal'));
       else if (a === 'pk') { openModal($('#pkModal')); renderPk(); }
@@ -7298,6 +7807,56 @@ body.light .stage::before{
       if (!b) return;
       doExport(b.dataset.format);
     });
+
+    // 课堂积分
+    var ptsBody = $('#pointsBody');
+    if (ptsBody) {
+      ptsBody.addEventListener('change', function (e) {
+        var t = e.target;
+        if (t && t.dataset && t.dataset.psel) {
+          var row = t.closest ? t.closest('.pts-row') : null;
+          if (!row) return;
+          if (t.checked) pointSel[row.dataset.puid] = 1; else delete pointSel[row.dataset.puid];
+          row.classList.toggle('on', t.checked);
+          syncPointsUI();
+          Sfx.play('tick', 0.35);
+          return;
+        }
+        if (t && t.id === 'ptsScope') {
+          state.settings.pointScope = ['recent1', 'recent10', 'recent20', 'all'].indexOf(t.value) >= 0 ? t.value : 'recent10';
+          pointSel = {};
+          save(); renderPoints();
+          Sfx.play('click', 0.4);
+        }
+      });
+      ptsBody.addEventListener('input', function (e) {
+        if (e.target && e.target.id === 'ptsDelta') syncPointsUI();
+      });
+      ptsBody.addEventListener('click', function (e) {
+        var t = e.target; if (!t || !t.closest) return;
+        if (t.closest('#ptsSelectAll')) {
+          var cands = pointCandidates();
+          var allOn = cands.length > 0 && cands.every(function (c) { return pointSel[c.p.uid]; });
+          pointSel = {};
+          if (!allOn) cands.forEach(function (c) { pointSel[c.p.uid] = 1; });
+          syncPointsUI();
+          return;
+        }
+        if (t.closest('#ptsClearSel')) { pointSel = {}; syncPointsUI(); return; }
+        if (t.closest('#ptsApply')) { applyPoints(); return; }
+        if (t.closest('#ptsUndoLast')) { undoLastPoints(); return; }
+        if (t.closest('#ptsClearLog')) { clearPoints(); return; }
+        var qb = t.closest('[data-delta]');
+        if (qb) {
+          var d = $('#ptsDelta'); if (d) d.value = qb.dataset.delta;
+          syncPointsUI(); Sfx.play('tick', 0.35); return;
+        }
+        var rb = t.closest('[data-reason]');
+        if (rb) { var r = $('#ptsReason'); if (r) { r.value = rb.dataset.reason; r.focus(); } return; }
+      });
+    }
+    var ptsExport = $('#ptsExportBtn');
+    if (ptsExport) ptsExport.addEventListener('click', function () { exportPoints(); });
 
     // 引导
     var gs = $('#guideStart');
