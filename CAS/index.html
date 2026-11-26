@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>随机点名 · 液态玻璃抽卡系统</title>
+<meta name="theme-color" content="#161d3e">
+<link rel="manifest" href="manifest.webmanifest">
 
-<!-- 请与 app.js / styles.css / xlsx.b64.js 保持在同一目录（纯离线，无需服务器） -->
+<!-- 请与 app.js / core.js / styles.css / xlsx.b64.js 保持在同一目录（纯离线，无需服务器） -->
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="light">
@@ -91,6 +93,7 @@
           <div class="last-id is-empty" id="lastId">等待开始</div>
           <div class="last-star" id="lastStar"></div>
           <div class="last-quick" id="lastQuick">
+            <span class="lq-lab" data-zh="课堂表现" data-en="Performance">课堂表现</span>
             <button type="button" data-quick="1" title="给刚刚抽中的同学加 1 分">+1</button>
             <button type="button" data-quick="-1" title="扣 1 分">−1</button>
             <button type="button" data-quick="more" title="打开积分面板">积分</button>
@@ -241,10 +244,10 @@
 </div>
 
 <!-- 导入弹窗 -->
-<div class="modal" id="importModal">
+<div class="modal" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle" aria-hidden="true">
   <div class="modal-card glass">
     <div class="modal-head">
-      <h3 data-zh="导入 / 编辑名单" data-en="Import / Edit roster">导入 / 编辑名单</h3>
+      <h3 data-zh="导入 / 编辑名单" data-en="Import / Edit roster" id="importTitle">导入 / 编辑名单</h3>
       <button class="close" data-close>✕</button>
     </div>
     <div class="hint-box" data-zh="每行一条，支持：姓名 / 姓名,学号 / 姓名,学号,分组。可直接从 Excel、WPS 或聊天记录粘贴：制表符、多个空格、中英文逗号、分号都会被识别，空行自动跳过。也可选择 .txt / .csv / .json / .xlsx / .xls 文件。" data-en="One entry per line: Name / Name,StudentID / Name,StudentID,Group. Paste straight from Excel, WPS or chat: tabs, runs of spaces, Chinese/English commas and semicolons are all recognised, blank lines skipped. Files: .txt / .csv / .json / .xlsx / .xls.">每行一条，支持：<code>姓名</code> · <code>姓名,学号</code> · <code>姓名,学号,分组</code><br>可直接从 Excel / WPS / 聊天记录粘贴（制表符、多空格、中英文逗号、分号均可识别），也支持 .txt / .csv / .json / .xlsx / .xls。</div>
@@ -267,10 +270,10 @@
 </div>
 
 <!-- 历史弹窗 -->
-<div class="modal" id="historyModal">
+<div class="modal" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle" aria-hidden="true">
   <div class="modal-card glass">
     <div class="modal-head">
-      <h3 data-zh="抽取历史" data-en="Draw history">抽取历史</h3>
+      <h3 data-zh="抽取历史" data-en="Draw history" id="historyTitle">抽取历史</h3>
       <button class="close" data-close>✕</button>
     </div>
     <div class="modal-body" id="historyBody"></div>
@@ -282,10 +285,10 @@
 </div>
 
 <!-- 设置弹窗 -->
-<div class="modal" id="settingsModal">
+<div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
   <div class="modal-card glass wide">
     <div class="modal-head">
-      <h3 data-zh="设置" data-en="Settings">设置</h3>
+      <h3 data-zh="设置" data-en="Settings" id="settingsTitle">设置</h3>
       <button class="close" data-close>✕</button>
     </div>
     <div class="modal-body settings-body">
@@ -351,7 +354,7 @@
                   <h4 data-zh="星级概率（1–5★）" data-en="Star odds (1–5★)">星级概率（1–5★）</h4>
                   <p class="set-desc strong" data-zh="星级只是抽中之后的评级展示，不会影响谁会抽中；下面这组数值只决定结果亮几颗星。" data-en="Stars are a rating shown after a draw — they never influence who is picked. These numbers only choose the star rating of the result.">星级只是抽中之后的评级展示，不会影响谁会抽中；下面这组数值只决定结果亮几颗星。</p>
                   <div class="star-config" id="starConfig"></div>
-                  <div class="sum-line">合计 <b id="starSum">100</b>% <span id="starSumWarn"></span></div>
+                  <div class="sum-line"><span data-zh="合计" data-en="Total">合计</span> <b id="starSum">100</b>% <span id="starSumWarn"></span></div>
                   <div class="preset-row" id="presetRow"></div>
                   <p class="set-desc" data-zh="四舍五入到 1%，合计必须恰好为 100% 才能抽取。" data-en="Whole percentages; the total must be exactly 100% before drawing.">四舍五入到 1%，合计必须恰好为 100% 才能抽取。</p>
                 </section>
@@ -420,10 +423,15 @@
                   <label class="range-row"><span data-zh="音效音量" data-en="Sound effects">音效音量</span><input type="range" id="soundVol" min="0" max="100" step="1"><output id="soundVolOut">60</output></label>
                   <label class="range-row"><span data-zh="背景音乐音量（0 = 关闭）" data-en="Music volume (0 = off)">背景音乐音量（0 = 关闭）</span><input type="range" id="bgmVol" min="0" max="100" step="1"><output id="bgmVolOut">0</output></label>
                   <div class="seg" id="bgmTrackSeg">
-                    <button type="button" data-track="calm">静谧星海</button>
-                    <button type="button" data-track="focus">专注课堂</button>
-                    <button type="button" data-track="epic">史诗抽卡</button>
+                    <button type="button" data-track="calm" data-zh="静谧星海" data-en="Calm sea">静谧星海</button>
+                    <button type="button" data-track="focus" data-zh="专注课堂" data-en="Focus class">专注课堂</button>
+                    <button type="button" data-track="epic" data-zh="史诗抽卡" data-en="Epic draw">史诗抽卡</button>
                   </div>
+                  <label class="switch-row"><span data-zh="语音播报抽中结果（系统语音）" data-en="Announce results (system speech)">语音播报抽中结果（系统语音）</span><span class="switch"><input type="checkbox" id="speechEnable"><span></span></span></label>
+                  <label class="range-row"><span data-zh="播报语速" data-en="Speech rate">播报语速</span><input type="range" id="speechRate" min="0.6" max="1.6" step="0.1"><output id="speechRateOut">1</output></label>
+                  <label class="range-row"><span data-zh="播报音调" data-en="Speech pitch">播报音调</span><input type="range" id="speechPitch" min="0.6" max="1.6" step="0.1"><output id="speechPitchOut">1</output></label>
+                  <label class="ctl-row"><span data-zh="播报音色" data-en="Speech voice">播报音色</span><select id="speechVoice" class="set-select" style="max-width:280px"></select></label>
+                  <p class="set-desc" data-zh="依赖系统语音合成（Chrome/Edge/Safari 均支持）；首次使用需一次点击手势解锁。语音只播报姓名与星级，不影响抽卡结果。" data-en="Uses the system speech engine (Chrome/Edge/Safari). A click is needed to unlock audio; only names and star ratings are spoken.">依赖系统语音合成（Chrome/Edge/Safari 均支持）；首次使用需一次点击手势解锁。语音只播报姓名与星级，不影响抽卡结果。</p>
                   <p class="set-desc" data-zh="17 种音效（点击 / 滚动 / 结果 / 五星 / 成就 / 成功 / 失败 / 开始 / 结束 / 币声 / 风声 / 史诗 / 胜利 / 失败 …）在启动时预合成；背景音乐默认音量 0 即关闭，开启后循环播放。" data-en="17 effects (click, roll, result, 5★, achievement, success, error, open, close, coin, whoosh, epic, win, lose …) are synthesised at start-up. Music is off at volume 0; turn it up to loop one of the three tracks.">17 种音效（点击 / 滚动 / 结果 / 五星 / 成就 / 成功 / 失败 / 开始 / 结束 / 币声 / 风声 / 史诗 / 胜利 / 失败 …）在启动时预合成；背景音乐默认音量 0 即关闭，开启后循环播放。</p>
                 </section>
         </div>
@@ -510,6 +518,8 @@
                     <label class="file-label"><span data-zh="导入备份" data-en="Import backup">导入备份</span><input type="file" id="importJsonInput" accept=".json" hidden></label>
                     <button type="button" id="archiveBtn" data-zh="归档历史" data-en="Archive history">归档历史</button>
                     <button type="button" id="clearHistoryBtn2" data-zh="清空历史" data-en="Clear history">清空历史</button>
+                    <button type="button" id="errLogBtn" data-zh="导出错误日志" data-en="Export error log">导出错误日志</button>
+                    <button type="button" id="errLogClear" data-zh="清空日志" data-en="Clear log">清空日志</button>
                   </div>
                   <p class="set-desc" data-zh="名单、历史、设置、概率与保底进度都会自动写入 localStorage；容量不足时会提示导出备份。" data-en="Roster, history, settings, odds and pity progress are written to localStorage automatically; a quota warning appears when storage is full.">名单、历史、设置、概率与保底进度都会自动写入 localStorage；容量不足时会提示导出备份。</p>
                 </section>
@@ -524,10 +534,10 @@
 </div>
 
 <!-- 统计弹窗 -->
-<div class="modal" id="statsModal">
+<div class="modal" id="statsModal" role="dialog" aria-modal="true" aria-labelledby="statsTitle" aria-hidden="true">
   <div class="modal-card glass wide">
     <div class="modal-head">
-      <h3 data-zh="统计 / 成就 / 排行榜" data-en="Stats / Achievements / Ranking">统计 / 成就 / 排行榜</h3>
+      <h3 data-zh="统计 / 成就 / 排行榜" data-en="Stats / Achievements / Ranking" id="statsTitle">统计 / 成就 / 排行榜</h3>
       <button class="close" data-close>✕</button>
     </div>
     <div class="modal-body" id="statsBody"></div>
@@ -538,10 +548,10 @@
 </div>
 
 <!-- 积分弹窗 -->
-<div class="modal" id="pointsModal">
+<div class="modal" id="pointsModal" role="dialog" aria-modal="true" aria-labelledby="pointsTitle" aria-hidden="true">
   <div class="modal-card glass wide pts-card">
     <div class="modal-head">
-      <h3 data-zh="课堂积分" data-en="Class points">课堂积分</h3>
+      <h3 data-zh="课堂积分" data-en="Class points" id="pointsTitle">课堂积分</h3>
       <button class="close" data-close>✕</button>
     </div>
     <div class="modal-body" id="pointsBody"></div>
@@ -553,10 +563,10 @@
 </div>
 
 <!-- 导出弹窗 -->
-<div class="modal" id="exportModal">
+<div class="modal" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle" aria-hidden="true">
   <div class="modal-card glass">
     <div class="modal-head">
-      <h3 data-zh="导出" data-en="Export">导出</h3>
+      <h3 data-zh="导出" data-en="Export" id="exportTitle">导出</h3>
       <button class="close" data-close>✕</button>
     </div>
     <div class="modal-body">
@@ -585,10 +595,10 @@
 </div>
 
 <!-- 确认弹窗 -->
-<div class="modal confirm" id="confirmModal">
+<div class="modal confirm" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true">
   <div class="modal-card glass confirm-card">
     <div class="modal-head">
-      <h3 id="confirmTitle">确认</h3>
+      <h3 id="confirmTitle" data-zh="确认" data-en="Confirm">确认</h3>
       <button class="close" id="confirmClose">✕</button>
     </div>
     <div class="modal-body"><div id="confirmMsg"></div></div>
@@ -600,10 +610,10 @@
 </div>
 
 <!-- 首次使用引导 -->
-<div class="modal guide" id="guideModal">
+<div class="modal guide" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle" aria-hidden="true">
   <div class="modal-card glass">
     <div class="modal-head">
-      <h3 data-zh="欢迎使用随机点名" data-en="Welcome to Random Roll">欢迎使用随机点名</h3>
+      <h3 data-zh="欢迎使用随机点名" data-en="Welcome to Random Roll" id="guideTitle">欢迎使用随机点名</h3>
       <button class="close" data-close>✕</button>
     </div>
     <div class="modal-body" id="guideBody"></div>
@@ -614,10 +624,10 @@
 </div>
 
 <!-- PK 对抗弹窗 -->
-<div class="modal" id="pkModal">
+<div class="modal" id="pkModal" role="dialog" aria-modal="true" aria-labelledby="pkTitle" aria-hidden="true">
   <div class="modal-card glass wide">
     <div class="modal-head">
-      <h3 data-zh="分组 PK" data-en="Group PK">分组 PK</h3>
+      <h3 data-zh="分组 PK" data-en="Group PK" id="pkTitle">分组 PK</h3>
       <button class="close" data-close>✕</button>
     </div>
     <div class="modal-body" id="pkBody"></div>
@@ -631,9 +641,9 @@
 
 
 
+<script src="core.js"></script>
 <script src="app.js"></script>
 
-
-<script src="xlsx.b64.js"></script>
+<!-- xlsx.b64.js 不再静态引入：app.js 在首次导入/导出 Excel 时动态加载，避免首屏被 1.17 MB 载荷拖慢 -->
 </body>
 </html>
