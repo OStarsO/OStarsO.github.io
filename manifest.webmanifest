@@ -1,0 +1,14 @@
+{
+  "name": "随机点名 · 液态玻璃抽卡系统",
+  "short_name": "随机点名",
+  "description": "离线的课堂随机点名、抽卡、积分与名单管理工具",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1430",
+  "theme_color": "#161d3e",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
