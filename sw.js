@@ -1,5 +1,5 @@
 /* sw.js — 离线缓存（P1）。file:// 下不会注册，HTTP(S) 首次访问后可用。 */
-const CACHE = 'cas-v2';
+const CACHE = 'cas-v3';
 const ASSETS = [
   './', './index.html', './styles.css', './app.js', './core.js',
   './manifest.webmanifest', './icon.svg'
