@@ -1,630 +1,776 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>正在进入…</title>
-<!-- 引入 UAParser.js 用于解析设备与浏览器信息 -->
-<script src="https://cdn.jsdelivr.net/npm/ua-parser-js@2.0.9/dist/ua-parser.pack.js"></script>
-<style>
-  * { box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>随机点名 · 液态玻璃抽卡系统</title>
+<meta name="theme-color" content="#161d3e">
+<link rel="manifest" href="manifest.webmanifest">
 
-  html, body {
-    height: 100%;
-    margin: 0;
-    background: #04060c;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ================= 顶部设备信息栏 ================= */
-  #device-info-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 12px 20px;
-    padding: 10px 16px;
-    background: rgba(4, 6, 12, 0.75);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(150, 200, 255, 0.15);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12px;
-    color: rgba(190, 214, 255, 0.9);
-    letter-spacing: 0.5px;
-    pointer-events: none;
-    transition: opacity 0.5s ease, visibility 0.5s;
-  }
-
-  #device-info-bar.hide {
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  #device-info-bar .info-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-  }
-
-  #device-info-bar .info-item .label {
-    color: rgba(120, 160, 210, 0.7);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  #device-info-bar .info-item .value {
-    color: #e0ecff;
-    font-weight: 500;
-  }
-
-  #device-info-bar .info-item .value.loading {
-    color: rgba(150, 180, 220, 0.5);
-    animation: blink 1.2s steps(1, end) infinite;
-  }
-
-  @keyframes blink {
-    0%, 49%   { opacity: 1; }
-    50%, 100% { opacity: 0.3; }
-  }
-
-  /* 响应式：小屏幕下隐藏部分次要信息 */
-  @media (max-width: 600px) {
-    #device-info-bar {
-      gap: 8px 12px;
-      font-size: 10px;
-      padding: 8px 10px;
-    }
-    #device-info-bar .info-item .label {
-      display: none;
-    }
-  }
-
-  /* ================= 星空画布 ================= */
-  #stars {
-    position: fixed;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-  }
-
-  /* ================= 中央舞台 ================= */
-  .stage {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  /* 被加载页面的容器 */
-  .frame {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    transform: scale(0.28);
-    transform-origin: 50% 50%;
-    border-radius: 18px;
-    overflow: hidden;
-    background: #060a12;
-    box-shadow:
-      0 0 0 1px rgba(150, 200, 255, 0.30),
-      0 0 60px rgba(90, 150, 255, 0.32),
-      0 0 180px rgba(60, 110, 255, 0.18);
-    pointer-events: auto;
-    will-change: transform;
-    transition:
-      transform 1.05s cubic-bezier(0.22, 0.9, 0.28, 1),
-      border-radius 1s ease,
-      box-shadow 1s ease;
-  }
-
-  .frame iframe {
-    position: relative;
-    z-index: 1;
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    background: #060a12;
-  }
-
-  /* 加载中盖在页面上的"暗纱" */
-  .veil {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: auto;
-    opacity: 1;
-    transition: opacity 0.9s ease;
-    background:
-      radial-gradient(circle at 50% 50%,
-        rgba(14, 26, 50, 0.35) 0%,
-        rgba(4, 6, 12, 0.78) 65%,
-        rgba(4, 6, 12, 0.92) 100%),
-      repeating-linear-gradient(0deg,
-        rgba(255, 255, 255, 0.035) 0px,
-        rgba(255, 255, 255, 0.035) 1px,
-        transparent 1px,
-        transparent 3px);
-  }
-
-  /* 加载完成后：淡出并让出点击事件 */
-  .frame.reveal .veil { 
-    opacity: 0; 
-    pointer-events: none;
-  }
-
-  /* ================= 点击提示弹窗 ================= */
-  #loading-tip {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
-    z-index: 20;
-    background: rgba(8, 14, 26, 0.85);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(150, 200, 255, 0.3);
-    border-radius: 12px;
-    padding: 20px 28px;
-    color: #e0ecff;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 14px;
-    text-align: center;
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.3s;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 30px rgba(90, 150, 255, 0.2);
-  }
-
-  #loading-tip.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  #loading-tip .tip-icon {
-    display: block;
-    margin: 0 auto 12px;
-    width: 24px;
-    height: 24px;
-    border: 2px solid rgba(150, 200, 255, 0.3);
-    border-top-color: #a8caff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  #loading-tip .tip-time {
-    color: #a8caff;
-    font-weight: bold;
-    font-size: 16px;
-  }
-
-  /* ================= 底部加载耗时提示 ================= */
-  #load-time-toast {
-    position: fixed;
-    left: 50%;
-    bottom: 12vh; /* 位于底部偏上一点 */
-    transform: translate(-50%, 20px);
-    z-index: 30;
-    background: rgba(8, 14, 26, 0.85);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(150, 200, 255, 0.3);
-    border-radius: 30px;
-    padding: 12px 24px;
-    color: #e0ecff;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 14px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 30px rgba(90, 150, 255, 0.2);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s;
-  }
-
-  #load-time-toast.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, 0);
-  }
-
-  #load-time-toast .time-val {
-    color: #a8caff;
-    font-weight: bold;
-    font-size: 16px;
-    margin: 0 4px;
-  }
-
-  /* ================= 底部提示 ================= */
-  .hint {
-    position: fixed;
-    left: 50%;
-    bottom: 6vh;
-    transform: translateX(-50%);
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font: 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: rgba(190, 214, 255, 0.8);
-    pointer-events: none;
-    white-space: nowrap;
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-
-  .hint::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: #a8caff;
-    box-shadow: 0 0 12px #5f9bff, 0 0 3px #fff;
-    animation: blink 1.1s steps(1, end) infinite;
-  }
-
-  .hint.hide {
-    opacity: 0;
-    transform: translateX(-50%) translateY(14px);
-  }
-</style>
+<!-- 请与 app.js / core.js / styles.css / xlsx.b64.js 保持在同一目录（纯离线，无需服务器） -->
+<link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="light">
 
-  <!-- 顶部设备与网络信息栏 -->
-  <div id="device-info-bar">
-    <div class="info-item">
-      <span class="label">设备</span>
-      <span class="value loading" id="info-device">检测中...</span>
+<!-- 自定义背景（可选图片 / 渐变色） -->
+<div id="custom-bg" aria-hidden="true"></div>
+
+<!-- 星空（暗色）背景 -->
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="nebula nebula-1" aria-hidden="true"></div>
+<div class="nebula nebula-2" aria-hidden="true"></div>
+<div class="nebula nebula-3" aria-hidden="true"></div>
+
+<!-- 阳光普照（浅色）背景 -->
+<div id="sunlight-bg" aria-hidden="true">
+  <div class="sun-core"></div>
+  <div class="sun-rays"></div>
+  <div class="sun-chroma"></div>
+  <div class="lens-flare"></div>
+  <div class="sky-veil"></div>
+</div>
+
+<div id="cursor-glow" aria-hidden="true"></div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">✦</div>
+      <div class="brand-text">
+        <h1 data-zh="随机点名" data-en="Random Roll">随机点名</h1>
+        <p>LIQUID GLASS · LOTTERY</p>
+      </div>
     </div>
-    <div class="info-item">
-      <span class="label">浏览器</span>
-      <span class="value loading" id="info-browser">检测中...</span>
+    <div class="top-actions">
+      <div class="stats glass">
+        <div class="stat"><b id="statTotal">0</b><span id="lblTotal" data-zh="总人数" data-en="Total">总人数</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><b id="statDrawn">0</b><span id="lblDrawn" data-zh="已抽中" data-en="Drawn">已抽中</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><b id="statLeft">0</b><span id="lblLeft" data-zh="剩余" data-en="Left">剩余</span></div>
+      </div>
+      <button class="icon-btn" id="soundBtn" data-zh-title="音效开关" data-en-title="Toggle sound" title="音效开关">🔊</button>
+      <button class="icon-btn" id="themeToggle" data-zh-title="切换背景" data-en-title="Toggle background" title="切换背景">🌙</button>
+      <button class="icon-btn" id="exportBtn" data-zh-title="导出 / 备份 / 分享" data-en-title="Export / backup / share" title="导出 / 备份 / 分享">📤</button>
+      <button class="icon-btn" id="settingsBtn" data-zh-title="设置" data-en-title="Settings" title="设置">⚙</button>
     </div>
-    <div class="info-item">
-      <span class="label">IP</span>
-      <span class="value loading" id="info-ip">获取中...</span>
+  </header>
+
+  <main class="layout">
+
+    <section class="panel glass stage-panel" id="stagePanel">
+      <div class="panel-head">
+        <h2 data-zh="抽卡舞台" data-en="Stage">抽卡舞台</h2>
+        <div class="stage-tools">
+          <span class="badge" id="stageBadge" data-zh="待开始" data-en="Ready">待开始</span>
+          <div class="seg" id="modeSeg">
+            <button type="button" data-mode="unique" data-zh="不重复" data-en="No repeat">不重复</button>
+            <button type="button" data-mode="repeat" data-zh="可重复" data-en="Repeatable">可重复</button>
+          </div>
+          <button type="button" class="chip" id="speedChip">⏩ 1x</button>
+          <div class="anim-switcher" id="animSwitcher">
+            <button class="anim-trigger" id="animTrigger">
+              <span id="animLabel">🌊 经典</span>
+              <span class="caret">▾</span>
+            </button>
+            <div class="anim-menu" id="animMenu">
+              <button type="button" data-anim="classic" class="active">🌊 经典</button>
+              <button type="button" data-anim="thunder">⚡ 雷霆</button>
+              <button type="button" data-anim="meteor">☄️ 流星</button>
+              <button type="button" data-anim="spin">🌀 旋涡</button>
+              <button type="button" data-anim="pulse">💫 脉冲</button>
+              <button type="button" data-anim="glitch">🔮 幻象</button>
+              <button type="button" data-anim="starlight">✨ 星河</button>
+              <button type="button" data-anim="sakura">🌸 樱花</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="last-card" id="lastCard">
+          <span class="last-label" data-zh="最 近 抽 中" data-en="LATEST DRAW">最 近 抽 中</span>
+          <span class="last-source" id="lastSource"></span>
+          <div class="last-name" id="lastName">—</div>
+          <div class="last-seat" id="lastSeat"></div>
+          <div class="last-no" id="lastNo"></div>
+          <div class="last-meta" id="lastMeta"></div>
+          <div class="last-id is-empty" id="lastId">等待开始</div>
+          <div class="last-star" id="lastStar"></div>
+          <div class="last-quick" id="lastQuick">
+            <span class="lq-lab" data-zh="课堂表现" data-en="Performance">课堂表现</span>
+            <button type="button" data-quick="1" title="给刚刚抽中的同学加 1 分">+1</button>
+            <button type="button" data-quick="-1" title="扣 1 分">−1</button>
+            <button type="button" data-quick="more" title="打开积分面板">积分</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="scope-bar" id="scopeBar">
+        <span class="scope-lab" data-zh="抽取范围" data-en="Scope">抽取范围</span>
+        <div class="seg scope-seg" id="scopeSeg">
+          <button type="button" data-scope="all" data-zh="全部名单" data-en="All">全部名单</button>
+          <button type="button" data-scope="group" data-zh="当前分组" data-en="Group">当前分组</button>
+        </div>
+        <span class="scope-name" id="scopeName">全部分组</span>
+      </div>
+
+      <!-- 舞台常驻模式说明：模式 / 范围 / 种子 / 保底 一直生效，直到再次切换 -->
+      <div class="stage-note" id="stageNote">
+        <span class="sn-ico">🧷</span>
+        <span class="sn-text"><b>常驻模式</b>：当前抽取模式与范围会一直生效，直到你在上方切换。</span>
+      </div>
+
+      <div class="draw-mode">
+        <input type="range" id="drawModeRange" min="0" max="2" step="1" value="2" aria-label="抽取模式 / Draw mode">
+        <div class="draw-mode-labels">
+          <span data-mode="number" data-zh="抽序号" data-en="By number">抽序号</span>
+          <span data-mode="seat" data-zh="抽座位" data-en="By seat">抽座位</span>
+          <span data-mode="name" data-zh="抽名字" data-en="By name">抽名字</span>
+        </div>
+      </div>
+      <div class="draw-actions">
+        <button class="draw-btn" id="drawBtn" data-zh="单 抽" data-en="SINGLE">单 抽</button>
+        <button class="draw-btn ten" id="drawTenBtn" data-zh="十 连" data-en="TEN PULL">十 连</button>
+      </div>
+      <div class="draw-extra">
+        <button type="button" class="mini-btn" id="drawIdBtn" data-zh="🎓 学号抽" data-en="🎓 Draw ID">🎓 学号抽</button>
+        <button type="button" class="mini-btn" id="openSeatBtn" data-zh="🪑 座位表" data-en="🪑 Seat map">🪑 座位表</button>
+      </div>
+      <div class="stage-foot" id="pityHint"></div>
+    </section>
+
+    <section class="panel glass roster-panel">
+      <div class="panel-head">
+        <h2 data-zh="参与者名单" data-en="Participants">参与者名单</h2>
+        <span class="badge" id="rosterCount">0 人</span>
+      </div>
+
+      <form class="add-form" id="addForm" autocomplete="off">
+        <input type="text" id="inputName" data-zh-ph="姓名" data-en-ph="Name" placeholder="姓名" maxlength="20">
+        <input type="text" id="inputId" data-zh-ph="学号（可选）" data-en-ph="Student ID (optional)" placeholder="学号（可选）" maxlength="30">
+        <input type="text" id="inputGroup" data-zh-ph="分组" data-en-ph="Group" placeholder="分组" maxlength="12">
+        <button type="submit" class="btn-add" data-zh-title="添加参与者" data-en-title="Add participant" title="添加参与者">＋</button>
+      </form>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="s-ico" aria-hidden="true">🔍</span>
+          <input type="text" id="searchInput" data-zh-ph="搜索姓名 / 学号" data-en-ph="Search name / ID" placeholder="搜索姓名 / 学号" autocomplete="off">
+        </div>
+        <select id="filterSelect" data-zh-title="筛选" data-en-title="Filter" title="筛选">
+          <option value="all" data-zh="全部" data-en="All">全部</option>
+          <option value="undrawn" data-zh="未抽" data-en="Undrawn">未抽</option>
+          <option value="drawn" data-zh="已抽" data-en="Drawn">已抽</option>
+        </select>
+        <select id="sortSelect" data-zh-title="排序" data-en-title="Sort" title="排序">
+          <option value="order" data-zh="添加顺序" data-en="Add order">添加顺序</option>
+          <option value="name" data-zh="姓名" data-en="Name">姓名</option>
+          <option value="pinyin" data-zh="拼音首字母" data-en="Pinyin initial">拼音首字母</option>
+          <option value="id" data-zh="学号" data-en="Student ID">学号</option>
+          <option value="drawn" data-zh="抽中状态" data-en="Draw state">抽中状态</option>
+          <option value="count" data-zh="抽中次数" data-en="Draw count">抽中次数</option>
+        </select>
+        <button type="button" class="mini-btn" id="sortDirBtn" title="升序 / 降序" data-zh="升序 ↑" data-en="Asc ↑">升序 ↑</button>
+      </div>
+
+      <div class="toolbar sub">
+        <select id="groupSelect" data-zh-title="分组筛选" data-en-title="Group filter" title="分组筛选"></select>
+        <button type="button" class="mini-btn" id="selectAllBtn" data-zh="全选" data-en="Select all">全选</button>
+      </div>
+
+      <div class="filter-row">
+        <select id="starFilter" data-zh-title="按最高星级筛选" data-en-title="Filter by best star" title="按最高星级筛选">
+          <option value="all" data-zh="全部星级" data-en="All stars">全部星级</option>
+          <option value="5">5★</option>
+          <option value="4">4★</option>
+          <option value="3">3★</option>
+          <option value="2">2★</option>
+          <option value="1">1★</option>
+          <option value="none" data-zh="未抽中" data-en="Never drawn">未抽中</option>
+        </select>
+        <select id="countFilter" data-zh-title="按抽中次数筛选" data-en-title="Filter by draw count" title="按抽中次数筛选">
+          <option value="all" data-zh="全部次数" data-en="Any count">全部次数</option>
+          <option value="0" data-zh="0 次" data-en="0 times">0 次</option>
+          <option value="1" data-zh="≥1 次" data-en="≥1 time">≥1 次</option>
+          <option value="3" data-zh="≥3 次" data-en="≥3 times">≥3 次</option>
+          <option value="5" data-zh="≥5 次" data-en="≥5 times">≥5 次</option>
+        </select>
+        <select id="excludeFilter" data-zh-title="按排除状态筛选" data-en-title="Filter by exclusion" title="按排除状态筛选">
+          <option value="all" data-zh="含已排除" data-en="Include excluded">含已排除</option>
+          <option value="only" data-zh="仅看已排除" data-en="Only excluded">仅看已排除</option>
+          <option value="off" data-zh="仅看参与中" data-en="Only active">仅看参与中</option>
+        </select>
+      </div>
+
+      <div class="batch-bar" id="batchBar" hidden>
+        <span id="batchCount">已选 0 人</span>
+        <button type="button" data-batch="return" data-zh="放回候选池" data-en="Return">放回候选池</button>
+        <button type="button" data-batch="exclude" data-zh="临时排除" data-en="Exclude">临时排除</button>
+        <button type="button" data-batch="include" data-zh="恢复参加" data-en="Restore">恢复参加</button>
+        <button type="button" data-batch="move" data-zh="移动到分组" data-en="Move to group">移动到分组</button>
+        <button type="button" data-batch="delete" data-zh="删除" data-en="Delete">删除</button>
+        <button type="button" data-batch="clear" data-zh="取消选择" data-en="Clear">取消选择</button>
+      </div>
+
+      <div class="roster-list" id="rosterList"></div>
+      <div class="empty" id="rosterEmpty">暂无参与者<br>请点击下方「导入」或在上方手动添加</div>
+    </section>
+
+  </main>
+</div>
+
+<nav class="dock glass" id="dock" aria-label="撤销与重做">
+  <button type="button" data-action="undo" id="undoBtn" data-zh-title="撤销（Ctrl+Z）" data-en-title="Undo (Ctrl+Z)" title="撤销（Ctrl+Z）"><span class="ico">↶</span><span data-zh="撤销" data-en="Undo">撤销</span></button>
+  <button type="button" data-action="redo" id="redoBtn" data-zh-title="重做（Ctrl+Shift+Z）" data-en-title="Redo (Ctrl+Shift+Z)" title="重做（Ctrl+Shift+Z）"><span class="ico">↷</span><span data-zh="重做" data-en="Redo">重做</span></button>
+</nav>
+
+<!-- 单抽遮罩 -->
+<div class="draw-overlay anim-classic" id="drawOverlay">
+  <div class="fx-layer"></div>
+  <button type="button" class="skip-btn" id="skipDrawBtn" data-zh="跳过 ▸" data-en="Skip ▸">跳过 ▸</button>
+  <div class="draw-stage">
+    <div class="roll-card" id="rollCard">
+      <div class="roll-star" id="rollStar"></div>
+      <div class="roll-name" id="rollName">—</div>
+      <div class="roll-id is-empty" id="rollId">—</div>
+      <div class="roll-title" id="rollTitle"></div>
     </div>
-    <div class="info-item">
-      <span class="label">地区</span>
-      <span class="value loading" id="info-region">获取中...</span>
+    <div class="draw-hint" id="drawHint">正在抽选…</div>
+  </div>
+</div>
+
+<!-- 十连遮罩 -->
+<div class="ten-overlay anim-classic" id="tenOverlay">
+  <div class="ten-fx"></div>
+  <button type="button" class="skip-btn" id="skipTenBtn" data-zh="跳过 ▸" data-en="Skip ▸">跳过 ▸</button>
+  <div class="ten-wrap">
+    <div class="ten-title" data-zh="十 连 抽 卡" data-en="TEN PULL">十 连 抽 卡</div>
+    <div class="ten-subtitle" id="tenTitleSub"></div>
+    <div class="ten-grid" id="tenGrid"></div>
+    <div class="ten-hint" id="tenHint" data-zh="点击任意处关闭" data-en="Click anywhere to close">点击任意处关闭</div>
+  </div>
+</div>
+
+<!-- 导入弹窗 -->
+<div class="modal" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importTitle" aria-hidden="true">
+  <div class="modal-card glass">
+    <div class="modal-head">
+      <h3 data-zh="导入 / 编辑名单" data-en="Import / Edit roster" id="importTitle">导入 / 编辑名单</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="hint-box" data-zh="每行一条，支持：姓名 / 姓名,学号 / 姓名,学号,分组。可直接从 Excel、WPS 或聊天记录粘贴：制表符、多个空格、中英文逗号、分号都会被识别，空行自动跳过。也可选择 .txt / .csv / .json / .xlsx / .xls 文件。" data-en="One entry per line: Name / Name,StudentID / Name,StudentID,Group. Paste straight from Excel, WPS or chat: tabs, runs of spaces, Chinese/English commas and semicolons are all recognised, blank lines skipped. Files: .txt / .csv / .json / .xlsx / .xls.">每行一条，支持：<code>姓名</code> · <code>姓名,学号</code> · <code>姓名,学号,分组</code><br>可直接从 Excel / WPS / 聊天记录粘贴（制表符、多空格、中英文逗号、分号均可识别），也支持 .txt / .csv / .json / .xlsx / .xls。</div>
+    <div class="modal-body">
+      <div class="sheet-pick" id="sheetPick" style="display:none">
+        <label data-zh="工作表" data-en="Sheet">工作表</label>
+        <select id="sheetSelect"></select>
+      </div>
+      <textarea id="importText" spellcheck="false" placeholder='"张三",&#10;"李四",&#10;王五&#10;赵六,2021006,一班'></textarea>
+      <div class="preview-box" id="importPreview">输入内容后实时预览有效人数、重复学号与空行。</div>
+    </div>
+    <div class="modal-foot">
+      <input type="file" id="fileInput" accept=".txt,.csv,.json,.xlsx,.xls,.xlsm" hidden>
+<input type="file" id="seatImportFile" accept=".xlsx,.xls" hidden>
+      <button type="button" id="pickFileBtn" data-zh="选择文件…" data-en="Choose file…">选择文件…</button>
+      <button type="button" id="appendBtn" data-zh="追加到名单" data-en="Append">追加到名单</button>
+      <button type="button" id="updateBtn" data-zh="按学号更新" data-en="Update by ID">按学号更新</button>
+      <button type="button" id="replaceBtn" class="primary" data-zh="替换全部名单" data-en="Replace all">替换全部名单</button>
     </div>
   </div>
+</div>
 
-  <canvas id="stars"></canvas>
-
-  <div class="stage">
-    <div class="frame" id="frame">
-      <iframe id="page" title="Introduction"></iframe>
-      <div class="veil"></div>
+<!-- 历史弹窗 -->
+<div class="modal" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle" aria-hidden="true">
+  <div class="modal-card glass">
+    <div class="modal-head">
+      <h3 data-zh="抽取历史" data-en="Draw history" id="historyTitle">抽取历史</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body" id="historyBody"></div>
+    <div class="modal-foot">
+      <button type="button" id="clearHistoryBtn" data-zh="清空历史" data-en="Clear history">清空历史</button>
+      <button type="button" id="exportBtn2" class="primary" data-zh="导出结果" data-en="Export">导出结果</button>
     </div>
   </div>
+</div>
 
-  <!-- 点击提示框 -->
-  <div id="loading-tip">
-    <div class="tip-icon"></div>
-    <div>网页正在努力加载中，请稍候…</div>
-    <div style="margin-top: 8px; font-size: 12px; color: rgba(150, 180, 220, 0.8);">
-      已等待 <span class="tip-time">0.0 秒</span>
+<!-- 设置弹窗 -->
+<div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
+  <div class="modal-card glass wide">
+    <div class="modal-head">
+      <h3 data-zh="设置" data-en="Settings" id="settingsTitle">设置</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body settings-body">
+
+      <nav class="set-nav" id="setNav" aria-label="设置分类">
+        <button type="button" class="set-nav-btn active" data-target="g-quick"><span class="sn-ico">🧭</span><span class="sn-lab" data-zh="快捷入口" data-en="SHORTCUTS">快捷入口</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-global"><span class="sn-ico">⚙</span><span class="sn-lab" data-zh="全局" data-en="GLOBAL">全局</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-odds"><span class="sn-ico">★</span><span class="sn-lab" data-zh="星级与概率" data-en="STARS &amp; ODDS">星级与概率</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-look"><span class="sn-ico">🎨</span><span class="sn-lab" data-zh="外观" data-en="APPEARANCE">外观</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-sound"><span class="sn-ico">🔊</span><span class="sn-lab" data-zh="声音" data-en="SOUND">声音</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-roster"><span class="sn-ico">👥</span><span class="sn-lab" data-zh="名单与分组" data-en="ROSTER &amp; GROUPS">名单与分组</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-interact"><span class="sn-ico">⌨</span><span class="sn-lab" data-zh="交互" data-en="INTERACTION">交互</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-other"><span class="sn-ico">🏅</span><span class="sn-lab" data-zh="其他" data-en="OTHERS">其他</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-data"><span class="sn-ico">💾</span><span class="sn-lab" data-zh="语言与数据" data-en="LANGUAGE &amp; DATA">语言与数据</span></button>
+        <button type="button" class="set-nav-btn" data-target="g-about"><span class="sn-ico">📖</span><span class="sn-lab" data-zh="关于" data-en="ABOUT">关于</span></button>
+      </nav>
+
+      <section class="set-group" id="g-quick">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">🧭</span><span data-zh="快捷入口" data-en="SHORTCUTS">快捷入口</span></h3>
+          <span class="sg-count">7</span>
+          <p data-zh="导入、历史、统计、积分、座位表与 PK 都在这里打开；底部工具条只保留撤销与重做。" data-en="Import, history, stats, points, seat map and PK all open from here; the bottom bar keeps only undo and redo.">导入、历史、统计、积分、座位表与 PK 都在这里打开；底部工具条只保留撤销与重做。</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="功能面板" data-en="PANELS">功能面板</h4>
+                  <div class="quick-grid" id="quickGrid">
+                    <button type="button" class="quick-item" data-action="import">
+                      <span class="qi-ico">📥</span>
+                      <b data-zh="导入 / 编辑名单" data-en="Import / edit roster">导入 / 编辑名单</b>
+                      <span class="qi-sub" data-zh="粘贴、CSV、Excel，支持追加与按学号更新" data-en="Paste, CSV or Excel — append or update by student ID">粘贴、CSV、Excel，支持追加与按学号更新</span>
+                    </button>
+                    <button type="button" class="quick-item" data-action="history">
+                      <span class="qi-ico">📜</span>
+                      <b data-zh="抽取历史" data-en="Draw history">抽取历史</b>
+                      <span class="qi-sub" data-zh="按时间倒序，可放回、补积分、看种子" data-en="Newest first — return to pool, add points, inspect seed">按时间倒序，可放回、补积分、看种子</span>
+                    </button>
+                    <button type="button" class="quick-item" data-action="stats">
+                      <span class="qi-ico">📊</span>
+                      <b data-zh="统计 / 成就 / 排行" data-en="Stats / achievements">统计 / 成就 / 排行</b>
+                      <span class="qi-sub" data-zh="星级分布、趋势图、分组占比与排行榜" data-en="Star spread, trends, group share and ranking">星级分布、趋势图、分组占比与排行榜</span>
+                    </button>
+                    <button type="button" class="quick-item" data-action="points">
+                      <span class="qi-ico">💯</span>
+                      <b data-zh="课堂积分" data-en="Class points">课堂积分</b>
+                      <span class="qi-sub" data-zh="单人/批量加减分，流水可筛选可导出" data-en="Single or batch points, filterable log with export">单人/批量加减分，流水可筛选可导出</span>
+                    </button>
+                    <button type="button" class="quick-item" data-action="seats">
+                      <span class="qi-ico">🪑</span>
+                      <b data-zh="座位表" data-en="Seat map">座位表</b>
+                      <span class="qi-sub" data-zh="动态行列、拖拽排座、座位 Excel 导入导出" data-en="Dynamic grid, drag to arrange, seat Excel in/out">动态行列、拖拽排座、座位 Excel 导入导出</span>
+                    </button>
+                    <button type="button" class="quick-item" data-action="pk">
+                      <span class="qi-ico">⚔️</span>
+                      <b data-zh="PK 对决" data-en="PK duel">PK 对决</b>
+                      <span class="qi-sub" data-zh="两人或两组同台比拼，胜负入历史" data-en="Two students or groups head to head, logged">两人或两组同台比拼，胜负入历史</span>
+                    </button>
+                    <button type="button" class="quick-item" data-action="export">
+                      <span class="qi-ico">📤</span>
+                      <b data-zh="导出 / 备份" data-en="Export / backup">导出 / 备份</b>
+                      <span class="qi-sub" data-zh="Excel、积分报表、长图、打印与 JSON 备份" data-en="Excel, points report, long card, print and JSON backup">Excel、积分报表、长图、打印与 JSON 备份</span>
+                    </button>
+                  </div>
+                </section>
+          <section class="set-sec set-sec-danger">
+                  <h4 data-zh="危险操作" data-en="DANGER ZONE">危险操作</h4>
+                  <p class="set-desc" data-zh="重置会清空全部名单、抽取历史、积分记录与座位安排，并回到首次使用的状态；设置、概率、保底与音效偏好保留。执行前会二次确认，执行后仍可撤销一步。" data-en="Reset clears the whole roster, draw history, point records and seat assignments and returns to a first-run state; settings, odds, pity and sound preferences are kept. It asks for confirmation and can be undone one step.">重置会清空全部名单、抽取历史、积分记录与座位安排，并回到首次使用的状态；设置、概率、保底与音效偏好保留。执行前会二次确认，执行后仍可撤销一步。</p>
+                  <button type="button" id="resetBtn2" class="btn-danger">
+                    <span class="bd-ico">♻</span>
+                    <span data-zh="重置全部数据" data-en="Reset all data">重置全部数据</span>
+                  </button>
+                </section>
+        </div>
+      </section>
+
+      <section class="set-group" id="g-global">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">⚙</span><span data-zh="全局" data-en="GLOBAL">全局</span></h3>
+          <span class="sg-count">3</span>
+          <p data-zh="抽取方式、批量人数、随机种子与保底规则" data-en="Draw mode, batch size, seed and pity">抽取方式、批量人数、随机种子与保底规则</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="抽取模式" data-en="DRAW MODE">抽取模式</h4>
+                  <p class="set-desc" data-zh="不重复：抽中者移出候选池；可重复：每次都从全量名单抽取，不标记已抽中，但历史照常记录。切换需要二次确认。" data-en="No repeat: drawn participants leave the pool. Repeatable: every draw uses the full roster, nothing is marked as drawn, history is still recorded. Switching asks for confirmation.">不重复：抽中者移出候选池；可重复：每次都从全量名单抽取，不标记已抽中，但历史照常记录。切换需要二次确认。</p>
+                  <div class="seg" id="modeSeg2">
+                    <button type="button" data-mode="unique" data-zh="不重复" data-en="No repeat">不重复</button>
+                    <button type="button" data-mode="repeat" data-zh="可重复" data-en="Repeatable">可重复</button>
+                  </div>
+                </section>
+
+          <section class="set-sec">
+                  <h4 data-zh="保底机制" data-en="PITY SYSTEM">保底机制</h4>
+                  <label class="switch-row"><span data-zh="开启保底（默认关闭）" data-en="Enable pity (off by default)">开启保底（默认关闭）</span><span class="switch"><input type="checkbox" id="pityEnable"><span></span></span></label>
+                  <label class="switch-row"><span data-zh="十连至少 1 个 4★" data-en="Ten-pull: at least one 4★">十连至少 1 个 4★</span><span class="switch"><input type="checkbox" id="pityTen"><span></span></span></label>
+                  <label class="switch-row"><span data-zh="50 抽保底 5★" data-en="50-draw 5★ guarantee">50 抽保底 5★</span><span class="switch"><input type="checkbox" id="pityFifty"><span></span></span></label>
+                  <p class="set-desc" id="pityStatus"></p>
+                  <label class="switch-row"><span data-zh="幸运值：连续未出 5★ 时逐步提升 5★ 概率" data-en="Luck: drift 5★ odds up during dry streaks">幸运值：连续未出 5★ 时逐步提升 5★ 概率</span><span class="switch"><input type="checkbox" id="luckyEnable"><span></span></span></label>
+                  <label class="range-row"><span data-zh="每抽提升" data-en="Per-pull bonus">每抽提升</span><input type="range" id="luckyStep" min="0" max="5" step="0.5"><output id="luckyStepOut">1</output></label>
+                  <p class="set-desc" id="luckyStatus"></p>
+                </section>
+
+          <section class="set-sec">
+                  <h4 data-zh="抽取设置（人数 / 种子 / 平衡）" data-en="DRAW SETTINGS (COUNT / SEED / BALANCE)">抽取设置（人数 / 种子 / 平衡）</h4>
+                  <label class="ctl-row"><span data-zh="每次批量抽取人数" data-en="People per batch draw">每次批量抽取人数</span><input type="number" id="pickCount" min="1" max="50" step="1" value="10" class="ctl-num"><output id="pickCountOut">10</output></label>
+                  <label class="switch-row"><span data-zh="按分组等比例抽取（分组平衡）" data-en="Balanced draw across groups">按分组等比例抽取（分组平衡）</span><span class="switch"><input type="checkbox" id="balanceToggle"><span></span></span></label>
+                  <label class="ctl-row"><span data-zh="随机种子（留空 = 真随机）" data-en="Random seed (empty = true random)">随机种子（留空 = 真随机）</span><input type="text" id="seedInput" maxlength="40" placeholder="例如 class-2024" class="ctl-text"><button type="button" class="mini-btn" id="seedCopyBtn" data-zh="复制" data-en="Copy">复制</button><button type="button" class="mini-btn" id="seedDiceBtn" data-zh="随机一个" data-en="Random">随机一个</button><button type="button" class="mini-btn" id="seedVerifyBtn" data-zh="验证种子" data-en="Verify seed">验证种子</button></label>
+                  <p class="set-desc" id="seedStatus"></p>
+                  <label class="ctl-row"><span data-zh="长按多选触发时长" data-en="Long-press select delay">长按多选触发时长</span><input type="range" id="longPressMs" min="200" max="1200" step="40" value="480" class="ctl-range"><output id="longPressMsOut">480 ms</output></label>
+                </section>
+
+        </div>
+      </section>
+
+      <section class="set-group" id="g-odds">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">★</span><span data-zh="星级与概率" data-en="STARS &amp; ODDS">星级与概率</span></h3>
+          <span class="sg-count">2</span>
+          <p data-zh="1–5★ 出现概率与权重换算" data-en="Star odds and weight conversion">1–5★ 出现概率与权重换算</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="星级概率（1–5★）" data-en="Star odds (1–5★)">星级概率（1–5★）</h4>
+                  <p class="set-desc strong" data-zh="星级只是抽中之后的评级展示，不会影响谁会抽中；下面这组数值只决定结果亮几颗星。" data-en="Stars are a rating shown after a draw — they never influence who is picked. These numbers only choose the star rating of the result.">星级只是抽中之后的评级展示，不会影响谁会抽中；下面这组数值只决定结果亮几颗星。</p>
+                  <div class="star-config" id="starConfig"></div>
+                  <div class="sum-line"><span data-zh="合计" data-en="Total">合计</span> <b id="starSum">100</b>% <span id="starSumWarn"></span></div>
+                  <div class="preset-row" id="presetRow"></div>
+                  <p class="set-desc" data-zh="四舍五入到 1%，合计必须恰好为 100% 才能抽取。" data-en="Whole percentages; the total must be exactly 100% before drawing.">四舍五入到 1%，合计必须恰好为 100% 才能抽取。</p>
+                </section>
+
+          <section class="set-sec">
+                  <h4 data-zh="星级权重模式（可选 1–5 倍）" data-en="STAR WEIGHT MODE (1–5×)">星级权重模式（可选 1–5 倍）</h4>
+                  <label class="switch-row"><span data-zh="启用权重模式：按 1–5 倍权重换算概率" data-en="Weight mode: derive odds from 1–5× weights">启用权重模式：按 1–5 倍权重换算概率</span><span class="switch"><input type="checkbox" id="weightEnable"><span></span></span></label>
+                  <div class="weight-grid" id="weightGrid"></div>
+                  <div class="preset-row" id="weightPresets"></div>
+                  <p class="set-desc" id="weightPct"></p>
+                  <div class="sim-row">
+                    <button type="button" class="mini-btn" id="simBtn" data-zh="概率模拟 1000 抽" data-en="Simulate 1000 draws">概率模拟 1000 抽</button>
+                    <span class="set-desc" id="simOut"></span>
+                  </div>
+                </section>
+        </div>
+      </section>
+
+      <section class="set-group" id="g-look">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">🎨</span><span data-zh="外观" data-en="APPEARANCE">外观</span></h3>
+          <span class="sg-count">3</span>
+          <p data-zh="动画节奏、卡面皮肤、主题色与背景" data-en="Animation, card skin, accent and background">动画节奏、卡面皮肤、主题色与背景</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="动画节奏" data-en="ANIMATION SPEED">动画节奏</h4>
+                  <div class="seg" id="speedSeg">
+                    <button type="button" data-speed="0.5">0.5x</button>
+                    <button type="button" data-speed="1">1x</button>
+                    <button type="button" data-speed="1.5">1.5x</button>
+                  </div>
+                  <p class="set-desc" data-zh="抽卡动画的播放速度；抽取途中也可以点遮罩右上角的「跳过 ▸」直接看结果。" data-en="Playback speed of the draw animation. During a draw you can also hit “Skip ▸” in the overlay to jump straight to the result.">抽卡动画的播放速度；抽取途中也可以点遮罩右上角的「跳过 ▸」直接看结果。</p>
+                </section>
+
+          <section class="set-sec">
+                  <h4 data-zh="卡面皮肤" data-en="CARD SKIN">卡面皮肤</h4>
+                  <div class="skin-grid" id="skinGrid"></div>
+                </section>
+
+          <section class="set-sec">
+                  <h4 data-zh="外观 · 主题色与背景" data-en="LOOK · ACCENT &amp; BACKGROUND">外观 · 主题色与背景</h4>
+                  <p class="set-desc" data-zh="主题色会应用到抽取按钮、主按钮与选中态；自定义背景支持渐变预设或本机图片，图片会压缩后存进本地，不会上传。" data-en="The accent colour drives draw / primary buttons and active states. Backgrounds can be a gradient preset or a local image, compressed and stored locally — never uploaded.">主题色会应用到抽取按钮、主按钮与选中态；自定义背景支持渐变预设或本机图片，图片会压缩后存进本地，不会上传。</p>
+                  <div class="accent-row" id="accentRow"></div>
+                  <div class="bg-row" id="bgRow"></div>
+                  <div class="library-actions">
+                    <label class="file-label"><span data-zh="选择背景图片" data-en="Pick background image">选择背景图片</span><input type="file" id="bgImageInput" accept="image/*" hidden></label>
+                    <button type="button" id="bgClearBtn" data-zh="清除自定义背景" data-en="Clear background">清除自定义背景</button>
+                    <span class="set-desc" id="bgStatus"></span>
+                  </div>
+                </section>
+        </div>
+      </section>
+
+      <section class="set-group" id="g-sound">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">🔊</span><span data-zh="声音" data-en="SOUND">声音</span></h3>
+          <span class="sg-count">1</span>
+          <p data-zh="音效开关、三通道音量与背景音乐" data-en="Effects, three-channel volume and music">音效开关、三通道音量与背景音乐</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="音效与音乐（Web Audio）" data-en="SOUND &amp; MUSIC (WEB AUDIO)">音效与音乐（Web Audio）</h4>
+                  <label class="switch-row"><span data-zh="开启音效" data-en="Enable sound">开启音效</span><span class="switch"><input type="checkbox" id="soundEnable"><span></span></span></label>
+                  <label class="range-row"><span data-zh="总音量（三通道共用）" data-en="Master volume">总音量（三通道共用）</span><input type="range" id="masterVol" min="0" max="100" step="1"><output id="masterVolOut">100</output></label>
+                  <label class="range-row"><span data-zh="音效音量" data-en="Sound effects">音效音量</span><input type="range" id="soundVol" min="0" max="100" step="1"><output id="soundVolOut">60</output></label>
+                  <label class="range-row"><span data-zh="背景音乐音量（0 = 关闭）" data-en="Music volume (0 = off)">背景音乐音量（0 = 关闭）</span><input type="range" id="bgmVol" min="0" max="100" step="1"><output id="bgmVolOut">0</output></label>
+                  <div class="seg" id="bgmTrackSeg">
+                    <button type="button" data-track="calm" data-zh="静谧星海" data-en="Calm sea">静谧星海</button>
+                    <button type="button" data-track="focus" data-zh="专注课堂" data-en="Focus class">专注课堂</button>
+                    <button type="button" data-track="epic" data-zh="史诗抽卡" data-en="Epic draw">史诗抽卡</button>
+                  </div>
+                  <label class="switch-row"><span data-zh="语音播报抽中结果（系统语音）" data-en="Announce results (system speech)">语音播报抽中结果（系统语音）</span><span class="switch"><input type="checkbox" id="speechEnable"><span></span></span></label>
+                  <label class="range-row"><span data-zh="播报语速" data-en="Speech rate">播报语速</span><input type="range" id="speechRate" min="0.6" max="1.6" step="0.1"><output id="speechRateOut">1</output></label>
+                  <label class="range-row"><span data-zh="播报音调" data-en="Speech pitch">播报音调</span><input type="range" id="speechPitch" min="0.6" max="1.6" step="0.1"><output id="speechPitchOut">1</output></label>
+                  <label class="ctl-row"><span data-zh="播报音色" data-en="Speech voice">播报音色</span><select id="speechVoice" class="set-select" style="max-width:280px"></select></label>
+                  <p class="set-desc" data-zh="依赖系统语音合成（Chrome/Edge/Safari 均支持）；首次使用需一次点击手势解锁。语音只播报姓名与星级，不影响抽卡结果。" data-en="Uses the system speech engine (Chrome/Edge/Safari). A click is needed to unlock audio; only names and star ratings are spoken.">依赖系统语音合成（Chrome/Edge/Safari 均支持）；首次使用需一次点击手势解锁。语音只播报姓名与星级，不影响抽卡结果。</p>
+                  <p class="set-desc" data-zh="17 种音效（点击 / 滚动 / 结果 / 五星 / 成就 / 成功 / 失败 / 开始 / 结束 / 币声 / 风声 / 史诗 / 胜利 / 失败 …）在启动时预合成；背景音乐默认音量 0 即关闭，开启后循环播放。" data-en="17 effects (click, roll, result, 5★, achievement, success, error, open, close, coin, whoosh, epic, win, lose …) are synthesised at start-up. Music is off at volume 0; turn it up to loop one of the three tracks.">17 种音效（点击 / 滚动 / 结果 / 五星 / 成就 / 成功 / 失败 / 开始 / 结束 / 币声 / 风声 / 史诗 / 胜利 / 失败 …）在启动时预合成；背景音乐默认音量 0 即关闭，开启后循环播放。</p>
+                </section>
+        </div>
+      </section>
+
+      <section class="set-group" id="g-roster">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">👥</span><span data-zh="名单与分组" data-en="ROSTER &amp; GROUPS">名单与分组</span></h3>
+          <span class="sg-count">2</span>
+          <p data-zh="分组配色、重命名与多套名单库" data-en="Group colours, renaming and libraries">分组配色、重命名与多套名单库</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="分组管理" data-en="GROUP MANAGEMENT">分组管理</h4>
+                  <div class="group-manage" id="groupManage"></div>
+                  <p class="set-desc" data-zh="给分组取色后，名单行与分组胶囊会同步变色；重命名会把该分组的成员一起迁移，删除分组只解散分组、不删人。" data-en="Assign a colour to each group: roster rows and chips follow it. Renaming moves its members; deleting a group only clears the group, never the people.">给分组取色后，名单行与分组胶囊会同步变色；重命名会把该分组的成员一起迁移，删除分组只解散分组、不删人。</p>
+                </section>
+
+          <section class="set-sec">
+                  <h4 data-zh="名单库（多套名单切换）" data-en="ROSTER LIBRARIES">名单库（多套名单切换）</h4>
+                  <p class="set-desc" data-zh="每套名单库独立保存名单、历史与保底进度：适合不同班级或不同课程分开使用。切换前会自动把当前名单库写回本地。" data-en="Each library keeps its own roster, history and pity counter — handy for different classes. The current library is written back before switching.">每套名单库独立保存名单、历史与保底进度：适合不同班级或不同课程分开使用。切换前会自动把当前名单库写回本地。</p>
+                  <div class="lib-list" id="libList"></div>
+                  <div class="library-actions">
+                    <button type="button" class="mini-btn" id="libNewBtn" data-zh="＋ 新建名单库" data-en="＋ New library">＋ 新建名单库</button>
+                    <span class="set-desc" id="libStatus"></span>
+                  </div>
+                </section>
+        </div>
+      </section>
+
+      <section class="set-group" id="g-interact">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">⌨</span><span data-zh="交互" data-en="INTERACTION">交互</span></h3>
+          <span class="sg-count">1</span>
+          <p data-zh="快捷键与操作手感" data-en="Shortcuts and input behaviour">快捷键与操作手感</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="全局快捷键" data-en="KEYBOARD SHORTCUTS">全局快捷键</h4>
+                  <label class="switch-row"><span data-zh="启用全局快捷键" data-en="Enable shortcuts">启用全局快捷键</span><span class="switch"><input type="checkbox" id="scEnable"><span></span></span></label>
+                  <label class="switch-row"><span data-zh="空格 / 回车抽卡（可关闭，防误触）" data-en="Space / Enter to draw (disable to avoid mis-taps)">空格 / 回车抽卡（可关闭，防误触）</span><span class="switch"><input type="checkbox" id="scSpace"><span></span></span></label>
+                  <div class="kbd-list" id="kbList"></div>
+                  <p class="set-desc" id="kbWarn"></p>
+                  <div class="kbd-foot">
+                    <button type="button" class="mini-btn" id="kbReset" data-zh="恢复默认键位" data-en="Reset keys">恢复默认键位</button>
+                    <span class="set-desc" data-zh="点「改」后按下新按键即可重绑；重复键位会在此提示。" data-en="Hit “Edit” then press the new key. Duplicate bindings are reported here.">点「改」后按下新按键即可重绑；重复键位会在此提示。</span>
+                  </div>
+                  <p class="set-desc" data-zh="输入框、文本域、下拉框聚焦时自动禁用快捷键；弹窗或抽卡动画打开时同样暂停抽卡快捷键。" data-en="Shortcuts are suspended while an input, textarea or select has focus, or while a dialog/overlay is open.">输入框、文本域、下拉框聚焦时自动禁用快捷键；弹窗或抽卡动画打开时同样暂停抽卡快捷键。</p>
+                </section>
+        </div>
+      </section>
+
+      <section class="set-group" id="g-other">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">🏅</span><span data-zh="其他" data-en="OTHERS">其他</span></h3>
+          <span class="sg-count">1</span>
+          <p data-zh="称号等个性化内容" data-en="Titles and other personalisation">称号等个性化内容</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="称号佩戴" data-en="TITLE">称号佩戴</h4>
+                  <select id="titleSelect" class="set-select"></select>
+                  <p class="set-desc" id="titlePreview"></p>
+                </section>
+        </div>
+      </section>
+
+      <section class="set-group" id="g-data">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">💾</span><span data-zh="语言与数据" data-en="LANGUAGE &amp; DATA">语言与数据</span></h3>
+          <span class="sg-count">1</span>
+          <p data-zh="界面语言、本地存储与备份" data-en="Language, storage and backup">界面语言、本地存储与备份</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="语言与数据" data-en="LANGUAGE & DATA">语言与数据</h4>
+                  <div class="seg" id="langSeg">
+                    <button type="button" data-lang="zh">中文</button>
+                    <button type="button" data-lang="en">English</button>
+                  </div>
+                  <div class="storage-line"><span data-zh="本地存储占用：" data-en="Local storage: ">本地存储占用：</span><b id="storageSize">0 KB</b><span data-zh="（浏览器上限约 5 MB）" data-en=" (browser limit ~5 MB)">（浏览器上限约 5 MB）</span></div>
+                  <div class="data-actions">
+                    <button type="button" id="exportJsonBtn" data-zh="导出备份 JSON" data-en="Export JSON backup">导出备份 JSON</button>
+                    <label class="file-label"><span data-zh="导入备份" data-en="Import backup">导入备份</span><input type="file" id="importJsonInput" accept=".json" hidden></label>
+                    <button type="button" id="archiveBtn" data-zh="归档历史" data-en="Archive history">归档历史</button>
+                    <button type="button" id="clearHistoryBtn2" data-zh="清空历史" data-en="Clear history">清空历史</button>
+                    <button type="button" id="errLogBtn" data-zh="导出错误日志" data-en="Export error log">导出错误日志</button>
+                    <button type="button" id="errLogClear" data-zh="清空日志" data-en="Clear log">清空日志</button>
+                  </div>
+                  <p class="set-desc" data-zh="名单、历史、设置、概率与保底进度都会自动写入 localStorage；容量不足时会提示导出备份。" data-en="Roster, history, settings, odds and pity progress are written to localStorage automatically; a quota warning appears when storage is full.">名单、历史、设置、概率与保底进度都会自动写入 localStorage；容量不足时会提示导出备份。</p>
+                </section>
+        </div>
+      </section>
+
+      <section class="set-group" id="g-about">
+        <div class="set-group-head">
+          <h3><span class="sg-ico">📖</span><span data-zh="关于" data-en="ABOUT">关于</span></h3>
+          <span class="sg-count">3</span>
+          <p data-zh="项目仓库、作者主页与版本信息" data-en="Repository, author links and version">项目仓库、作者主页与版本信息</p>
+        </div>
+        <div class="set-group-body">
+          <section class="set-sec">
+                  <h4 data-zh="项目与作者" data-en="PROJECT &amp; AUTHOR">项目与作者</h4>
+                  <div class="about-links">
+                    <a class="about-link" href="https://github.com/OStarsO/CAS" target="_blank" rel="noopener noreferrer">
+                      <span class="al-ico">🐙</span>
+                      <span class="al-txt">
+                        <b data-zh="项目仓库" data-en="Repository">项目仓库</b>
+                        <span class="al-url">github.com/OStarsO/CAS</span>
+                      </span>
+                      <span class="al-go">↗</span>
+                    </a>
+                    <a class="about-link" href="https://ostarso.github.io" target="_blank" rel="noopener noreferrer">
+                      <span class="al-ico">✍️</span>
+                      <span class="al-txt">
+                        <b data-zh="作者博客" data-en="Author blog">作者博客</b>
+                        <span class="al-url">ostarso.github.io</span>
+                      </span>
+                      <span class="al-go">↗</span>
+                    </a>
+                    <a class="about-link is-todo" id="aboutProfile" role="link" tabindex="0" aria-disabled="true" data-todo="1">
+                      <span class="al-ico">👤</span>
+                      <span class="al-txt">
+                        <b data-zh="作者 GitHub 主页" data-en="Author on GitHub">作者 GitHub 主页</b>
+                        <span class="al-url" id="aboutProfileUrl" data-zh="占位链接 · 待补充" data-en="Placeholder · to be filled">占位链接 · 待补充</span>
+                      </span>
+                      <span class="al-go">↗</span>
+                    </a>
+                  </div>
+                  <p class="set-desc" data-zh="随机点名 · 液态玻璃抽卡系统：纯离线单页应用，双击 index.html 即可运行，名单、历史、积分与座位只保存在本机浏览器（localStorage），不会上传。遇到问题可在仓库提 Issue。" data-en="Random Roll · Liquid Glass Lottery: a fully offline single-page app — double-click index.html to run. Roster, history, points and seats live only in your browser (localStorage) and are never uploaded. File issues in the repository.">随机点名 · 液态玻璃抽卡系统：纯离线单页应用，双击 index.html 即可运行，名单、历史、积分与座位只保存在本机浏览器（localStorage），不会上传。遇到问题可在仓库提 Issue。</p>
+                  <p class="set-desc about-meta"><span data-zh="数据版本 v" data-en="Data schema v">数据版本 v</span><b id="aboutVersion">4</b><span data-zh=" · 单文件离线 · 无需联网" data-en=" · offline · no network needed"> · 单文件离线 · 无需联网</span></p>
+                </section>
+        </div>
+      </section>
+
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="primary" data-close data-zh="完成" data-en="Done">完成</button>
     </div>
   </div>
+</div>
 
-  <!-- 加载完成耗时提示 -->
-  <div id="load-time-toast">
-    本次加载耗时 <span class="time-val" id="final-time">0.0</span> 秒
+<!-- 统计弹窗 -->
+<div class="modal" id="statsModal" role="dialog" aria-modal="true" aria-labelledby="statsTitle" aria-hidden="true">
+  <div class="modal-card glass wide">
+    <div class="modal-head">
+      <h3 data-zh="统计 / 成就 / 排行榜" data-en="Stats / Achievements / Ranking" id="statsTitle">统计 / 成就 / 排行榜</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body" id="statsBody"></div>
+    <div class="modal-foot">
+      <button type="button" class="primary" data-close data-zh="关闭" data-en="Close">关闭</button>
+    </div>
   </div>
+</div>
 
-  <div class="hint" id="hint">正在加载</div>
+<!-- 积分弹窗 -->
+<div class="modal" id="pointsModal" role="dialog" aria-modal="true" aria-labelledby="pointsTitle" aria-hidden="true">
+  <div class="modal-card glass wide pts-card">
+    <div class="modal-head">
+      <h3 data-zh="课堂积分" data-en="Class points" id="pointsTitle">课堂积分</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body" id="pointsBody"></div>
+    <div class="modal-foot">
+      <button type="button" id="ptsExportBtn" title="最近 10 抽 + 积分变动 + 当前积分" data-zh="导出积分报表" data-en="Export points report">导出积分报表</button>
+      <button type="button" class="primary" data-close data-zh="关闭" data-en="Close">关闭</button>
+    </div>
+  </div>
+</div>
 
-<script>
-(function () {
-  'use strict';
+<!-- 座位表弹窗 -->
+<div class="modal" id="seatModal" role="dialog" aria-modal="true" aria-labelledby="seatTitle" aria-hidden="true">
+  <div class="modal-card glass wide seat-card">
+    <div class="modal-head">
+      <h3 id="seatTitle" data-zh="座位表" data-en="Seat map">座位表</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body seat-body" id="seatBody"></div>
+    <div class="modal-foot">
+      <button type="button" id="seatDrawBtn" class="primary" data-zh="抽座位" data-en="Draw a seat">抽座位</button>
+      <button type="button" id="seatExportBtn" data-zh="导出座位 Excel" data-en="Export seat Excel">导出座位 Excel</button>
+      <button type="button" data-close data-zh="关闭" data-en="Close">关闭</button>
+    </div>
+  </div>
+</div>
 
-  var canvas = document.getElementById('stars');
-  var ctx    = canvas.getContext('2d');
-  var frame  = document.getElementById('frame');
-  var iframe = document.getElementById('page');
-  var hint   = document.getElementById('hint');
-  var infoBar = document.getElementById('device-info-bar');
-  
-  var veil = document.querySelector('.veil');
-  var tip = document.getElementById('loading-tip');
-  var tipTime = tip.querySelector('.tip-time');
-  
-  var timeToast = document.getElementById('load-time-toast');
-  var finalTimeSpan = document.getElementById('final-time');
+<!-- 导出弹窗 -->
+<div class="modal" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle" aria-hidden="true">
+  <div class="modal-card glass">
+    <div class="modal-head">
+      <h3 data-zh="导出" data-en="Export" id="exportTitle">导出</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="export-grid" id="exportGrid">
+        <button type="button" class="export-opt" data-format="csv"><b>CSV</b><span data-zh="Excel / WPS 可直接打开的表格，含序号、姓名、学号、星级、时间。" data-en="Spreadsheet for Excel / WPS with index, name, ID, stars and time.">Excel / WPS 可直接打开的表格，含序号、姓名、学号、星级、时间。</span></button>
+        <button type="button" class="export-opt" data-format="rostercsv"><b data-zh="名单 CSV" data-en="Roster CSV">名单 CSV</b><span data-zh="只导出名单基础信息（序号、姓名、学号、分组），不含抽卡状态与历史。" data-en="Basic roster only (index, name, ID, group) — no draw state or history.">只导出名单基础信息（序号、姓名、学号、分组），不含抽卡状态与历史。</span></button>
+        <button type="button" class="export-opt" data-format="txt"><b>TXT</b><span data-zh="纯文本结果，适合发群或贴进文档。" data-en="Plain-text results, handy for chat or documents.">纯文本结果，适合发群或贴进文档。</span></button>
+        <button type="button" class="export-opt" data-format="json"><b>JSON</b><span data-zh="完整数据备份（名单 + 历史 + 设置），可再次导入。" data-en="Full backup (roster + history + settings) that can be re-imported.">完整数据备份（名单 + 历史 + 设置），可再次导入。</span></button>
+        <button type="button" class="export-opt" data-format="png"><b data-zh="图片 PNG" data-en="Image PNG">图片 PNG</b><span data-zh="把最近一次抽中结果渲染成分享图。" data-en="Render the latest result as a shareable image.">把最近一次抽中结果渲染成分享图。</span></button>
+        <button type="button" class="export-opt" data-format="pnglong"><b data-zh="分享长图" data-en="Long share card">分享长图</b><span data-zh="含最近结果、抽取统计、星级分布与排行榜，适合发班级群。" data-en="Latest result plus stats, star breakdown and ranking — sized for a class group post.">含最近结果、抽取统计、星级分布与排行榜，适合发班级群。</span></button>
+        <button type="button" class="export-opt" data-format="points"><b data-zh="积分报表" data-en="Points report">积分报表</b><span data-zh="一个工作簿三张表：最近抽到（近 10 抽去重）、积分变动记录、当前积分汇总。" data-en="One workbook, three sheets: recent winners (last 10 draws, de-duplicated), point changes and current totals.">一个工作簿三张表：最近抽到（近 10 抽去重）、积分变动记录、当前积分汇总。</span></button>
+        <button type="button" class="export-opt" data-format="print"><b data-zh="打印 / 存 PDF" data-en="Print / PDF">打印 / 存 PDF</b><span data-zh="用浏览器打印样式输出名单与历史（已隐藏特效与按钮），可另存为 PDF。" data-en="Print the roster and history with the print stylesheet (effects and buttons hidden); save as PDF if needed.">用浏览器打印样式输出名单与历史（已隐藏特效与按钮），可另存为 PDF。</span></button>
+        <button type="button" class="export-opt" data-format="xl"><b>Excel</b><span data-zh="生成真正的 .xlsx 工作簿（名单、历史、统计三个工作表）。" data-en="A real .xlsx workbook with roster, history and stats sheets.">生成真正的 .xlsx 工作簿（名单、历史、统计三个工作表）。</span></button>
+        <button type="button" class="export-opt" data-format="tenpng"><b data-zh="十连长图" data-en="Ten-pull card">十连长图</b><span data-zh="把最近一次十连的十张卡渲染成一张长图。" data-en="Render the latest ten-pull as one tall card image.">把最近一次十连的十张卡渲染成一张长图。</span></button>
+      </div>
+      <div class="print-scope" id="printScopeRow">
+        <span data-zh="打印范围" data-en="Print scope">打印范围</span>
+        <select id="printScope">
+          <option value="all" data-zh="名单 + 历史 + 统计" data-en="Roster + history + stats">名单 + 历史 + 统计</option>
+          <option value="roster" data-zh="仅名单" data-en="Roster only">仅名单</option>
+          <option value="history" data-zh="仅历史" data-en="History only">仅历史</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
 
-  /* =========================================================
-     一、星空：白色像素点，从远处朝观察者（屏幕外）飞来
-     ========================================================= */
-  var W = 0, H = 0, CX = 0, CY = 0, DPR = 1;
+<!-- 确认弹窗 -->
+<div class="modal confirm" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true">
+  <div class="modal-card glass confirm-card">
+    <div class="modal-head">
+      <h3 id="confirmTitle" data-zh="确认" data-en="Confirm">确认</h3>
+      <button class="close" id="confirmClose">✕</button>
+    </div>
+    <div class="modal-body"><div id="confirmMsg"></div></div>
+    <div class="modal-foot">
+      <button type="button" id="confirmCancel">取消</button>
+      <button type="button" id="confirmOk" class="primary">确定</button>
+    </div>
+  </div>
+</div>
 
-  var FOV   = 520;
-  var FAR   = 1400;
-  var SPEED = 10;
-  var COUNT = 340;
+<!-- 首次使用引导 -->
+<div class="modal guide" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle" aria-hidden="true">
+  <div class="modal-card glass">
+    <div class="modal-head">
+      <h3 data-zh="欢迎使用随机点名" data-en="Welcome to Random Roll" id="guideTitle">欢迎使用随机点名</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body" id="guideBody"></div>
+    <div class="modal-foot">
+      <button type="button" class="primary" id="guideStart" data-zh="开始使用" data-en="Get started">开始使用</button>
+    </div>
+  </div>
+</div>
 
-  var stars   = [];
-  var running = true;
-  var lastT   = 0;
+<!-- PK 对抗弹窗 -->
+<div class="modal" id="pkModal" role="dialog" aria-modal="true" aria-labelledby="pkTitle" aria-hidden="true">
+  <div class="modal-card glass wide">
+    <div class="modal-head">
+      <h3 data-zh="分组 PK" data-en="Group PK" id="pkTitle">分组 PK</h3>
+      <button class="close" data-close>✕</button>
+    </div>
+    <div class="modal-body" id="pkBody"></div>
+    <div class="modal-foot">
+      <button type="button" id="pkRunBtn" class="primary" data-zh="开始 PK" data-en="Start PK">开始 PK</button>
+    </div>
+  </div>
+</div>
 
-  function rand(a, b) { return a + Math.random() * (b - a); }
-
-  function spawn(s, initial) {
-    s.x = rand(-1, 1) * 1800;
-    s.y = rand(-1, 1) * 1800;
-    s.z = initial ? rand(40, FAR) : FAR + rand(0, 500);
-    s.b = rand(0.45, 1);
-  }
-
-  function initStars() {
-    stars.length = 0;
-    for (var i = 0; i < COUNT; i++) {
-      var s = {};
-      spawn(s, true);
-      stars.push(s);
-    }
-  }
-
-  function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth;
-    H = window.innerHeight;
-
-    canvas.width  = Math.round(W * DPR);
-    canvas.height = Math.round(H * DPR);
-    canvas.style.width  = W + 'px';
-    canvas.style.height = H + 'px';
-
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    CX = W / 2;
-    CY = H / 2;
-
-    ctx.fillStyle = '#04060c';
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  function tick(now) {
-    if (!running) return;
-
-    if (!lastT) lastT = now;
-    var dt = now - lastT;
-    lastT = now;
-    if (dt > 120) dt = 120;
-    var f = dt / 16.667;
-
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(4, 6, 12, 0.42)';
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.fillStyle = '#ffffff';
-
-    for (var i = 0; i < stars.length; i++) {
-      var s = stars[i];
-
-      s.z -= SPEED * f;
-      if (s.z <= 14) { spawn(s, false); continue; }
-
-      var k  = FOV / s.z;
-      var sx = CX + s.x * k;
-      var sy = CY + s.y * k;
-
-      if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) {
-        spawn(s, false);
-        continue;
-      }
-
-      var t     = 1 - s.z / FAR;
-      var size  = Math.max(1, Math.round(1 + t * 3.2));
-      var alpha = Math.min(1, 0.12 + t * 1.5) * s.b;
-
-      ctx.globalAlpha = alpha;
-      ctx.fillRect(sx | 0, sy | 0, size, size);
-    }
-
-    ctx.globalAlpha = 1;
-    requestAnimationFrame(tick);
-  }
-
-  initStars();
-  resize();
-  requestAnimationFrame(tick);
-  window.addEventListener('resize', resize);
-
-  /* =========================================================
-     二、获取并显示设备、浏览器、IP及地区信息
-     ========================================================= */
-  function setInfo(id, text) {
-    var el = document.getElementById(id);
-    if (el) {
-      el.textContent = text;
-      el.classList.remove('loading');
-    }
-  }
-
-  try {
-    var parser = new UAParser();
-    var result = parser.getResult();
-    var deviceType = result.device.type || 'desktop';
-    var deviceVendor = result.device.vendor || '';
-    var deviceModel = result.device.model || '';
-    var deviceText = deviceType === 'desktop' ? 'Desktop' : (deviceType === 'mobile' ? 'Mobile' : (deviceType === 'tablet' ? 'Tablet' : deviceType));
-    if (deviceVendor) deviceText += ' · ' + deviceVendor;
-    if (deviceModel) deviceText += ' ' + deviceModel;
-    setInfo('info-device', deviceText);
-
-    var browserName = result.browser.name || '未知浏览器';
-    var browserVersion = result.browser.version || '';
-    var browserText = browserName + (browserVersion ? ' ' + browserVersion.split('.')[0] : '');
-    setInfo('info-browser', browserText);
-  } catch (e) {
-    setInfo('info-device', '未知设备');
-    setInfo('info-browser', '未知浏览器');
-  }
-
-  fetch('https://ipwho.is/')
-    .then(function(response) {
-      if (!response.ok) throw new Error('Network response was not ok');
-      return response.json();
-    })
-    .then(function(data) {
-      if (data.success === false) throw new Error(data.message || 'API returned error');
-      setInfo('info-ip', data.ip || '未知');
-      var regionParts = [];
-      if (data.city) regionParts.push(data.city);
-      if (data.region) regionParts.push(data.region);
-      if (data.country) regionParts.push(data.country);
-      setInfo('info-region', regionParts.length > 0 ? regionParts.join(', ') : '未知地区');
-    })
-    .catch(function(error) {
-      console.warn('IP 地理位置获取失败，尝试备用 API...', error);
-      return fetch('https://ip-api.com/json')
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data.status === 'success') {
-            setInfo('info-ip', data.query || '未知');
-            var regionParts = [];
-            if (data.city) regionParts.push(data.city);
-            if (data.regionName) regionParts.push(data.regionName);
-            if (data.country) regionParts.push(data.country);
-            setInfo('info-region', regionParts.length > 0 ? regionParts.join(', ') : '未知地区');
-          } else {
-            throw new Error('Backup API failed');
-          }
-        });
-    })
-    .catch(function() {
-      setInfo('info-ip', '获取失败');
-      setInfo('info-region', '获取失败');
-    });
-
-  /* =========================================================
-     三、加载计时与点击提示逻辑
-     ========================================================= */
-  var revealed  = false;
-  var t0        = performance.now(); // 记录加载开始时间
-  var MIN_SHOW  = 1900;
-  var hardTimer = setTimeout(function () { reveal(); }, 20000);
-
-  var tipInterval = null;
-  var tipTimer    = null;
-
-  // 点击提示框触发函数
-  function showLoadingTip() {
-    if (revealed) return;
-    
-    tip.classList.add('show');
-    
-    function updateTime() {
-      var elapsed = (performance.now() - t0) / 1000;
-      tipTime.textContent = elapsed.toFixed(1) + ' 秒';
-    }
-    
-    updateTime();
-    
-    if (tipInterval) clearInterval(tipInterval);
-    if (tipTimer) clearTimeout(tipTimer);
-    
-    tipInterval = setInterval(updateTime, 100);
-    tipTimer = setTimeout(function() {
-      tip.classList.remove('show');
-      if (tipInterval) clearInterval(tipInterval);
-    }, 3000);
-  }
-
-  // 拦截用户点击遮罩层
-  veil.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    showLoadingTip();
-  });
-  
-  veil.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    showLoadingTip();
-  }, { passive: false });
+<div class="toast-box" id="toastBox"></div>
 
 
-  /* =========================================================
-     四、加载完成动画与耗时提示
-     ========================================================= */
-  function reveal() {
-    if (revealed) return;
-    revealed = true;
-    
-    // 1. 计算最终耗时（秒），保留1位小数
-    var elapsed = ((performance.now() - t0) / 1000).toFixed(1);
-    
-    // 清理计时器
-    clearTimeout(hardTimer);
-    if (tipTimer) clearTimeout(tipTimer);
-    if (tipInterval) clearInterval(tipInterval);
-    tip.classList.remove('show');
 
-    // 隐藏顶部与底部提示
-    hint.classList.add('hide');
-    if (infoBar) {
-      infoBar.classList.add('hide');
-    }
-    
-    // 触发飞入动画
-    frame.style.transition = 'transform 1.05s cubic-bezier(0.22, 0.9, 0.28, 1), border-radius 1s ease, box-shadow 1s ease';
-    frame.style.transform  = 'scale(1.06)';
-    frame.classList.add('reveal');
+<script src="core.js"></script>
+<script src="app.js"></script>
 
-    setTimeout(function () {
-      frame.style.transition = 'transform 0.55s cubic-bezier(0.33, 1, 0.42, 1)';
-      frame.style.transform  = 'scale(1)';
-    }, 980);
-
-    setTimeout(function () {
-      frame.style.transition = 'border-radius 0.8s ease, box-shadow 0.8s ease';
-      frame.style.borderRadius = '0px';
-      frame.style.boxShadow    = 'none';
-    }, 1150);
-
-    setTimeout(function () { running = false; }, 2600);
-
-    // 2. 弹出耗时提示
-    finalTimeSpan.textContent = elapsed;
-    timeToast.classList.add('show');
-    
-    // 4秒后自动隐藏耗时提示
-    setTimeout(function() {
-      timeToast.classList.remove('show');
-    }, 4000);
-  }
-
-  iframe.addEventListener('load', function () {
-    try {
-      var innerTitle = iframe.contentDocument.title;
-      document.title = innerTitle || 'Introduction';
-    } catch (e) {
-      document.title = 'Introduction';
-    }
-
-    var wait = Math.max(0, MIN_SHOW - (performance.now() - t0));
-    setTimeout(reveal, wait);
-  });
-
-  iframe.src = 'Introduction.html';
-})();
-</script>
+<!-- xlsx.b64.js 不再静态引入：app.js 在首次导入/导出 Excel 时动态加载，避免首屏被 1.17 MB 载荷拖慢 -->
 </body>
 </html>
